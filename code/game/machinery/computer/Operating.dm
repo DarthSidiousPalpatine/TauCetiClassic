@@ -11,7 +11,10 @@
 	circuit = /obj/item/weapon/circuitboard/operating
 	var/mob/living/carbon/human/victim = null
 	var/obj/machinery/optable/table = null
+<<<<<<< HEAD
 	var/dpmlast = 0
+=======
+>>>>>>> parent of ffb30314bf... Additional medbay sounds
 
 /obj/machinery/computer/operating/atom_init()
 	. = ..()
@@ -60,6 +63,7 @@
 /obj/machinery/computer/operating/process()
 	if(..())
 		src.updateDialog()
+<<<<<<< HEAD
 	src.victim = src.table.victim
 
 	if(src.table.check_victim())
@@ -82,3 +86,5 @@
 					dpmlast = world.time + 39
 				else
 					playsound(src, 'sound/machines/cardio/dead.ogg', VOL_EFFECTS_MASTER, vary = FALSE, extrarange = -4)
+=======
+>>>>>>> parent of ffb30314bf... Additional medbay sounds

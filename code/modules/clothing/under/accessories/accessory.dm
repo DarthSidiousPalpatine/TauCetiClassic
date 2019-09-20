@@ -87,6 +87,7 @@
 					their = "your"
 				user.visible_message("<span class='notice'>[user] places [src] against [M]'s [target_zone] and starts listen attentively.</span>",
 									"<span class='notice'>You place [src] against [their] [target_zone] and start to listen attentively.</span>")
+<<<<<<< HEAD
 				if(M.stat != DEAD && !(M.status_flags & FAKEDEATH))
 					if(target_zone == BP_CHEST)
 						if(M.oxyloss < 50)
@@ -99,6 +100,8 @@
 								user.playsound_local(null, 'sound/machines/cardio/crackles.ogg', VOL_EFFECTS_MASTER, vary = FALSE)
 							else
 								user.playsound_local(null, 'sound/machines/cardio/normal.ogg', VOL_EFFECTS_MASTER, vary = FALSE)
+=======
+>>>>>>> parent of ffb30314bf... Additional medbay sounds
 				if(do_after(user, 25, target = M) && src)
 					var/pulse_status = "pulse"
 					var/pulse_strength = "hear a weak"
