@@ -775,13 +775,13 @@
 		item_state = "cpaperpack"
 		to_chat(usr, "You closed your paper pack.")
 		is_closed = 1
-		usr.update_inv_wear_suit()
+		usr.update_inv_mob()
 	else
 		icon_state = "opaperpack"
 		item_state = "opaperpack"
 		to_chat(usr, "You opened your paper pack.")
 		is_closed = 0
-		usr.update_inv_wear_suit()
+		usr.update_inv_mob()
 
 /obj/item/weapon/storage/box/paperpack/atom_init()
 	. = ..()
@@ -815,15 +815,11 @@
 		to_chat(usr, "You closed your paper pack.")
 		is_closed = 1
 		usr.update_icons()
-		usr.update_inv_head()
-		usr.update_inv_r_hand()
-		usr.update_inv_l_hand()
+		usr.update_inv_mob()
 	else
 		icon_state = "opaperpack"
 		item_state = "opaperpack"
 		to_chat(usr, "You opened your paper pack.")
 		is_closed = 0
 		usr.update_icons()
-		usr.update_inv_head()
-		usr.update_inv_r_hand()
-		usr.update_inv_l_hand()
+		usr.update_inv_mob()
