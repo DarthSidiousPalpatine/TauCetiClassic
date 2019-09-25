@@ -32,3 +32,38 @@
 	item_state = "eguitar"
 
 	sound_path = "sound/musical_instruments/eguitar"
+
+/obj/item/device/guitar/electric/stratocaster
+	name = "stratocaster guitar"
+	desc = "Rock'n'Roll in more classical style."
+	icon_state = "stratocaster"
+	item_state = "stratocaster"
+
+	sound_path = "sound/musical_instruments/stratocaster"
+
+/obj/item/device/guitar/electric/lespaul
+	name = "lespaul guitar"
+	desc = "Styled Rock'n'Roll."
+	icon_state = "lespaul"
+	item_state = "lespaul"
+
+	sound_path = "sound/musical_instruments/lespaul"
+
+/obj/item/device/guitar/electric/bassural
+	name = "bassural bass guitar"
+	desc = "Bears'n'Beers."
+	icon_state = "bassural"
+	item_state = "bassural"
+
+	sound_path = "sound/musical_instruments/bassural"
+
+/obj/item/device/guitar/ukulele
+	name = "ukulele"
+	desc = "Bears'n'Beers."
+	icon_state = "ukulele"
+	item_state = "ukulele"
+
+	sound_path = "sound/musical_instruments/ukulele"
+	hitsound = list('sound/musical_instruments/ukulele/hit.ogg')
+	force = 2
+	attack_verb = list("Alohead", "Ukulled")

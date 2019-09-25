@@ -220,10 +220,14 @@
 	do
 		var/cur_oct[7]
 		var/cur_acc[7]
+		var/cur_par[7]
+		var/cur_amp[7]
 
 		for(var/i in 1 to 7)
 			cur_oct[i] = "3"
 			cur_acc[i] = "n"
+			cur_par[i] = "w"
+			cur_amp[i] = "p"
 
 		for(var/line in song_lines)
 			for(var/beat in splittext(lowertext(line), ","))
@@ -251,16 +255,21 @@
 						var/ni = copytext(note,i,i+1)
 
 						if(!text2num(ni))
+
 							if(ni == "#" || ni == "b" || ni == "n")
 								cur_acc[cur_note] = ni
 							else if(ni == "s")
 								cur_acc[cur_note] = "#"
+							else if(ni == "l" || ni == "d"|| ni == "t" || ni == "w")
+								cur_par[cur_note] = ni
+							else if(ni == "f" || ni == "o"|| ni == "p")
+								cur_amp[cur_note] = ni
+
 						else
 							cur_oct[cur_note] = ni
 
-					var/current_note = uppertext(copytext(note, 1, 2)) + cur_acc[cur_note] + cur_oct[cur_note]
+					var/current_note = uppertext(copytext(note, 1, 2)) + cur_acc[cur_note] + cur_par[cur_note] + cur_amp[cur_note] + cur_oct[cur_note]
 					playsound(instrument, "[sound_path]/[current_note].ogg", VOL_EFFECTS_INSTRUMENT, volume, FALSE, falloff = 5)
-
 				var/pause_time = COUNT_PAUSE(song_tempo)
 
 				if(notes.len >= 2 && text2num(notes[2]))
