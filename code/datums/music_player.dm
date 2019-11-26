@@ -262,7 +262,7 @@
 								cur_acc[cur_note] = "#"
 							else if(ni == "l" || ni == "d"|| ni == "t" || ni == "w")
 								cur_par[cur_note] = ni
-							else if(ni == "f" || ni == "o"|| ni == "p")
+							else if(ni == "u" || ni == "o"|| ni == "p" || ni == "v")
 								cur_amp[cur_note] = ni
 
 						else

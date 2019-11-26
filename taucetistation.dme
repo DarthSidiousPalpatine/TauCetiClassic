@@ -1566,6 +1566,7 @@
 #include "code\modules\musical_instruments\flute.dm"
 #include "code\modules\musical_instruments\guitar.dm"
 #include "code\modules\musical_instruments\harmonica.dm"
+#include "code\modules\musical_instruments\organ.dm"
 #include "code\modules\musical_instruments\piano.dm"
 #include "code\modules\musical_instruments\thrumpet.dm"
 #include "code\modules\musical_instruments\violin.dm"
