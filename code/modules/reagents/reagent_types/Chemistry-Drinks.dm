@@ -496,6 +496,22 @@
 		if(H.getToxLoss() && prob(50))
 			H.adjustToxLoss(-2)
 
+/datum/reagent/brine
+	name = "Brine"
+	id = "brine"
+	description = "Its a Brine."
+	reagent_state = LIQUID
+	color = "#c3dcc8" // rgb: 200, 165, 220
+	taste_message = "You taste salt and garlic"
+	restrict_species = list(IPC, DIONA)
+
+/datum/reagent/brine/on_general_digest(mob/living/M)
+	..()
+	M.reagents.remove_all_type(/datum/reagent/toxin, REM, 0, 1)
+	M.drowsyness = max(M.drowsyness - 2 * REM, 0)
+	M.hallucination = max(0, M.hallucination - 5 * REM)
+	M.adjustToxLoss(-2 * REM)
+
 //////////////////////////////////////////////The ten friggen million reagents that get you drunk//////////////////////////////////////////////
 
 /datum/reagent/consumable/atomicbomb

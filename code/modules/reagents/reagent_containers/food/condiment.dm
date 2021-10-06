@@ -261,6 +261,45 @@
 			add_overlay(condiment)
 			cond_number += 4
 
+/obj/structure/condiment_shelf/pickles_shelf
+	name = "pickles shelf"
+	desc = "Its a small wooden shelf for pickle jars."
+	icon = 'icons/obj/cond_shelf.dmi'
+	icon_state = "cond_shelf"
+	anchored = TRUE
+	density = FALSE
+	opacity = FALSE
+
+	var/pickles = 0
+	max_items_inside = 6
+	list/can_be_placed = list(/obj/item/weapon/storage/pickled_cucumbers)
+
+/obj/structure/condiment_shelf/pickles_shelf/atom_init(mapload)
+	. = ..()
+	if(!mapload)
+		for(var/i = 1 to rand(1, 6))
+			new /obj/item/weapon/storage/pickled_cucumbers(src)
+			pickles += 1
+		update_icon()
+
+/obj/structure/condiment_shelf/pickles_shelf/update_icon()
+	cut_overlay("pickles_[pickles + 1]")
+	add_overlay("pickles_[pickles]")
+
+/obj/structure/condiment_shelf/pickles_shelf/attackby(obj/O, mob/user)
+	if(istype(O, /obj/item/weapon/storage/pickled_cucumbers) && do_after(user, 15, TRUE, src, FALSE, TRUE))
+		user.drop_from_inventory(O, src)
+		visible_message("<span class='notice'>[user] put a pickles to \the [src]</span>")
+		pickles += 1
+		update_icon()
+
+/obj/structure/condiment_shelf/pickles_shelf/attack_hand(mob/user)
+	if(pickles && do_after(user, 15, TRUE, src, FALSE, TRUE))
+		user.put_in_hands(pick(src.contents))
+		visible_message("<span class='notice'>[user] picked a pickles from \the [src]</span>")
+		pickles -= 1
+		update_icon()
+
 //////////////////////
 //LIST OF CONDIMENTS//
 //////////////////////

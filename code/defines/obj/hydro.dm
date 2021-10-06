@@ -911,6 +911,23 @@
 	plant_type = 0
 	growthstages = 6
 
+/obj/item/seeds/cucumberseed
+	name = "pack of cucumber seeds"
+	desc = "These seeds grow into a long pimply boy."
+	icon_state = "seed-cucumber"
+	hydroponictray_icon_path = 'icons/obj/hydroponics/growing_vegetables.dmi'
+	species = "cucumber"
+	plantname = "Cucumber vines"
+	product_type = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber
+	lifespan = 45
+	endurance = 40
+	maturation = 5
+	production = 7
+	yield = 5
+	potency = 15
+	plant_type = 0
+	growthstages = 5
+
 /obj/item/seeds/sugarcaneseed
 	name = "pack of sugarcane seeds"
 	desc = "These seeds grow into sugarcane."
