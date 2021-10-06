@@ -248,7 +248,7 @@
 	display_contents_with_number = FALSE	//Set this to make the storage item group contents of the same type and display them as a number.
 	allow_quick_empty = TRUE	//Set this variable to allow the object to have the 'empty' verb, which dumps all the contents on the floor.
 	allow_quick_gather = FALSE	//Set this variable to allow the object to have the 'toggle mode' verb, which quickly collects all items from a tile.
-	list/use_sound = null // sound played when used. null for no sound.
+	use_sound = null // sound played when used. null for no sound.
 
 	var/items = 0
 	var/item = null

@@ -272,7 +272,7 @@
 
 	var/pickles = 0
 	max_items_inside = 6
-	list/can_be_placed = list(/obj/item/weapon/reagent_containers/item_liquid_container/pickles)
+	can_be_placed = list(/obj/item/weapon/reagent_containers/item_liquid_container/pickles)
 
 /obj/structure/condiment_shelf/pickles_shelf/atom_init(mapload)
 	. = ..()
