@@ -501,7 +501,7 @@
 	id = "brine"
 	description = "Its a Brine."
 	reagent_state = LIQUID
-	color = "#c3dcc8" // rgb: 200, 165, 220
+	color = "#83af79"
 	taste_message = "You taste salt and garlic"
 	restrict_species = list(IPC, DIONA)
 

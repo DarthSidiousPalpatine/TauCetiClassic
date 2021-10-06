@@ -36,8 +36,8 @@
 	return
 
 /obj/item/weapon/reagent_containers/attack(mob/M, mob/user, def_zone)
-	if(user.a_intent == INTENT_HARM) // Since we usually splash mobs or whatever, now we will also hit them.
-		..()
+	..()
+
 
 /obj/item/weapon/reagent_containers/afterattack(atom/target, mob/user, proximity, params)
 	return

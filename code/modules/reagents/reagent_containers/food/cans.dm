@@ -221,3 +221,114 @@
 	desc = "A can of soda water. Still water's more refreshing cousin."
 	icon_state = "sodawater"
 	list_reagents = list("sodawater" = 50)
+
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles
+	name = "Jar"
+	desc = "A jar for food preservation"
+	icon = 'icons/obj/drinks.dmi'
+	icon_state = "jar"
+	w_class = SIZE_TINY
+
+	//Liquid_vars
+	amount_per_transfer_from_this = 10
+	possible_transfer_amounts = list(10,20,30)
+	list_reagents = list("brine" = 90)
+	volume = 100
+
+	//Item_vars
+	can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled,
+					/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled)
+
+	max_w_class = SIZE_TINY //Max size of objects that this object can store (in effect only if can_hold isn't set)
+	max_storage_space = null //Total storage cost of items this can hold. Will be autoset based on storage_slots if left null.
+	storage_slots = 7 //The number of storage slots in this container.
+
+	use_to_pickup = FALSE	//Set this to make it possible to use this item in an inverse way, so you can have the item in your hand and click items on the floor to pick them up.
+	display_contents_with_number = FALSE	//Set this to make the storage item group contents of the same type and display them as a number.
+	allow_quick_empty = TRUE	//Set this variable to allow the object to have the 'empty' verb, which dumps all the contents on the floor.
+	allow_quick_gather = FALSE	//Set this variable to allow the object to have the 'toggle mode' verb, which quickly collects all items from a tile.
+	list/use_sound = null // sound played when used. null for no sound.
+
+	var/items = 0
+	var/item = null
+	var/item_name = null
+	var/image/filling
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/atom_init()
+	. = ..()
+	if(prob(50))
+		item = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
+		can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled)
+		item_name = "pickled cucumber"
+	else
+		item = /obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled
+		can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled)
+		item_name = "pickled tomato"
+	for(var/i = 1 to rand(1, 7))
+		new item(src)
+		items += 1
+	update_icon()
+
+	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/proc/gulp_whole
+	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/pickles/proc/lid
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/examine(mob/user)
+	..()
+	if(items > 0)
+		to_chat(user, "<span class='info'>It contains some [item_name]s.</span>")
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/update_icon()
+	cut_overlay("[item_name]_[items + 1]")
+	if(items > 0 && items < 8)
+		add_overlay("[item_name]_[items]")
+	else
+		item_name = null
+		can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled,
+						/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled)
+
+	filling = image('icons/obj/reagentfillings.dmi', src, "[icon_state]10")
+	cut_overlay(filling)
+
+	if(reagents.total_volume)
+		var/percent = round((reagents.total_volume / volume) * 100)
+		switch(percent)
+			if(0 to 9)		filling.icon_state = "[icon_state]-10"
+			if(10 to 24) 	filling.icon_state = "[icon_state]10"
+			if(25 to 49)	filling.icon_state = "[icon_state]25"
+			if(50 to 74)	filling.icon_state = "[icon_state]50"
+			if(75 to 89)	filling.icon_state = "[icon_state]75"
+			if(90 to 99)	filling.icon_state = "[icon_state]90"
+			if(100 to INFINITY) filling.icon_state = "[icon_state]100"
+
+		filling.icon += mix_color_from_reagents(reagents.reagent_list)
+		add_overlay(filling)
+
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/open(mob/user)
+	if (!is_open_container())
+		to_chat(user, "<span class='notice'>You need to open [src]!</span>")
+		return
+	..()
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/handle_item_insertion()
+	..()
+	items += 1
+	update_icon()
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/remove_from_storage()
+	items -= 1
+	update_icon()
+	..()
+
+/obj/item/weapon/reagent_containers/item_liquid_container/pickles/proc/lid()
+	set category = "Object"
+	set name = "Toggle lid open/closed"
+	set src in view(1)
+
+	if (is_open_container())
+		to_chat(usr, "<span class = 'notice'>You put the lid on \the [src].</span>")
+		flags ^= OPENCONTAINER
+	else
+		to_chat(usr, "<span class = 'notice'>You take the lid off \the [src].</span>")
+		flags |= OPENCONTAINER

@@ -615,6 +615,29 @@
 	reagents.add_reagent("nutriment", 1+round((potency / 20), 1))
 	bitesize = 1+round(reagents.total_volume / 2, 1)
 
+/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber
+	seed_type = /obj/item/seeds/cucumberseed
+	name = "cucumber"
+	desc = "Most likely gives you the strength of Earth."
+	icon_state = "cucumber"
+	potency = 20
+	filling_color = "##125709"
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/atom_init()
+	. = ..()
+	reagents.add_reagent("nutriment", 1+round((potency / 10), 1))
+	bitesize = 1+round(reagents.total_volume / 2, 1)
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
+	seed_type = null
+	name = "pickled cucumber"
+	desc = "Greedy-beef."
+	icon_state = "cucumber_pickled"
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled/atom_init()
+	. = ..()
+	reagents.add_reagent("brine", 4+round((potency / 5), 1))
+
 /obj/item/weapon/reagent_containers/food/snacks/grown/tomato
 	seed_type = /obj/item/seeds/tomatoseed
 	name = "tomato"
@@ -633,6 +656,16 @@
 	new/obj/effect/decal/cleanable/tomato_smudge(loc)
 	visible_message("<span class='notice'>The [name] has been squashed.</span>","<span class='moderate'>You hear a smack.</span>")
 	qdel(src)
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled
+	seed_type = null
+	name = "pickled tomato"
+	desc = "I say to-mah-to, you say tom-mae-to."
+	icon_state = "tomato_pickled"
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled/atom_init()
+	. = ..()
+	reagents.add_reagent("brine", 4+round((potency / 5), 1))
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/killertomato
 	seed_type = /obj/item/seeds/killertomatoseed
@@ -982,28 +1015,6 @@
 	if(istype(loc,/mob))
 		loc.set_light(round(loc.luminosity - potency/10,1))
 	return ..()
-
-/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber
-	seed_type = /obj/item/seeds/cucumberseed
-	name = "cucumber"
-	desc = "Most likely gives you the strength of Earth."
-	icon_state = "cucumber"
-	potency = 20
-	filling_color = "##125709"
-
-/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/atom_init()
-	. = ..()
-	reagents.add_reagent("nutriment", 1+round((potency / 10), 1))
-	bitesize = 1+round(reagents.total_volume / 2, 1)
-
-/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
-	name = "pickled cucumber"
-	desc = "Greedy-beef."
-	icon_state = "cucumber_pickled"
-
-/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled/atom_init()
-	. = ..()
-	reagents.add_reagent("brine", 4+round((potency / 5), 1))
 
 // *************************************
 // Complex Grown Object Defines -
