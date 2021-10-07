@@ -272,13 +272,13 @@
 
 	var/pickles = 0
 	max_items_inside = 6
-	can_be_placed = list(/obj/item/weapon/reagent_containers/item_liquid_container/pickles)
+	can_be_placed = list(/obj/item/weapon/reagent_containers/item_liquid_container/jar)
 
 /obj/structure/condiment_shelf/pickles_shelf/atom_init(mapload)
 	. = ..()
 	if(!mapload)
 		for(var/i = 1 to rand(1, 6))
-			new /obj/item/weapon/reagent_containers/item_liquid_container/pickles(src)
+			new /obj/item/weapon/reagent_containers/item_liquid_container/jar(src)
 			pickles += 1
 		update_icon()
 
@@ -287,7 +287,7 @@
 	add_overlay("pickles_[pickles]")
 
 /obj/structure/condiment_shelf/pickles_shelf/attackby(obj/O, mob/user)
-	if(istype(O, /obj/item/weapon/reagent_containers/item_liquid_container/pickles) && do_after(user, 15, TRUE, src, FALSE, TRUE))
+	if(istype(O, /obj/item/weapon/reagent_containers/item_liquid_container/jar) && do_after(user, 15, TRUE, src, FALSE, TRUE))
 		user.drop_from_inventory(O, src)
 		visible_message("<span class='notice'>[user] put a pickles to \the [src]</span>")
 		pickles += 1

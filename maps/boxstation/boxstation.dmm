@@ -47307,18 +47307,16 @@
 /turf/simulated/floor/plating,
 /area/station/bridge/teleporter)
 "bGv" = (
-/obj/structure/closet/crate,
-/obj/item/toy/prize/honk,
-/obj/item/weapon/coin/bananium,
-/obj/item/weapon/coin/bananium{
-	pixel_x = -3
+/obj/structure/ageing_shelf{
+	dir = 4;
+	pixel_x = -32
 	},
-/obj/item/weapon/coin/bananium{
-	pixel_x = 7;
-	pixel_y = 5
+/mob/living/simple_animal/mouse/gray,
+/obj/machinery/light/small{
+	dir = 1
 	},
-/turf/simulated/floor/plating,
-/area/station/maintenance/cargo)
+/turf/simulated/floor/wood,
+/area/station/civilian/cold_room)
 "bGw" = (
 /obj/machinery/disposal,
 /obj/machinery/light{
@@ -47903,6 +47901,7 @@
 	dir = 4;
 	pixel_x = -6
 	},
+/obj/structure/closet/crate/freezer,
 /turf/simulated/floor{
 	icon_state = "showroomfloor"
 	},
@@ -48536,6 +48535,10 @@
 	name = "CondiMaster Neo";
 	pixel_x = -5
 	},
+/obj/machinery/firealarm{
+	dir = 8;
+	pixel_x = -24
+	},
 /turf/simulated/floor{
 	icon_state = "showroomfloor"
 	},
@@ -49075,13 +49078,8 @@
 /turf/simulated/floor/plating,
 /area/station/maintenance/disposal)
 "bJX" = (
-/obj/structure/closet/crate/freezer,
 /obj/machinery/atmospherics/components/unary/vent_pump/on{
 	dir = 4
-	},
-/obj/machinery/firealarm{
-	dir = 8;
-	pixel_x = -24
 	},
 /turf/simulated/floor{
 	dir = 1;
@@ -72614,9 +72612,16 @@
 /turf/simulated/floor/plating,
 /area/station/maintenance/cargo)
 "gYZ" = (
-/obj/structure/rack,
-/obj/item/weapon/storage/toolbox/electrical,
-/obj/item/device/multitool,
+/obj/structure/closet/crate,
+/obj/item/toy/prize/honk,
+/obj/item/weapon/coin/bananium{
+	pixel_x = -3
+	},
+/obj/item/weapon/coin/bananium,
+/obj/item/weapon/coin/bananium{
+	pixel_x = 7;
+	pixel_y = 5
+	},
 /turf/simulated/floor/plating,
 /area/station/maintenance/cargo)
 "gZb" = (
@@ -74328,6 +74333,10 @@
 	icon_state = "warning"
 	},
 /area/station/medical/chemistry)
+"jDM" = (
+/obj/structure/mineral_door/wood,
+/turf/simulated/floor/wood,
+/area/station/civilian/cold_room)
 "jEb" = (
 /obj/structure/disposalpipe/segment,
 /turf/simulated/floor/wood{
@@ -79896,6 +79905,13 @@
 	icon_state = "dark"
 	},
 /area/station/civilian/hydroponics)
+"rGX" = (
+/obj/structure/ageing_shelf{
+	dir = 4;
+	pixel_x = -32
+	},
+/turf/simulated/floor/wood,
+/area/station/civilian/cold_room)
 "rHb" = (
 /obj/structure/cable{
 	d1 = 1;
@@ -82107,6 +82123,7 @@
 /area/station/civilian/chapel/altar)
 "wuI" = (
 /obj/item/weapon/cigbutt,
+/obj/random/scrap/moderate_weighted,
 /turf/simulated/floor/plating,
 /area/station/maintenance/cargo)
 "wwg" = (
@@ -82524,6 +82541,12 @@
 	icon_state = "brown"
 	},
 /area/station/hallway/secondary/arrival)
+"xOe" = (
+/obj/structure/rack,
+/obj/item/weapon/storage/toolbox/electrical,
+/obj/item/device/multitool,
+/turf/simulated/floor/plating,
+/area/station/maintenance/cargo)
 "xQr" = (
 /obj/structure/disposalpipe/segment{
 	dir = 4
@@ -102558,11 +102581,11 @@ qex
 aMQ
 bEI
 bEW
-aSM
-aSM
-aSM
-bEW
-moP
+bDp
+bDp
+bDp
+bDp
+bDp
 wuI
 bDk
 bNk
@@ -102815,11 +102838,11 @@ aFf
 byP
 bEL
 bEW
-aSM
+bDp
 bGv
-aSM
-dLO
-aSM
+rGX
+rGX
+bDp
 qcd
 bDk
 bNk
@@ -103074,7 +103097,7 @@ bDp
 bDp
 bDp
 bDp
-bDp
+jDM
 bDp
 bDp
 qcd
@@ -104361,7 +104384,7 @@ bDp
 bDp
 bDp
 gYZ
-bEW
+aSM
 bEW
 bDk
 bNk
@@ -104618,7 +104641,7 @@ tEw
 dLO
 aSM
 aSM
-bEW
+xOe
 moP
 fDx
 bNk

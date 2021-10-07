@@ -223,7 +223,7 @@
 	list_reagents = list("sodawater" = 50)
 
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles
+/obj/item/weapon/reagent_containers/item_liquid_container/jar
 	name = "Jar"
 	desc = "A jar for food preservation"
 	icon = 'icons/obj/drinks.dmi'
@@ -255,7 +255,7 @@
 	var/item_name = null
 	var/image/filling
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/atom_init()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/atom_init()
 	. = ..()
 	if(prob(50))
 		item = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
@@ -271,14 +271,14 @@
 	update_icon()
 
 	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/proc/gulp_whole
-	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/pickles/proc/lid
+	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/jar/proc/lid
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/examine(mob/user)
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/examine(mob/user)
 	..()
 	if(items > 0)
 		to_chat(user, "<span class='info'>It contains some [item_name]s.</span>")
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/update_icon()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/update_icon()
 	cut_overlay("[item_name]_[items + 1]")
 	if(items > 0 && items < 8)
 		add_overlay("[item_name]_[items]")
@@ -305,23 +305,23 @@
 		add_overlay(filling)
 
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/open(mob/user)
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/open(mob/user)
 	if (!is_open_container())
 		to_chat(user, "<span class='notice'>You need to open [src]!</span>")
 		return
 	..()
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/handle_item_insertion()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/handle_item_insertion()
 	..()
 	items += 1
 	update_icon()
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/remove_from_storage()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/remove_from_storage()
 	items -= 1
 	update_icon()
 	..()
 
-/obj/item/weapon/reagent_containers/item_liquid_container/pickles/proc/lid()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/proc/lid()
 	set category = "Object"
 	set name = "Toggle lid open/closed"
 	set src in view(1)

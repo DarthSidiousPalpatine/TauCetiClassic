@@ -5,6 +5,7 @@
 	nutriment_factor = 1
 	taste_message = null
 	var/last_volume = 0 // Check digestion code below.
+	var/age = 0
 
 	data = list()
 
@@ -87,7 +88,7 @@
 /datum/reagent/consumable/sprinkles/on_general_digest(mob/living/M)
 	..()
 	if(ishuman(M) && (M.job in list("Security Officer", "Head of Security", "Detective", "Warden", "Captain")))
-		M.heal_bodypart_damage(1, 1)
+		M.heal_bodypart_damage(1 + age**age, 1 + age**age)
 
 /datum/reagent/consumable/syndicream
 	name = "Cream filling"
@@ -98,7 +99,7 @@
 /datum/reagent/consumable/syndicream/on_general_digest(mob/living/M)
 	..()
 	if(ishuman(M) && M.mind && M.mind.special_role)
-		M.heal_bodypart_damage(1, 1)
+		M.heal_bodypart_damage(1 + age**age, 1 + age**age)
 
 /datum/reagent/nutriment/dairy/on_skrell_digest(mob/living/M) // Is not as poisonous to skrell.
 	..()
