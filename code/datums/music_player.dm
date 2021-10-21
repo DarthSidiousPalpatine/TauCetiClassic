@@ -222,10 +222,14 @@ var/global/datum/notes_storage/note_cache_storage = new
 	do
 		var/cur_oct[7]
 		var/cur_acc[7]
+		var/cur_par[7]
+		var/cur_amp[7]
 
 		for(var/i in 1 to 7)
 			cur_oct[i] = "3"
 			cur_acc[i] = "n"
+			cur_par[i] = "w"
+			cur_amp[i] = "p"
 
 		for(var/line in song_lines)
 			for(var/beat in splittext(lowertext(line), ","))
@@ -257,10 +261,14 @@ var/global/datum/notes_storage/note_cache_storage = new
 								cur_acc[cur_note] = ni
 							else if(ni == "s")
 								cur_acc[cur_note] = "#"
+							else if(ni == "l" || ni == "d"|| ni == "t" || ni == "w")
+								cur_par[cur_note] = ni
+							else if(ni == "u" || ni == "o"|| ni == "p" || ni == "v")
+								cur_amp[cur_note] = ni
 						else
 							cur_oct[cur_note] = ni
 
-					var/current_note = uppertext(copytext(note, 1, 2)) + cur_acc[cur_note] + cur_oct[cur_note]
+					var/current_note = uppertext(copytext(note, 1, 2)) + cur_acc[cur_note] + cur_par[cur_note] + cur_amp[cur_note] + cur_oct[cur_note]
 
 					if(fexists("[sound_path]/[current_note].ogg"))
 						// ^ Since this is dynamic path, no point in running playsound without file (since it will play even "no file" and eat cpu for nothing)

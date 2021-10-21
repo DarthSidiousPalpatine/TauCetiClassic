@@ -628,7 +628,6 @@
 		return
 
 	drop_held_item()
-
 	return
 
 /mob/living/simple_animal/parrot/proc/drop_held_item(drop_gently = 1)
