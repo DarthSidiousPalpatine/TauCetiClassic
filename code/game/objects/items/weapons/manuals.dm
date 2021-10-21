@@ -8,7 +8,8 @@
 
 /obj/item/weapon/book/manual/wiki
 	var/wiki_page = ""
-	window_size = "970x710"
+	window_width = 970
+	window_height = 710
 
 /obj/item/weapon/book/manual/wiki/atom_init()
 	..()
@@ -19,6 +20,7 @@
 		dat = {"
 
 			<html><head>
+			<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 			<style>
 				html, body, iframe {
 					padding: 0px; margin: 0px;
@@ -204,6 +206,15 @@
 
 //Law and Order
 
+/obj/item/weapon/book/manual/wiki/possible_threats
+	name = "Possible Threats"
+	desc = "A Nanotrasen warning about possible threats"
+	icon_state = "bookThreats"
+	item_state = "book9"
+	author = "NanoTrasen"
+	title = "Возможные угрозы"
+	wiki_page = "Возможные_угрозы"
+
 /obj/item/weapon/book/manual/wiki/security_space_law
 	name = "Space Law"
 	desc = "A set of NanoTrasen guidelines for keeping law and order on their space stations."
@@ -230,6 +241,7 @@
 
 	dat = {"<html>
 				<head>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 18px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -310,6 +322,14 @@
 	title = "Rules"
 	wiki_page = "Rules"
 
+/obj/item/weapon/book/manual/wiki/cult
+	name = "Ordhu'rug'ar"
+	icon_state = "book"
+	item_state = "book2"
+	author = "Bok'irg"
+	title = "Магия культа"
+	wiki_page = "Cult_Magic"
+
 //Old manuals that we should keep for a while
 
 /obj/item/weapon/book/manual/hydroponics_beekeeping
@@ -320,6 +340,7 @@
 	title = "The Ins and Outs of Apiculture - A Precise Art"
 	dat = {"<html>
 				<head>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 18px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -353,6 +374,7 @@
 
 	dat = {"<html>
 				<head>
+				<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
 				<style>
 				h1 {font-size: 21px; margin: 15px 0px 5px;}
 				h2 {font-size: 15px; margin: 15px 0px 5px;}
@@ -395,3 +417,26 @@
 				</body>
 			</html>
 			"}
+
+/obj/item/weapon/syndcodebook
+	name = "black-red book"
+	desc = "Ominous book with some gabblery written on yellow pages."
+	icon = 'icons/obj/library.dmi'
+	icon_state ="syndicate"
+	item_state ="book"
+
+/obj/item/weapon/syndcodebook/attack_self(mob/user)
+	if(user.is_busy())
+		return
+	user.visible_message(
+		"<span class='notice'>[user] starts reading \the [src] intently...</span>",
+		"<span class='notice'>You start reading \the [src]...</span>"
+	)
+	if(do_after(user, 40, target = user))
+		user.visible_message(
+			"<span class='warning'>[user] perks at \the [src] and nods. Suddenly, \the [src] burns to ashes!</span>",
+			"<span class='warning'>As soon as you finish reading \the [src], you become the speaker of Sy-Code and [src] burns to ashes.</span>"
+		)
+		user.add_language("Sy-Code")
+		new /obj/effect/decal/cleanable/ash(user.loc)
+		qdel(src)

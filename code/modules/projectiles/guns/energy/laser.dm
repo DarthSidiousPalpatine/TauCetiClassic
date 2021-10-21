@@ -4,7 +4,7 @@
 	icon = 'icons/obj/gun.dmi'
 	icon_state = "laser"
 	item_state = null	//so the human update icon uses the icon_state instead.
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	m_amt = 2000
 	origin_tech = "combat=3;magnets=2"
 	ammo_type = list(/obj/item/ammo_casing/energy/laser)
@@ -114,7 +114,7 @@
 	ammo_type = list(/obj/item/ammo_casing/energy/laser, /obj/item/ammo_casing/energy/laser/scatter)
 
 /obj/item/weapon/gun/energy/laser/scatter/attack_self(mob/living/user)
-	select_fire(user)
+	..()
 	update_icon()
 
 /obj/item/weapon/gun/energy/laser/scatter/alien
@@ -190,17 +190,20 @@
 	charge_tick = 0
 	if(!power_supply)
 		return FALSE
-	power_supply.give(100)
+	power_supply.give(130)
 	update_icon()
 	return TRUE
 
 /obj/item/weapon/gun/energy/laser/lasertag/bluetag
+	fire_delay = 5
 	icon_state = "bluetag"
+	item_state = "l_tag_blue"
 	ammo_type = list(/obj/item/ammo_casing/energy/laser/bluetag)
 	lasertag_color = "blue"
 
 /obj/item/weapon/gun/energy/laser/lasertag/redtag
+	fire_delay = 5
 	icon_state = "redtag"
+	item_state = "l_tag_red"
 	ammo_type = list(/obj/item/ammo_casing/energy/laser/redtag)
 	lasertag_color = "red"
-

@@ -8,7 +8,7 @@ would spawn and follow the beaker, even if it is carried or thrown.
 /obj/effect/effect
 	name = "effect"
 	icon = 'icons/effects/effects.dmi'
-	mouse_opacity = 0
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	unacidable = 1//So effect are not targeted by alien acid.
 	pass_flags = PASSTABLE | PASSGRILLE
 
@@ -17,7 +17,7 @@ would spawn and follow the beaker, even if it is carried or thrown.
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "extinguish"
 	var/life = 15.0
-	mouse_opacity = 0
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
 /obj/effect/Destroy()
 	if(reagents)
@@ -86,7 +86,7 @@ steam.start() -- spawns the effect
 	name = "steam"
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "extinguish"
-	density = 0
+	density = FALSE
 
 /datum/effect/effect/system/steam_spread/set_up(n = 3, c = 0, turf/loc)
 	if(n > 10)
@@ -149,6 +149,9 @@ steam.start() -- spawns the effect
 	if (istype(T, /turf))
 		T.hotspot_expose(1000,100)
 
+/obj/effect/effect/sparks/get_current_temperature()
+	return 1000
+
 /datum/effect/effect/system/spark_spread
 	var/total_sparks = 0 // To stop it being spammed and lagging!
 
@@ -186,6 +189,9 @@ steam.start() -- spawns the effect
 		qdel(sparks)
 	total_sparks--
 
+/obj/effect/effect/sparks/blue
+	icon_state = "shieldsparkles"
+
 /////////////////////////////////////////////
 //// SMOKE SYSTEMS
 // direct can be optinally added when set_up, to make the smoke always travel in one direction
@@ -213,10 +219,10 @@ steam.start() -- spawns the effect
 	set_opacity(TRUE)
 	QDEL_IN(src, time_to_live)
 
-/obj/effect/effect/smoke/Crossed(mob/living/carbon/M as mob )
-	..()
-	if(istype(M))
-		affect(M)
+/obj/effect/effect/smoke/Crossed(atom/movable/AM)
+	. = ..()
+	if(iscarbon(AM))
+		affect(AM)
 
 /obj/effect/effect/smoke/proc/affect(mob/living/carbon/M)
 	if (istype(M))
@@ -270,7 +276,7 @@ steam.start() -- spawns the effect
 		return 0
 
 	M.drop_item()
-	M:sleeping += 1
+	M.Sleeping(1 SECOND)
 	if (M.coughedtime != 1)
 		M.coughedtime = 1
 		M.emote("cough")
@@ -370,7 +376,7 @@ steam.start() -- spawns the effect
 /obj/effect/effect/ion_trails
 	name = "ion trails"
 	icon_state = "ion_trails"
-	anchored = 1
+	anchored = TRUE
 
 /datum/effect/effect/system/ion_trail_follow
 	var/turf/oldposition
@@ -394,7 +400,7 @@ steam.start() -- spawns the effect
 		if(T != src.oldposition)
 			if(!has_gravity(T))
 				var/obj/effect/effect/ion_trails/I = new /obj/effect/effect/ion_trails(src.oldposition)
-				I.dir = src.holder.dir
+				I.set_dir(src.holder.dir)
 				flick("ion_fade", I)
 				I.icon_state = "blank"
 				QDEL_IN(I, 20)
@@ -402,7 +408,7 @@ steam.start() -- spawns the effect
 		spawn(2)
 			if(src.on)
 				src.processing = 1
-				src.start()
+				start()
 
 /datum/effect/effect/system/ion_trail_follow/proc/stop()
 	src.processing = 0
@@ -434,19 +440,19 @@ steam.start() -- spawns the effect
 				var/obj/effect/effect/steam/I = new /obj/effect/effect/steam(src.oldposition)
 				src.number++
 				src.oldposition = get_turf(holder)
-				I.dir = src.holder.dir
+				I.set_dir(src.holder.dir)
 				spawn(10)
 					qdel(I)
 					src.number--
 				spawn(2)
 					if(src.on)
 						src.processing = 1
-						src.start()
+						start()
 			else
 				spawn(2)
 					if(src.on)
 						src.processing = 1
-						src.start()
+						start()
 
 /datum/effect/effect/system/steam_trail_follow/proc/stop()
 	src.processing = 0
@@ -462,10 +468,10 @@ steam.start() -- spawns the effect
 	name = "foam"
 	icon_state = "foam"
 	opacity = 0
-	anchored = 1
-	density = 0
+	anchored = TRUE
+	density = FALSE
 	layer = OBJ_LAYER + 0.9
-	mouse_opacity = 0
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	var/amount = 3
 	var/expand = 1
 	animate_movement = 0
@@ -477,7 +483,7 @@ steam.start() -- spawns the effect
 	metal = ismetal
 	MakeSlippery()
 	icon_state = "[metal ? "m" : ""]foam"
-	playsound(src, 'sound/effects/bubbles2.ogg', VOL_EFFECTS_MASTER, null, null, -3)
+	playsound(src, 'sound/effects/bubbles2.ogg', VOL_EFFECTS_MASTER, null, FALSE, null, -3)
 	addtimer(CALLBACK(src, .proc/disolve_stage, 1), 3 + metal * 3)
 
 /obj/effect/effect/foam/proc/MakeSlippery()
@@ -615,7 +621,7 @@ steam.start() -- spawns the effect
 
 
 /obj/structure/foamedmetal/Destroy()
-	density = 0
+	density = FALSE
 	update_nearby_tiles(1)
 	return ..()
 
@@ -654,8 +660,7 @@ steam.start() -- spawns the effect
 
 
 /obj/structure/foamedmetal/attackby(obj/item/I, mob/user)
-
-	if (istype(I, /obj/item/weapon/grab))
+	if(istype(I, /obj/item/weapon/grab))
 		var/obj/item/weapon/grab/G = I
 		G.affecting.forceMove(loc)
 		for(var/mob/O in viewers(src))

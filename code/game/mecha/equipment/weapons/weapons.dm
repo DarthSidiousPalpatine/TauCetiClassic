@@ -10,6 +10,7 @@
 	var/fire_sound //Sound played while firing.
 	var/fire_volume = null //How loud it is played (null to use playsound's default value)
 	var/auto_rearm = 0 //Does the weapon reload itself after each shot?
+	sound_detonation = 'sound/mecha/weapdestr.ogg'
 
 /obj/item/mecha_parts/mecha_equipment/weapon/can_attach(obj/mecha/combat/M)
 	if(!istype(M))
@@ -60,7 +61,7 @@
 	if(isbrain(chassis.occupant))
 		P.def_zone = ran_zone()
 	else
-		P.def_zone = check_zone(chassis.occupant.zone_sel.selecting)
+		P.def_zone = check_zone(chassis.occupant.get_targetzone())
 	P.yo = aimloc.y - P.loc.y
 	P.xo = aimloc.x - P.loc.x
 	P.process()
@@ -153,7 +154,7 @@
 			if(istype(H.l_ear, /obj/item/clothing/ears/earmuffs) || istype(H.r_ear, /obj/item/clothing/ears/earmuffs))
 				continue
 		to_chat(M, "<font color='red' size='7'>HONK</font>")
-		M.sleeping = 0
+		M.SetSleeping(0)
 		M.stuttering += 20
 		M.ear_deaf += 30
 		M.Weaken(3)
@@ -187,23 +188,24 @@
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/proc/rearm()
 	if(projectiles < initial(projectiles))
+		playsound(src, 'sound/weapons/guns/plasma10_overcharge_load.ogg', VOL_EFFECTS_MASTER, 100, FALSE)
 		var/projectiles_to_add = initial(projectiles) - projectiles
 		while(chassis.get_charge() >= projectile_energy_cost && projectiles_to_add)
 			projectiles++
 			projectiles_to_add--
 			chassis.use_power(projectile_energy_cost)
-	send_byjax(chassis.occupant,"exosuit.browser","\ref[src]",src.get_equip_info())
+	send_byjax(chassis.occupant,"exosuit.browser","\ref[src]",get_equip_info())
 	log_message("Rearmed [src.name].")
 	return
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/Topic(href, href_list)
 	..()
 	if (href_list["rearm"])
-		src.rearm()
+		rearm()
 	return
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/carbine
-	name = "\improper FNX-66 Carbine"
+	name = "FNX-66 Carbine"
 	icon_state = "mecha_carbine"
 	equip_cooldown = 5
 	projectile = /obj/item/projectile/bullet/incendiary
@@ -215,7 +217,7 @@
 	name = "LBX AC 10 \"Scattershot\""
 	icon_state = "mecha_scatter"
 	equip_cooldown = 20
-	projectile = /obj/item/projectile/bullet/midbullet
+	projectile = /obj/item/projectile/bullet/smg
 	fire_sound = 'sound/weapons/guns/gunshot_medium.ogg'
 	projectiles = 40
 	projectiles_per_shot = 4
@@ -226,7 +228,7 @@
 	name = "Ultra AC 2"
 	icon_state = "mecha_uac2"
 	equip_cooldown = 10
-	projectile = /obj/item/projectile/bullet/midbullet
+	projectile = /obj/item/projectile/bullet/smg
 	fire_sound = 'sound/weapons/guns/gunshot_medium.ogg'
 	projectiles = 300
 	projectiles_per_shot = 3
@@ -245,7 +247,7 @@
 	name = "SRM-8 Missile Rack"
 	icon_state = "mecha_missilerack"
 	projectile = /obj/item/missile
-	fire_sound = 'sound/effects/bang.ogg'
+	fire_sound = 'sound/mecha/mecha_bang-drop.ogg'
 	projectiles = 8
 	projectile_energy_cost = 1000
 	equip_cooldown = 60
@@ -261,7 +263,7 @@
 	var/primed = null
 	throwforce = 15
 
-/obj/item/missile/throw_impact(atom/hit_atom)
+/obj/item/missile/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
 	if(primed)
 		explosion(hit_atom, 0, 0, 2, 4)
 		qdel(src)
@@ -273,7 +275,7 @@
 	name = "SGL-6 Grenade Launcher"
 	icon_state = "mecha_grenadelnchr"
 	projectile = /obj/item/weapon/grenade/flashbang
-	fire_sound = 'sound/effects/bang.ogg'
+	fire_sound = 'sound/mecha/mecha_bang-drop.ogg'
 	projectiles = 6
 	missile_speed = 1.5
 	projectile_energy_cost = 800

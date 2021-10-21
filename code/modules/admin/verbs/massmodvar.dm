@@ -19,7 +19,7 @@
 				if(null)
 					return
 
-	src.massmodify_variables(A, var_name, method)
+	massmodify_variables(A, var_name, method)
 	feedback_add_details("admin_verb","MEV") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 
@@ -58,6 +58,9 @@
 		return
 
 	if((variable in VE_MASS_ICONS) && !check_rights(R_DEBUG|R_EVENT))
+		return
+
+	if((variable in VE_HIDDEN_LOG) && !check_rights(R_LOG))
 		return
 
 	if(isnull(var_value))
@@ -290,9 +293,7 @@
 			var/new_value
 
 			if(variable == "dynamic_lighting")
-				new_value = alert("dynamic_lighting", ,
-					"DYNAMIC_LIGHTING_DISABLED", "DYNAMIC_LIGHTING_ENABLED", "DYNAMIC_LIGHTING_FORCED"
-					)
+				new_value = tgui_alert(usr, "dynamic_lighting",, list("DYNAMIC_LIGHTING_DISABLED", "DYNAMIC_LIGHTING_ENABLED", "DYNAMIC_LIGHTING_FORCED"))
 				switch(new_value)
 					if("DYNAMIC_LIGHTING_DISABLED")
 						new_value = DYNAMIC_LIGHTING_DISABLED

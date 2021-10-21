@@ -10,6 +10,10 @@
 	var/to_be_destroyed = 0 //Used for fire, if a melting temperature was reached, it will be destroyed
 	var/max_fire_temperature_sustained = 0 //The max temperature of the fire which it was subjected to
 	var/dirt = 0
+	var/footstep
+	var/barefootstep
+	var/clawfootstep
+	var/heavyfootstep
 
 /turf/simulated/atom_init()
 	..()
@@ -22,7 +26,7 @@
 	var/typepath
 	if(ishuman(M))
 		typepath = /obj/effect/decal/cleanable/blood/tracks/footprints
-	else if(isalien(M))
+	else if(isxeno(M))
 		typepath = /obj/effect/decal/cleanable/blood/tracks/footprints/claws
 	else // can shomeone make shlime footprint shprites later pwetty pwease?
 		typepath = /obj/effect/decal/cleanable/blood/tracks/footprints/paws
@@ -57,30 +61,6 @@
 			else
 				dirtoverlay.alpha = min(dirtoverlay.alpha+5, 255)
 
-		if(istype(M, /mob/living/carbon/human))
-			var/mob/living/carbon/human/H = M
-
-			//Footstep sound
-			if(istype(H:shoes, /obj/item/clothing/shoes) && !H.buckled)
-				var/obj/item/clothing/shoes/O = H.shoes
-
-				var/footstepsound = pick(SOUNDIN_FOOTSTEPS)
-
-				if(istype(H.shoes, /obj/item/clothing/shoes/clown_shoes))
-					if(prob(25))
-						footstepsound = pick(SOUNDIN_CLOWNSTEP)
-				if(H.shoes.wet)
-					footstepsound = 'sound/effects/waterstep.ogg'
-
-				if(H.m_intent == "run")
-					if(O.footstep >= 2)
-						O.footstep = 0
-						playsound(src, footstepsound, VOL_EFFECTS_MASTER)
-					else
-						O.footstep++
-				else
-					playsound(src, footstepsound, VOL_EFFECTS_MASTER, 20)
-
 		// Tracking blood
 		var/list/bloodDNA = null
 		var/datum/dirt_cover/blooddatum
@@ -97,8 +77,8 @@
 				M.track_blood--
 
 		if (bloodDNA)
-			src.AddTracks(M,bloodDNA,M.dir,0,blooddatum) // Coming
-			var/turf/simulated/from = get_step(M,reverse_direction(M.dir))
+			AddTracks(M,bloodDNA,M.dir,0,blooddatum) // Coming
+			var/turf/simulated/from = get_step(M, turn(M.dir, 180))
 			if(istype(from) && from)
 				from.AddTracks(M,bloodDNA,0,M.dir,blooddatum) // Going
 
@@ -158,7 +138,7 @@
 
 		this.blood_DNA[M.dna.unique_enzymes] = M.dna.b_type
 
-	else if( istype(M, /mob/living/carbon/alien ))
+	else if( istype(M, /mob/living/carbon/xenomorph ))
 		var/obj/effect/decal/cleanable/blood/xeno/this = new /obj/effect/decal/cleanable/blood/xeno(src)
 		this.blood_DNA["UNKNOWN BLOOD"] = "X*"
 
@@ -190,12 +170,12 @@
 		if(severity < LUBE_FLOOR) // Thats right, lube does not add nor clean wet overlay. So if the floor was wet before and we add lube, wet overlay simply stays longer.
 			if(!wet_overlay)      // For stealth - floor must be dry, so added lube effect will be invisible.
 				wet_overlay = image('icons/effects/water.dmi', "wet_floor", src)
-				overlays += wet_overlay
+				add_overlay(wet_overlay)
 
 /turf/simulated/proc/make_dry_floor()
 	if(wet)
 		if(wet_overlay)
-			overlays -= wet_overlay
+			cut_overlay(wet_overlay)
 			wet_overlay = null
 		wet = 0
 		UpdateSlip()
@@ -203,8 +183,8 @@
 /turf/simulated/proc/UpdateSlip()
 	switch(wet)
 		if(WATER_FLOOR)
-			AddComponent(/datum/component/slippery, 5, NO_SLIP_WHEN_WALKING)
+			AddComponent(/datum/component/slippery, 2, NO_SLIP_WHEN_WALKING)
 		if(LUBE_FLOOR)
-			AddComponent(/datum/component/slippery, 10, SLIDE | GALOSHES_DONT_HELP)
+			AddComponent(/datum/component/slippery, 5, SLIDE | GALOSHES_DONT_HELP)
 		else
 			qdel(GetComponent(/datum/component/slippery))

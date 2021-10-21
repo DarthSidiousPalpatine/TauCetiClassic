@@ -7,13 +7,16 @@
 //	designation = "Syndicate"
 	braintype = "Robot"
 	req_access = list(access_syndicate)
+	w_class = SIZE_BIG
+
+	typing_indicator_type = "syndibot"
 
 	var/static/image/sword_overlay
 
 /mob/living/silicon/robot/syndicate/atom_init()
 	. = ..()
 	updatename("Syndicate")
-	connected_ai = null
+	set_ai_link(null)
 	cell.maxcharge = 25000
 	cell.charge = 25000
 	radio = new /obj/item/device/radio/borg/syndicate(src)
@@ -28,7 +31,7 @@
 	if(istype(module_active, /obj/item/weapon/melee/energy/sword/cyborg))
 		var/obj/item/weapon/melee/energy/sword/cyborg/SW = module_active
 		if(SW.active)
-			overlays += sword_overlay
+			add_overlay(sword_overlay)
 
 /obj/item/device/radio/borg/syndicate
 	syndie = 1
@@ -46,9 +49,9 @@
 	if(istype(user, /mob/living/silicon/robot/syndicate))
 		var/mob/living/silicon/robot/syndicate/S = user
 		if(active)
-			S.overlays += S.sword_overlay
+			S.add_overlay(S.sword_overlay)
 		else
-			S.overlays -= S.sword_overlay
+			S.cut_overlay(S.sword_overlay)
 
 /obj/item/weapon/melee/energy/sword/cyborg/attack(mob/M, mob/living/silicon/robot/R)
 	if(R.cell)

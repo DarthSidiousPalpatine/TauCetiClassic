@@ -11,6 +11,12 @@
 		return text
 	return default
 
+/proc/sanitize_islist(value, default)
+	if(islist(value) && length(value))
+		return value
+	if(default)
+		return default
+
 /proc/sanitize_inlist(value, list/List, default)
 	if(value in List)	return value
 	if(default)			return default
@@ -44,3 +50,18 @@
 			if(65 to 70)	. += ascii2text(ascii+32)	//letters A to F - translates to lowercase
 			else			return default
 	return .
+
+var/global/regex/IP_pattern = regex(@"^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$")
+
+/proc/sanitize_ip(addr)
+	// Return null if IP is invalid, return a valid IP otherwwise.
+	if(IP_pattern.Find(addr))
+		return addr
+	return null
+
+// check long numbers in text type
+/proc/sanitize_numbers(num)
+	var/static/regex/num_regex = regex(@"^[0-9]*$")
+	if(!istext(num) || !num_regex.Find(num))
+		return FALSE
+	return num

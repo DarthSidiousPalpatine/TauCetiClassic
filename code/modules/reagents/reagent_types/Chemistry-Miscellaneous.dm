@@ -1,5 +1,5 @@
 /datum/reagent/blood
-	data = new/list("donor"=null,"viruses"=null,"blood_DNA"=null,"blood_type"=null,"resistances"=null,"trace_chem"=null, "antibodies" = null)
+	data = list()
 	name = "Blood"
 	id = "blood"
 	reagent_state = LIQUID
@@ -11,7 +11,6 @@
 	src = null
 	if(self.data && self.data["viruses"])
 		for(var/datum/disease/D in self.data["viruses"])
-			//var/datum/disease/virus = new D.type(0, D, 1)
 			// We don't spread.
 			if(D.spread_type == SPECIAL || D.spread_type == NON_CONTAGIOUS)
 				continue
@@ -40,18 +39,22 @@
 	return FALSE // Returning false would mean that generic digestion proc won't be used.
 
 /datum/reagent/blood/reaction_turf(turf/simulated/T, volume)//splash the blood all over the place
+	. = ..()
 	if(!istype(T))
 		return
 	var/datum/reagent/blood/self = src
-	src = null
 	if(!(volume >= 3))
 		return
-	//var/datum/disease/D = self.data["virus"]
+
 	if(!self.data["donor"] || istype(self.data["donor"], /mob/living/carbon/human))
 		var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T //find some blood here
 		if(!blood_prop) //first blood!
 			blood_prop = new(T)
-			blood_prop.blood_DNA[self.data["blood_DNA"]] = self.data["blood_type"]
+			if(self.data["blood_DNA"])
+				if(self.data["blood_type"])
+					blood_prop.blood_DNA[self.data["blood_DNA"]] = self.data["blood_type"]
+				else
+					blood_prop.blood_DNA[self.data["blood_DNA"]] = "O+"
 
 		for(var/datum/disease/D in self.data["viruses"])
 			var/datum/disease/newVirus = D.Copy(1)
@@ -60,7 +63,6 @@
 
 		if(self.data["virus2"])
 			blood_prop.virus2 = virus_copylist(self.data["virus2"])
-
 
 	else if(istype(self.data["donor"], /mob/living/carbon/monkey))
 		var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T
@@ -72,7 +74,7 @@
 			blood_prop.viruses += newVirus
 			newVirus.holder = blood_prop
 
-	else if(istype(self.data["donor"], /mob/living/carbon/alien))
+	else if(istype(self.data["donor"], /mob/living/carbon/xenomorph))
 		var/obj/effect/decal/cleanable/blood/xeno/blood_prop = locate() in T
 		if(!blood_prop)
 			blood_prop = new(T)
@@ -114,10 +116,12 @@
 	overdose = REAGENTS_OVERDOSE
 	taste_message = "oil"
 
+	needed_aspects = list(ASPECT_WACKY = 1)
+
 /datum/reagent/lube/reaction_turf(turf/simulated/T, volume)
+	. = ..()
 	if(!istype(T))
 		return
-	src = null
 	if(volume >= 1)
 		T.make_wet_floor(LUBE_FLOOR)
 
@@ -161,12 +165,12 @@
 	color = "#673910" // rgb: 103, 57, 16
 
 /datum/reagent/thermite/reaction_turf(turf/T, volume)
-	src = null
-	if(volume >= 5)
+	. = ..()
+	if(volume >= 30)
 		if(istype(T, /turf/simulated/wall))
 			var/turf/simulated/wall/W = T
 			W.thermite = 1
-			W.overlays += image('icons/effects/effects.dmi',icon_state = "#673910")
+			W.add_overlay(image('icons/effects/effects.dmi',icon_state = "#673910"))
 
 /datum/reagent/thermite/on_general_digest(mob/living/M)
 	..()
@@ -205,6 +209,7 @@
 	new /obj/effect/decal/cleanable/liquid_fuel(the_turf, volume)
 
 /datum/reagent/fuel/reaction_turf(turf/T, volume)
+	. = ..()
 	new /obj/effect/decal/cleanable/liquid_fuel(T, volume)
 
 /datum/reagent/fuel/on_general_digest(mob/living/M)
@@ -234,6 +239,7 @@
 			O.clean_blood()
 
 /datum/reagent/space_cleaner/reaction_turf(turf/T, volume)
+	. = ..()
 	if(volume >= 1)
 		if(istype(T, /turf/simulated))
 			var/turf/simulated/S = T
@@ -310,7 +316,7 @@
 	color = "#9e6b38" // rgb: 158, 107, 56
 	taste_message = null
 
-/datum/reagent/foaming_agent// Metal foaming agent. This is lithium hydride. Add other recipes (e.g. LiH + H2O -> LiOH + H2) eventually.
+/datum/reagent/foaming_agent // Metal foaming agent. This is lithium hydride. Add other recipes (e.g. LiH + H2O -> LiOH + H2) eventually.
 	name = "Foaming agent"
 	id = "foaming_agent"
 	description = "A agent that yields metallic foam when mixed with light metal and a strong acid."
@@ -484,43 +490,47 @@
 	taste_message = "nanomachines, son"
 	restrict_species = list(IPC, DIONA)
 
+	data = list()
+
 /datum/reagent/mednanobots/on_general_digest(mob/living/M)
 	..()
+	if(!data["ticks"])
+		data["ticks"] = 1
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
 		switch(volume)
-			if(1 to 5)
+			if(0 to 5)
 				var/obj/item/organ/external/BP = H.bodyparts_by_name[BP_CHEST] // it was H.get_bodypart(????) with nothing as arg, so its always a chest?
 				for(var/datum/wound/W in BP.wounds)
 					BP.wounds -= W
 					H.visible_message("<span class='warning'>[H]'s wounds close up in the blink of an eye!</span>")
 				if(H.getOxyLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.1))
 						H.adjustOxyLoss(-4)
-						holder.remove_reagent("mednanobots", 0.1)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
+						holder.remove_reagent(id, 0.1)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
 
 				if(H.getBruteLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.125))
 						H.heal_bodypart_damage(5, 0)
-						holder.remove_reagent("mednanobots", 0.125)
+						holder.remove_reagent(id, 0.125)
 
 				if(H.getFireLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.125))
 						H.heal_bodypart_damage(0, 5)
-						holder.remove_reagent("mednanobots", 0.125)
+						holder.remove_reagent(id, 0.125)
 
 				if(H.getToxLoss() > 0 && prob(50))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.05))
 						H.adjustToxLoss(-2)
-						holder.remove_reagent("mednanobots", 0.05)
+						holder.remove_reagent(id, 0.05)
 
 				if(H.getCloneLoss() > 0 && prob(60))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.05))
 						H.adjustCloneLoss(-2)
-						holder.remove_reagent("mednanobots", 0.05)
+						holder.remove_reagent(id, 0.05)
 
 				if(percent_machine > 5)
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id))
 						percent_machine -= 1
 						if(prob(20))
 							to_chat(M, pick("You feel more like yourself again."))
@@ -528,52 +538,55 @@
 					H.dizziness = max(0, H.dizziness - 15)
 				if(H.confused != 0)
 					H.confused = max(0, H.confused - 5)
-				for(var/datum/disease/D in M.viruses)
-					D.spread = "Remissive"
-					D.stage--
-					if(D.stage < 1)
-						D.cure()
+				if(holder && holder.has_reagent(id))
+					for(var/ID in H.virus2)
+						var/datum/disease2/disease/D = H.virus2[ID]
+						D.spreadtype = "Remissive"
+						D.stage--
+						if(D.stage < 1 && prob(data["ticks"] / 4))
+							D.cure(H)
+				data["ticks"]++
 			if(5 to 20)		//Danger zone healing. Adds to a human mob's "percent machine" var, which is directly translated into the chance that it will turn horror each tick that the reagent is above 5u.
 				var/obj/item/organ/external/BP = H.bodyparts_by_name[BP_CHEST]
 				for(var/datum/wound/W in BP.wounds)
 					BP.wounds -= W
 					H.visible_message("<span class='warning'>[H]'s wounds close up in the blink of an eye!</span>")
 				if(H.getOxyLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.1))
 						H.adjustOxyLoss(-4)
-						holder.remove_reagent("mednanobots", 0.1)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
+						holder.remove_reagent(id, 0.1)  //The number/40 means that every time it heals, it uses up number/40ths of a unit, meaning each unit heals 40 damage
 						percent_machine += 0.5
 						if(prob(20))
 							to_chat(M, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
 
 				if(H.getBruteLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.125))
 						H.heal_bodypart_damage(5, 0)
-						holder.remove_reagent("mednanobots", 0.125)
+						holder.remove_reagent(id, 0.125)
 						percent_machine += 0.5
 						if(prob(20))
 							to_chat(M, pick("<span class='warning'> Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
 
 				if(H.getFireLoss() > 0 && prob(90))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.125))
 						H.heal_bodypart_damage(0, 5)
-						holder.remove_reagent("mednanobots", 0.125)
+						holder.remove_reagent(id, 0.125)
 						percent_machine += 0.5
 						if(prob(20))
 							to_chat(M, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
 
 				if(H.getToxLoss() > 0 && prob(50))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.05))
 						H.adjustToxLoss(-2)
-						holder.remove_reagent("mednanobots", 0.05)
+						holder.remove_reagent(id, 0.05)
 						percent_machine += 0.5
 						if(prob(20))
 							to_chat(M, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
 
 				if(H.getCloneLoss() > 0 && prob(60))
-					if(holder.has_reagent("mednanobots"))
+					if(holder && holder.has_reagent(id, 0.05))
 						H.adjustCloneLoss(-2)
-						holder.remove_reagent("mednanobots", 0.05)
+						holder.remove_reagent(id, 0.05)
 						percent_machine += 0.5
 						if(prob(20))
 							to_chat(M, pick("<span class='warning'>Something shifts inside you...</span>", "<span class='warning'>You feel different, somehow...</span>"))
@@ -582,14 +595,17 @@
 					H.dizziness = max(0, H.dizziness - 15)
 				if(H.confused != 0)
 					H.confused = max(0, H.confused - 5)
-				for(var/datum/disease/D in M.viruses)
-					D.spread = "Remissive"
-					D.stage--
-					if(D.stage < 1)
-						D.cure()
-				if(prob(percent_machine))
-					holder.add_reagent("mednanobots", 20)
+				if(holder && holder.has_reagent(id))
+					for(var/ID in H.virus2)
+						var/datum/disease2/disease/D = H.virus2[ID]
+						D.spreadtype = "Remissive"
+						D.stage--
+						if(D.stage < 1 && prob(data["ticks"] / 4))
+							D.cure(H)
+				if(holder && prob(percent_machine))
+					holder.add_reagent(id, 20)
 					to_chat(M, pick("<b><span class='warning'>Your body lurches!</b></span>"))
+				data["ticks"] += 2
 			if(20 to INFINITY)
 				spawning_horror = 1
 				to_chat(M, pick("<b><span class='warning'>Something doesn't feel right...</span></b>", "<b><span class='warning'>Something is growing inside you!</span></b>", "<b><span class='warning'>You feel your insides rearrange!</span></b>"))
@@ -602,7 +618,7 @@
 						spawning_horror = 0
 						H.gib()
 	else
-		holder.del_reagent("mednanobots")
+		holder.del_reagent(id)
 
 /datum/reagent/paint
 	name = "Paint"
@@ -661,6 +677,7 @@
 	id = "paint_custom"
 
 /datum/reagent/paint/reaction_turf(turf/T, volume)
+	. = ..()
 	if(!istype(T) || istype(T, /turf/space))
 		return
 	if(color_weight < 15 || volume < 5)
@@ -689,41 +706,41 @@
 			H.eye_blind = max(H.eye_blind, 1)
 		if(volume >= 10 && H.species.flags[HAS_SKIN_COLOR])
 			if(!H.wear_suit && !H.w_uniform && !H.shoes && !H.head && !H.wear_mask) // You either paint the full body, or beard/hair
-				H.r_skin = CLAMP(round(H.r_skin * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255) // Full body painting is costly! Hence, *0.1
-				H.g_skin = CLAMP(round(H.g_skin * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
-				H.b_skin = CLAMP(round(H.b_skin * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
-				H.dyed_r_hair = CLAMP(round(H.dyed_r_hair * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255) // If you're painting full body, all the painting is costly.
-				H.dyed_g_hair = CLAMP(round(H.dyed_g_hair * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
-				H.dyed_b_hair = CLAMP(round(H.dyed_b_hair * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
+				H.r_skin = clamp(round(H.r_skin * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255) // Full body painting is costly! Hence, *0.1
+				H.g_skin = clamp(round(H.g_skin * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
+				H.b_skin = clamp(round(H.b_skin * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
+				H.dyed_r_hair = clamp(round(H.dyed_r_hair * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255) // If you're painting full body, all the painting is costly.
+				H.dyed_g_hair = clamp(round(H.dyed_g_hair * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
+				H.dyed_b_hair = clamp(round(H.dyed_b_hair * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
 				H.hair_painted = TRUE
-				H.dyed_r_facial = CLAMP(round(H.dyed_r_facial * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255)
-				H.dyed_g_facial = CLAMP(round(H.dyed_g_facial * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
-				H.dyed_b_facial = CLAMP(round(H.dyed_b_facial * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
+				H.dyed_r_facial = clamp(round(H.dyed_r_facial * max((100 - volume)/100, 0) + r_tweak * 0.1), 0, 255)
+				H.dyed_g_facial = clamp(round(H.dyed_g_facial * max((100 - volume)/100, 0) + g_tweak * 0.1), 0, 255)
+				H.dyed_b_facial = clamp(round(H.dyed_b_facial * max((100 - volume)/100, 0) + b_tweak * 0.1), 0, 255)
 				H.facial_painted = TRUE
 				hair_changes_occured = TRUE
 				body_changes_occured = TRUE
-		else if(H.species && H.species.name in list(HUMAN, UNATHI, TAJARAN))
+		else if(H.species && (H.species.name in list(HUMAN, UNATHI, TAJARAN)))
 			if(!(H.head && ((H.head.flags & BLOCKHAIR) || (H.head.flags & HIDEEARS))) && H.h_style != "Bald")
 				if(!H.hair_painted)
-					H.dyed_r_hair = CLAMP(round(H.r_hair * volume_coefficient + r_tweak), 0, 255)
-					H.dyed_g_hair = CLAMP(round(H.g_hair * volume_coefficient + g_tweak), 0, 255)
-					H.dyed_b_hair = CLAMP(round(H.b_hair * volume_coefficient + b_tweak), 0, 255)
+					H.dyed_r_hair = clamp(round(H.r_hair * volume_coefficient + r_tweak), 0, 255)
+					H.dyed_g_hair = clamp(round(H.g_hair * volume_coefficient + g_tweak), 0, 255)
+					H.dyed_b_hair = clamp(round(H.b_hair * volume_coefficient + b_tweak), 0, 255)
 					H.hair_painted = TRUE
 				else
-					H.dyed_r_hair = CLAMP(round(H.dyed_r_hair * volume_coefficient + r_tweak), 0, 255)
-					H.dyed_g_hair = CLAMP(round(H.dyed_g_hair * volume_coefficient + g_tweak), 0, 255)
-					H.dyed_b_hair = CLAMP(round(H.dyed_b_hair * volume_coefficient + b_tweak), 0, 255)
+					H.dyed_r_hair = clamp(round(H.dyed_r_hair * volume_coefficient + r_tweak), 0, 255)
+					H.dyed_g_hair = clamp(round(H.dyed_g_hair * volume_coefficient + g_tweak), 0, 255)
+					H.dyed_b_hair = clamp(round(H.dyed_b_hair * volume_coefficient + b_tweak), 0, 255)
 				hair_changes_occured = TRUE
 			if(!((H.wear_mask && (H.wear_mask.flags & HEADCOVERSMOUTH)) || (H.head && (H.head.flags & HEADCOVERSMOUTH))) && H.f_style != "Shaved")
 				if(!H.facial_painted)
-					H.dyed_r_facial = CLAMP(round(H.r_facial * volume_coefficient + r_tweak), 0, 255)
-					H.dyed_g_facial = CLAMP(round(H.g_facial * volume_coefficient + g_tweak), 0, 255)
-					H.dyed_b_facial = CLAMP(round(H.b_facial * volume_coefficient + b_tweak), 0, 255)
+					H.dyed_r_facial = clamp(round(H.r_facial * volume_coefficient + r_tweak), 0, 255)
+					H.dyed_g_facial = clamp(round(H.g_facial * volume_coefficient + g_tweak), 0, 255)
+					H.dyed_b_facial = clamp(round(H.b_facial * volume_coefficient + b_tweak), 0, 255)
 					H.facial_painted = TRUE
 				else
-					H.dyed_r_facial = CLAMP(round(H.dyed_r_facial * volume_coefficient + r_tweak), 0, 255)
-					H.dyed_g_facial = CLAMP(round(H.dyed_g_facial * volume_coefficient + g_tweak), 0, 255)
-					H.dyed_b_facial = CLAMP(round(H.dyed_b_facial * volume_coefficient + b_tweak), 0, 255)
+					H.dyed_r_facial = clamp(round(H.dyed_r_facial * volume_coefficient + r_tweak), 0, 255)
+					H.dyed_g_facial = clamp(round(H.dyed_g_facial * volume_coefficient + g_tweak), 0, 255)
+					H.dyed_b_facial = clamp(round(H.dyed_b_facial * volume_coefficient + b_tweak), 0, 255)
 				hair_changes_occured = TRUE
 		if(!H.head && !H.wear_mask && H.h_style == "Bald" && H.f_style == "Shaved" && volume >= 5)
 			H.lip_style = "spray_face"
@@ -776,6 +793,7 @@
 				H.update_hair()
 
 /datum/reagent/paint_remover/reaction_turf(turf/T, volume)
+	. = ..()
 	if(istype(T) && T.icon != initial(T.icon))
 		T.icon = initial(T.icon)
 
@@ -893,43 +911,69 @@ TODO: Convert everything to custom hair dye. ~ Luduk.
 	description = "A spooky scary substance to explain ghosts and stuff."
 	reagent_state = LIQUID
 	taste_message = "spooky ghosts"
-	data = 1
 	color = "#ffa8e4" // rgb: 255, 168, 228
+
+	data = list()
+
+	needed_aspects = list(ASPECT_MYSTIC = 1)
 
 /datum/reagent/ectoplasm/on_general_digest(mob/living/M)
 	..()
+	if(!data["ticks"])
+		data["ticks"] = 1
 	M.hallucination += 1
 	M.make_jittery(2)
-	switch(data)
+	switch(data["ticks"])
 		if(1 to 15)
 			M.make_jittery(2)
 			M.hallucination = max(M.hallucination, 3)
 			if(prob(1))
 				to_chat(src, "<span class='warning'>You see... [pick(nightmares)] ...</span>")
-				M.emote("faint") // Seeing ghosts ain't an easy thing for your mind.
+				M.Sleeping(10) // Seeing ghosts ain't an easy thing for your mind.
 		if(15 to 45)
 			M.make_jittery(4)
-			M.druggy = max(M.druggy, 15)
+			M.adjustDrugginess(1)
 			M.hallucination = max(M.hallucination, 10)
 			if(prob(5))
 				to_chat(src, "<span class='warning'>You see... [pick(nightmares)] ...</span>")
-				M.emote("faint")
+				M.Sleeping(10)
 		if(45 to 90)
 			M.make_jittery(8)
-			M.druggy = max(M.druggy, 30)
+			M.adjustDrugginess(3)
 			M.hallucination = max(M.hallucination, 60)
 			if(prob(10))
 				to_chat(src, "<span class='warning'>You see... [pick(nightmares)] ...</span>")
-				M.emote("faint")
+				M.Sleeping(10)
 		if(90 to 180)
 			M.make_jittery(8)
-			M.druggy = max(M.druggy, 35)
+			M.adjustDrugginess(3)
 			M.hallucination = max(M.hallucination, 60)
 			if(prob(10))
 				to_chat(src, "<span class='warning'>You see... [pick(nightmares)] ...</span>")
-				M.emote("faint")
+				M.Sleeping(10)
 			if(prob(5))
 				M.adjustBrainLoss(5)
 		if(180 to INFINITY)
 			M.adjustBrainLoss(100)
-	data++
+	data["ticks"]++
+
+/datum/reagent/aqueous_foam
+	name = "Aqueous Film Forming Foam"
+	id = "aqueous_foam"
+	description = "Smothers the fire and seals in the flammable vapours."
+	reagent_state = LIQUID
+	taste_message = "fire repellant"
+	color = "#c2eaed" // rgb: 194, 234, 237
+
+/datum/reagent/aqueous_foam/reaction_turf(turf/T, method=TOUCH, volume)
+	. = ..()
+	var/obj/effect/effect/aqueous_foam/F = locate(/obj/effect/effect/aqueous_foam) in T
+	if(F)
+		INVOKE_ASYNC(F, /obj/effect/effect/aqueous_foam.proc/performAction) // So we don't instantinate a new object, but still make the room slightly colder.
+	else if(!T.density)
+		new /obj/effect/effect/aqueous_foam(T)
+
+/datum/reagent/aqueous_foam/on_slime_digest(mob/living/M)
+	..()
+	M.adjustToxLoss(REM)
+	return FALSE

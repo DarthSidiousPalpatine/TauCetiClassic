@@ -10,7 +10,9 @@
 	var/map_path = "boxstation"
 	var/map_file = "boxstation.dmm"
 	var/station_name = "NSS Exodus"
+	var/station_name_ru = "КСН Исход"
 	var/system_name = "Tau Ceti"
+	var/system_name_ru = "Тау Кита"
 	var/station_image = "exodus"
 
 	// Config from maps.txt
@@ -26,6 +28,8 @@
 
 /proc/load_map_config(filename = "data/next_map.json", default_to_box, delete_after, error_if_missing = TRUE)
 	var/datum/map_config/config = new
+	if (global.config.load_testmap)
+		filename = "maps/testmap.json"
 	if (default_to_box)
 		return config
 	if (!config.LoadConfig(filename, error_if_missing))
@@ -120,8 +124,14 @@
 	if ("station_name" in json)
 		station_name = json["station_name"]
 
+	if ("station_name_ru" in json)
+		station_name_ru = json["station_name_ru"]
+
 	if ("system_name" in json)
 		system_name = json["system_name"]
+
+	if ("system_name_ru" in json)
+		system_name_ru = json["system_name_ru"]
 
 	if("station_image" in json)
 		station_image = json["station_image"]

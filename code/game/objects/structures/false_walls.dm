@@ -14,7 +14,9 @@
 		/turf/simulated/wall,
 		/turf/simulated/wall/r_wall,
 		/obj/structure/falsewall,
-		/obj/structure/falsewall/reinforced
+		/obj/structure/falsewall/reinforced,
+		/obj/structure/girder,
+		/obj/structure/girder/reinforced
 	)
 	smooth = SMOOTH_TRUE
 	can_be_unanchored = FALSE
@@ -87,7 +89,7 @@
 
 		if( iswelder(W) )
 			var/obj/item/weapon/weldingtool/WT = W
-			if( WT.welding )
+			if( WT.isOn() )
 				T.ChangeTurf(walltype)
 				if(walltype != /turf/simulated/wall/mineral/phoron)//Stupid shit keeps me from pushing the attackby() to phoron walls -Sieve
 					T = get_turf(src)

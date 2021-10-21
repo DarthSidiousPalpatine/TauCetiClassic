@@ -1,7 +1,22 @@
 // Contains everything related to earning research points
 
 /datum/experiment_data
-	var/saved_best_explosion = 0
+	var/list/saved_best_score = list(
+		"Explosion" = 0,
+		"Empulse" = 0,
+		"Anomalous means" = 0,
+	)
+
+	var/list/earned_score = list(
+		"Explosion" = 0,
+		"Empulse" = 0,
+		"Anomalous means" = 0,
+	)
+
+
+	//Determines maximum amount of points that can be earned by certain methods. 
+	//Total points that can be earned equal highest score multiplied by this number
+	var/cap_coeff = 2 
 
 	var/list/tech_points = list(
 		"materials" = 200,
@@ -16,25 +31,36 @@
 		"syndicate" = 5000,
 	)
 
-	// So we don't give points for researching non-artifact item
-	var/list/artifact_types = list(
-		/obj/item/clothing/glasses/hud/mining/ancient,
-		/obj/machinery/auto_cloner,
-		/obj/machinery/power/supermatter,
-		/obj/structure/constructshell,
-		/obj/machinery/giga_drill,
-		/obj/structure/cult/pylon,
-		/obj/mecha/working/hoverpod,
-		/obj/machinery/replicator,
-		/obj/machinery/power/crystal,
-		/obj/machinery/artifact
+	// How much likely this tech is already known from the start.
+	// In this list there is no "syndicate", since it shouldn't be known from the beggining.
+	var/list/tech_points_rarity = list(
+		"bluespace" = 3,
+		"phorontech" = 3,
+		"magnets" = 2,
+		"combat" = 2,
+		"engineering" = 1,
+		"powerstorage" = 1,
+		"programming" = 1,
+		"materials" = 0,
+		"biotech" = 0,
 	)
 
 	var/list/saved_tech_levels = list() // list("materials" = list(1, 4, ...), ...)
 	var/list/saved_autopsy_weapons = list()
-	var/list/saved_artifacts = list()
 	var/list/saved_symptoms = list()
 	var/list/saved_slimecores = list()
+	//xenoarcheology stuff
+	var/list/saved_artifacts = list()
+
+/datum/experiment_data/proc/init_known_tech()
+	for(var/tech in tech_points_rarity)
+		var/cap_at = rand(0, 4) - tech_points_rarity[tech]
+		if(cap_at > 0)
+			if(!saved_tech_levels[tech])
+				saved_tech_levels[tech] = list()
+
+			for(var/i in 1 to cap_at)
+				saved_tech_levels[tech] |= i
 
 /datum/experiment_data/proc/ConvertReqString2List(list/source_list)
 	var/list/temp_list = params2list(source_list)
@@ -75,7 +101,7 @@
 		if(!(temp_tech[T] in saved_tech_levels[T]))
 			saved_tech_levels[T] += temp_tech[T]
 
-// Returns ammount of research points received
+// Returns amount of research points received
 /datum/experiment_data/proc/read_science_tool(obj/item/device/science_tool/I)
 	var/points = 0
 
@@ -97,19 +123,18 @@
 			else
 				points += rand(5,10) * 200 // 1000-2000 points for random weapon
 
-	for(var/list/artifact in I.scanned_artifacts)
-		if(!(artifact["type"] in artifact_types)) // useless
-			continue
-
+	for(var/list/scanning_artifact in I.scanned_artifacts)
 		var/already_scanned = FALSE
-		for(var/list/our_artifact in saved_artifacts)
-			if(our_artifact["type"] == artifact["type"] && our_artifact["first_effect"] == artifact["first_effect"] && our_artifact["second_effect"] == artifact["second_effect"])
+		for(var/list/stored_artifact in saved_artifacts)
+			if(stored_artifact["type"] == scanning_artifact["type"] && stored_artifact["first_effect"] == scanning_artifact["first_effect"] && stored_artifact["second_effect"] == scanning_artifact["second_effect"])
 				already_scanned = TRUE
 				break
 
 		if(!already_scanned)
-			points += rand(5,10) * 1000 // 5000-10000 points for random artifact
-			saved_artifacts += list(artifact)
+			points += 10000 //10000 points for main effect
+			if(scanning_artifact["second_effect"] != "")
+				points += 5000 //5000 points for secondary effect
+			saved_artifacts += list(scanning_artifact)
 
 	for(var/symptom in I.scanned_symptoms)
 		if(saved_symptoms[symptom])
@@ -128,8 +153,6 @@
 
 		var/reward = 1000
 		switch(core)
-			if(/obj/item/slime_extract/grey)
-				reward = 100
 			if(/obj/item/slime_extract/gold)
 				reward = 2000
 			if(/obj/item/slime_extract/adamantine)
@@ -154,14 +177,14 @@
 	for(var/weapon in O.saved_autopsy_weapons)
 		saved_autopsy_weapons |= weapon
 
-	for(var/list/artifact in O.saved_artifacts)
+	for(var/list/scanning_artifact in O.saved_artifacts)
 		var/has_artifact = FALSE
-		for(var/list/our_artifact in saved_artifacts)
-			if(our_artifact["type"] == artifact["type"] && our_artifact["first_effect"] == artifact["first_effect"] && our_artifact["second_effect"] == artifact["second_effect"])
+		for(var/list/stored_artifact in saved_artifacts)
+			if(stored_artifact["type"] == scanning_artifact["type"] && stored_artifact["first_effect"] == scanning_artifact["first_effect"] && stored_artifact["second_effect"] == scanning_artifact["second_effect"])
 				has_artifact = TRUE
 				break
 		if(!has_artifact)
-			saved_artifacts += list(artifact)
+			saved_artifacts += list(scanning_artifact)
 
 	for(var/symptom in O.saved_symptoms)
 		saved_symptoms[symptom] = O.saved_symptoms[symptom]
@@ -169,48 +192,103 @@
 	for(var/core in O.saved_slimecores)
 		saved_slimecores |= core
 
-	saved_best_explosion = max(saved_best_explosion, O.saved_best_explosion)
+	for(var/interaction_type in saved_best_score)
+		saved_best_score[interaction_type] = max(saved_best_score[interaction_type], O.saved_best_score[interaction_type])
 
 
 // Grants research points when explosion happens nearby
-/obj/item/device/radio/beacon/explosion_watcher
+/obj/item/device/radio/beacon/interaction_watcher
 	name = "Kinetic Energy Scanner"
 	desc = "Scans the level of kinetic energy from explosions"
 
 	channels = list("Science" = 1)
 
-/obj/item/device/radio/beacon/explosion_watcher/ex_act(severity)
-	return
+	var/message_scientists = TRUE
 
-/obj/item/device/radio/beacon/explosion_watcher/atom_init()
-	. = ..()
-	explosion_watcher_list += src
+	// This thing should be really hard to destroy by any means.
+	// Some destruction methods(Lord Singuloo) are expected, and not considered anomalous.
+	var/anomalous_destruction = TRUE
 
-/obj/item/device/radio/beacon/explosion_watcher/Destroy()
-	explosion_watcher_list -= src
+/obj/item/device/radio/beacon/interaction_watcher/singularity_act()
+	anomalous_destruction = FALSE
 	return ..()
 
-/obj/item/device/radio/beacon/explosion_watcher/proc/react_explosion(turf/epicenter, power)
-	power = round(power)
+/obj/item/device/radio/beacon/interaction_watcher/ex_act(severity)
+	return
+
+/obj/item/device/radio/beacon/interaction_watcher/emp_act(severity)
+	return
+
+/obj/item/device/radio/beacon/interaction_watcher/atom_init()
+	. = ..()
+	global.interaction_watcher_list += src
+
+/obj/item/device/radio/beacon/interaction_watcher/attack_self(mob/living/carbon/human/user)
+	message_scientists = !message_scientists
+	to_chat(user, "<span class='notice'>You toggle [src]'s messaging module [message_scientists ? "on" : "off"]</span>")
+
+/obj/item/device/radio/beacon/interaction_watcher/autosay(message, from, channel, freq = 1459)
+	if(!message_scientists)
+		return
+	return ..()
+
+/obj/item/device/radio/beacon/interaction_watcher/Destroy()
+	global.interaction_watcher_list -= src
+
+	if(anomalous_destruction)
+		var/calculated_research_points = research_interaction("Anomalous means", 20000, new_score_coeff=1, repeat_score_coeff=0)
+
+		if(calculated_research_points > 0)
+			autosay("Destroyed via anomalous means, received [calculated_research_points] research points", name ,"Science", freq = radiochannels["Science"])
+		else
+			autosay("Destroyed via anomalous means, R&D console is missing or broken", name ,"Science", freq = radiochannels["Science"])
+
+	return ..()
+
+/obj/item/device/radio/beacon/interaction_watcher/proc/research_interaction(inter_type, score, new_score_coeff=800, repeat_score_coeff=160)
 	var/calculated_research_points = -1
 	for(var/obj/machinery/computer/rdconsole/RD in RDcomputer_list)
-		if(RD.id == 1) // only core gets the science
-			var/saved_power_level = RD.files.experiments.saved_best_explosion
+		if(RD.id == 1)
+			var/saved_interaction_score = RD.files.experiments.saved_best_score[inter_type]
+			var/saved_earned_points = max(RD.files.experiments.earned_score[inter_type], 1)
 
-			var/added_power = max(0, power - saved_power_level)
-			var/already_earned_power = min(saved_power_level, power)
+			var/added_score = max(0, score - saved_interaction_score)
+			var/already_earned_score = min(saved_interaction_score, score)
+			var/repetition_cap = max(score, saved_interaction_score) * RD.files.experiments.cap_coeff * new_score_coeff
 
-			calculated_research_points = added_power * 800 + already_earned_power * 160
+			var/softcap_coeff = max(repetition_cap / saved_earned_points - 1, 0)
 
-			if(power > saved_power_level)
-				RD.files.experiments.saved_best_explosion = power
+			calculated_research_points = added_score * new_score_coeff + min(already_earned_score * round(repeat_score_coeff * softcap_coeff), repetition_cap - saved_earned_points)
 
+			if(score > saved_interaction_score)
+				RD.files.experiments.saved_best_score[inter_type] = score
+
+			RD.files.experiments.earned_score[inter_type] += calculated_research_points
 			RD.files.research_points += calculated_research_points
+
+	return calculated_research_points
+
+/obj/item/device/radio/beacon/interaction_watcher/proc/react_explosion(turf/epicenter, power)
+	power = round(power)
+	var/calculated_research_points = research_interaction("Explosion", power, new_score_coeff=800, repeat_score_coeff=160)
 
 	if(calculated_research_points > 0)
 		autosay("Detected explosion with power level [power], received [calculated_research_points] research points", name ,"Science", freq = radiochannels["Science"])
+	else if (calculated_research_points == 0)
+		autosay("Detected explosion with power level [power], could not acquire any more research points", name ,"Science", freq = radiochannels["Science"])
 	else
 		autosay("Detected explosion with power level [power], R&D console is missing or broken", name ,"Science", freq = radiochannels["Science"])
+
+/obj/item/device/radio/beacon/interaction_watcher/proc/react_empulse(turf/epicenter, power)
+	power = round(power)
+	var/calculated_research_points = research_interaction("Empulse", power, new_score_coeff=600, repeat_score_coeff=120)
+
+	if(calculated_research_points > 0)
+		autosay("Detected EMP with power level [power], received [calculated_research_points] research points", name ,"Science", freq = radiochannels["Science"])
+	else if (calculated_research_points == 0)
+		autosay("Detected EMP with power level [power], could not acquire any more research points", name ,"Science", freq = radiochannels["Science"])
+	else
+		autosay("Detected EMP with power level [power], R&D console is missing or broken", name ,"Science", freq = radiochannels["Science"])
 
 // Universal tool to get research points from autopsy reports, virus info reports, archeology reports, slime cores
 /obj/item/device/science_tool
@@ -218,10 +296,10 @@
 	icon_state = "science"
 	item_state = "sciencetool"
 	desc = "A hand-held device capable of extracting usefull data from various sources, such as paper reports and slime cores."
-	flags = CONDUCT
+	flags = CONDUCT | NOBLUDGEON | NOATTACKANIMATION
 	slot_flags = SLOT_FLAGS_BELT
 	throwforce = 3
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throw_speed = 5
 	throw_range = 10
 	m_amt = 200
@@ -241,26 +319,28 @@
 /obj/item/device/science_tool/attack(mob/living/M, mob/living/user)
 	return
 
-/obj/item/device/science_tool/afterattack(obj/O, mob/living/user)
+/obj/item/device/science_tool/afterattack(atom/target, mob/user, proximity, params)
+	if(!proximity)
+		return
 	var/scanneddata = 0
 
-	if(istype(O, /obj/item/weapon/disk/research_points))
-		var/obj/item/weapon/disk/research_points/disk = O
+	if(istype(target, /obj/item/weapon/disk/research_points))
+		var/obj/item/weapon/disk/research_points/disk = target
 		to_chat(user, "<span class='notice'>[disk] stores approximately [disk.stored_points] research points</span>")
 		return
 
-	if(istype(O,/obj/item/weapon/paper/autopsy_report))
-		var/obj/item/weapon/paper/autopsy_report/report = O
+	if(istype(target,/obj/item/weapon/paper/autopsy_report))
+		var/obj/item/weapon/paper/autopsy_report/report = target
 		for(var/datum/autopsy_data/W in report.autopsy_data)
 			if(!(W.weapon in scanned_autopsy_weapons))
 				scanneddata += 1
 				scanned_autopsy_weapons += W.weapon
 
-	if(istype(O, /obj/item/weapon/paper/artifact_info))
-		var/obj/item/weapon/paper/artifact_info/report = O
+	if(istype(target, /obj/item/weapon/paper/artifact_info))
+		var/obj/item/weapon/paper/artifact_info/report = target
 		if(report.artifact_type)
-			for(var/list/artifact in scanned_artifacts)
-				if(artifact["type"] == report.artifact_type && artifact["first_effect"] == report.artifact_first_effect && artifact["second_effect"] == report.artifact_second_effect)
+			for(var/list/scanning_artifact in scanned_artifacts)
+				if(scanning_artifact["type"] == report.artifact_type && scanning_artifact["first_effect"] == report.artifact_first_effect && scanning_artifact["second_effect"] == report.artifact_second_effect)
 					to_chat(user, "<span class='notice'>[src] already has data about this artifact report</span>")
 					return
 
@@ -271,26 +351,26 @@
 			))
 			scanneddata += 1
 
-	if(istype(O, /obj/item/weapon/paper/virus_report))
-		var/obj/item/weapon/paper/virus_report/report = O
+	if(istype(target, /obj/item/weapon/paper/virus_report))
+		var/obj/item/weapon/paper/virus_report/report = target
 		for(var/symptom in report.symptoms)
 			if(!scanned_symptoms[symptom])
 				scanneddata += 1
 				scanned_symptoms[symptom] = report.symptoms[symptom]
-	if(istype(O, /obj/item/slime_extract))
-		if(!(O.type in scanned_slimecores))
-			scanned_slimecores += O.type
+	if(istype(target, /obj/item/slime_extract))
+		if(!(target.type in scanned_slimecores))
+			scanned_slimecores += target.type
 			scanneddata += 1
 
 	if(scanneddata > 0)
 		datablocks += scanneddata
-		to_chat(user, "<span class='notice'>[src] received [scanneddata] data block[scanneddata>1?"s":""] from scanning [O]</span>")
-	else if(istype(O, /obj/item))
-		var/science_value = experiments.get_object_research_value(O)
+		to_chat(user, "<span class='notice'>[src] received [scanneddata] data block[scanneddata>1?"s":""] from scanning [target]</span>")
+	else if(istype(target, /obj/item))
+		var/science_value = experiments.get_object_research_value(target)
 		if(science_value > 0)
-			to_chat(user, "<span class='notice'>Estimated research value of [O.name] is [science_value]</span>")
+			to_chat(user, "<span class='notice'>Estimated research value of [target.name] is [science_value]</span>")
 		else
-			to_chat(user, "<span class='notice'>[O] has no research value</span>")
+			to_chat(user, "<span class='notice'>[target] has no research value</span>")
 
 /obj/item/device/science_tool/proc/clear_data()
 	scanned_autopsy_weapons = list()
@@ -305,7 +385,7 @@
 	icon = 'icons/obj/cloning.dmi'
 	icon_state = "datadisk2"
 	item_state = "card-id"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	m_amt = 30
 	g_amt = 10
 	var/stored_points

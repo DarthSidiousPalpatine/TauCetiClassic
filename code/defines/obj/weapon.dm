@@ -8,21 +8,21 @@
 	throwforce = 2.0
 	throw_speed = 1
 	throw_range = 4
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	attack_verb = list("called", "rang")
 	hitsound = list('sound/weapons/ring.ogg')
 
 /obj/item/weapon/rsp
-	name = "\improper Rapid-Seed-Producer (RSP)"
+	name = "Rapid-Seed-Producer (RSP)"
 	desc = "A device used to rapidly deploy seeds."
 	icon = 'icons/obj/items.dmi'
 	icon_state = "rcd"
 	opacity = 0
-	density = 0
-	anchored = 0.0
+	density = FALSE
+	anchored = FALSE
 	var/matter = 0
 	var/mode = 1
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 
 /obj/item/weapon/corncob
 	name = "corn cob"
@@ -30,7 +30,7 @@
 	icon = 'icons/obj/hydroponics/harvest.dmi'
 	icon_state = "corncob"
 	item_state = "corncob"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throwforce = 0
 	throw_speed = 4
 	throw_range = 20
@@ -41,7 +41,7 @@
 	icon = 'icons/obj/items.dmi'
 	icon_state = "c_tube"
 	throwforce = 1
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throw_speed = 4
 	throw_range = 5
 
@@ -55,19 +55,27 @@
 	flags = CONDUCT
 	force = 5.0
 	throwforce = 7.0
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	m_amt = 50
 	attack_verb = list("bludgeoned", "whacked", "disciplined", "thrashed")
+
+/obj/item/weapon/cane/atom_init()
+	. = ..()
+	var/datum/swipe_component_builder/SCB = new
+	SCB.can_push = TRUE
+	SCB.can_pull = TRUE
+	AddComponent(/datum/component/swiping, SCB)
 
 /obj/item/weapon/gift
 	name = "gift"
 	desc = "A wrapped item."
 	icon = 'icons/obj/items.dmi'
 	icon_state = "gift3"
-	var/size = 3.0
-	var/obj/item/gift = null
 	item_state = "gift"
-	w_class = ITEM_SIZE_LARGE
+	w_class = SIZE_SMALL
+	var/size = SIZE_SMALL
+	var/sender = FALSE
+	var/recipient = FALSE
 
 /obj/item/weapon/legcuffs
 	name = "legcuffs"
@@ -77,7 +85,7 @@
 	icon_state = "handcuff"
 	flags = CONDUCT
 	throwforce = 0
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	origin_tech = "materials=1"
 	var/breakouttime = 300	//Deciseconds = 30s = 0.5 minute
 
@@ -100,7 +108,8 @@
 		icon_state = "beartrap[armed]"
 		to_chat(user, "<span class='notice'>[src] is now [armed ? "armed" : "disarmed"].</span>")
 
-/obj/item/weapon/legcuffs/beartrap/Crossed(AM as mob|obj)
+/obj/item/weapon/legcuffs/beartrap/Crossed(atom/movable/AM)
+	. = ..()
 	if(armed)
 		if(ishuman(AM))
 			if(isturf(src.loc))
@@ -110,19 +119,14 @@
 					H.legcuffed = src
 					src.loc = H
 					H.update_inv_legcuffed()
-					to_chat(H, "<span class='danger'>You step on \the [src]!</span>")
+					H.visible_message("<span class='danger'>[H] steps on \the [src].</span>", "<span class='danger'>You step on \the [src]!</span>")
 					feedback_add_details("handcuffs","B") //Yes, I know they're legcuffs. Don't change this, no need for an extra variable. The "B" is used to tell them apart.
-					for(var/mob/O in viewers(H, null))
-						if(O == H)
-							continue
-						O.show_message("<span class='danger'>[H] steps on \the [src].</span>", 1)
 		if(isanimal(AM) && !istype(AM, /mob/living/simple_animal/parrot) && !istype(AM, /mob/living/simple_animal/construct) && !istype(AM, /mob/living/simple_animal/shade) && !istype(AM, /mob/living/simple_animal/hostile/viscerator))
 			armed = 0
 			var/mob/living/simple_animal/SA = AM
 			SA.health -= 20
 
 		icon_state = "beartrap[armed]"
-	..()
 
 /obj/item/weapon/legcuffs/bola
 	name = "bola"
@@ -137,7 +141,7 @@
 	..()
 	playsound(src,'sound/weapons/bolathrow.ogg', VOL_EFFECTS_MASTER)
 
-/obj/item/weapon/legcuffs/bola/throw_impact(atom/hit_atom)
+/obj/item/weapon/legcuffs/bola/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
 	if(!iscarbon(hit_atom))//if it gets caught or the target can't be cuffed,
 		return
 	var/mob/living/carbon/C = hit_atom
@@ -168,7 +172,7 @@
 	throwforce = 3.0
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	attack_verb = list("warned", "cautioned", "smashed")
 
 /obj/item/weapon/caution/cone
@@ -191,26 +195,24 @@
 	sharp = 1
 	edge = 1
 	desc = "Could probably be used as ... a throwing weapon?"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	force = 5.0
 	throwforce = 8.0
 	item_state = "shard-glass"
 	g_amt = 3750
+	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb = list("stabbed", "slashed", "sliced", "cut")
+	var/on_step_sound = 'sound/effects/glass_step.ogg'
 
 /obj/item/weapon/shard/suicide_act(mob/user)
 	to_chat(viewers(user), pick("<span class='danger'>[user] is slitting \his wrists with the shard of glass! It looks like \he's trying to commit suicide.</span>", \
 						"<span class='danger'>[user] is slitting \his throat with the shard of glass! It looks like \he's trying to commit suicide.</span>"))
 	return (BRUTELOSS)
 
-/obj/item/weapon/shard/attack(mob/living/carbon/M, mob/living/carbon/user)
-	playsound(src, 'sound/weapons/bladeslice.ogg', VOL_EFFECTS_MASTER)
-	return ..()
-
-/obj/item/weapon/shard/afterattack(atom/A, mob/user, proximity)
+/obj/item/weapon/shard/afterattack(atom/target, mob/user, proximity, params)
 	if(!proximity)
 		return
-	if(isturf(A))
+	if(isturf(target))
 		return
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
@@ -235,7 +237,7 @@
 	var/mob/currentUser = null
 	var/obj/item/device/radio/origradio = null
 	flags = CONDUCT | ONBELT
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	item_state = "radio"
 	throw_speed = 4
 	throw_range = 20
@@ -247,6 +249,7 @@
 	icon = 'icons/obj/shards.dmi'
 	icon_state = "shrapnellarge"
 	desc = "A bunch of tiny bits of shattered metal."
+	on_step_sound = 'sound/effects/metalstep.ogg'
 
 /obj/item/weapon/shard/shrapnel/atom_init()
 	. = ..()
@@ -277,7 +280,7 @@
 	slot_flags = SLOT_FLAGS_BELT
 	item_state = "radio"
 	throwforce = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throw_speed = 4
 	throw_range = 20
 	m_amt = 100
@@ -293,15 +296,32 @@
 	throwforce = 5.0
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	flags = NOSHIELD
 	attack_verb = list("bludgeoned", "whacked", "disciplined")
+
+/obj/item/weapon/staff/atom_init()
+	. = ..()
+	var/datum/swipe_component_builder/SCB = new
+	SCB.can_push = TRUE
+	SCB.can_pull = TRUE
+	AddComponent(/datum/component/swiping, SCB)
 
 /obj/item/weapon/staff/broom
 	name = "broom"
 	desc = "Used for sweeping, and flying into the night while cackling. Black cat not included."
 	icon = 'icons/obj/wizard.dmi'
 	icon_state = "broom"
+
+/obj/item/weapon/staff/broom/atom_init()
+	. = ..()
+	var/datum/swipe_component_builder/SCB = new
+	SCB.can_push = TRUE
+	SCB.can_pull = TRUE
+
+	SCB.can_sweep = TRUE
+	SCB.can_spin = TRUE
+	AddComponent(/datum/component/swiping, SCB)
 
 /obj/item/weapon/staff/gentcane
 	name = "Gentlemans Cane"
@@ -320,7 +340,7 @@
 	throwforce = 5.0
 	throw_speed = 1
 	throw_range = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	flags = NOSHIELD
 
 /obj/item/weapon/table_parts
@@ -385,7 +405,7 @@
 /obj/item/weapon/module
 	icon = 'icons/obj/module.dmi'
 	icon_state = "std_module"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	item_state = "electronic"
 	flags = CONDUCT
 	usesound = 'sound/items/Deconstruct.ogg'
@@ -404,7 +424,7 @@
 	g_amt = 50
 
 /obj/item/weapon/module/id_auth
-	name = "\improper ID authentication module"
+	name = "ID authentication module"
 	icon_state = "id_mod"
 	desc = "A module allowing secure authorization of ID cards."
 
@@ -424,7 +444,7 @@
 	icon = 'icons/obj/food.dmi'
 	icon_state = "meat"
 	flags = CONDUCT
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	origin_tech = "biotech=2"
 
 /obj/item/weapon/hatchet
@@ -436,13 +456,22 @@
 	force = 12.0
 	sharp = 1
 	edge = 1
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throwforce = 15.0
 	throw_speed = 4
 	throw_range = 4
 	m_amt = 15000
 	origin_tech = "materials=2;combat=1"
 	attack_verb = list("chopped", "torn", "cut")
+
+/obj/item/weapon/hatchet/atom_init()
+	. = ..()
+	var/datum/swipe_component_builder/SCB = new
+	SCB.interupt_on_sweep_hit_types = list(/obj, /turf)
+
+	SCB.can_sweep = TRUE
+	SCB.can_spin = TRUE
+	AddComponent(/datum/component/swiping, SCB)
 
 /obj/item/weapon/hatchet/attack(mob/living/carbon/M, mob/living/carbon/user)
 	playsound(src, 'sound/weapons/bladeslice.ogg', VOL_EFFECTS_MASTER)
@@ -465,19 +494,28 @@
 	edge = 1
 	throw_speed = 1
 	throw_range = 3
-	w_class = ITEM_SIZE_LARGE
+	w_class = SIZE_NORMAL
 	flags = NOSHIELD
 	slot_flags = SLOT_FLAGS_BACK
 	origin_tech = "materials=2;combat=2"
 	attack_verb = list("chopped", "sliced", "cut", "reaped")
 
-/obj/item/weapon/scythe/afterattack(atom/A, mob/user, proximity)
+/obj/item/weapon/scythe/atom_init()
+	. = ..()
+	var/datum/swipe_component_builder/SCB = new
+	SCB.interupt_on_sweep_hit_types = list(/turf, /obj/effect/effect/weapon_sweep)
+
+	SCB.can_sweep = TRUE
+	SCB.can_spin = TRUE
+	AddComponent(/datum/component/swiping, SCB)
+
+/obj/item/weapon/scythe/afterattack(atom/target, mob/user, proximity, params)
 	if(!proximity) return
-	if(istype(A, /obj/effect/spacevine))
-		for(var/obj/effect/spacevine/B in orange(A, 1))
+	if(istype(target, /obj/effect/spacevine))
+		for(var/obj/effect/spacevine/B in orange(target, 1))
 			if(prob(80))
 				qdel(B)
-		qdel(A)
+		qdel(target)
 
 /*
 /obj/item/weapon/cigarpacket
@@ -486,7 +524,7 @@
 	icon = 'icons/obj/cigarettes.dmi'
 	icon_state = "cigarpacket"
 	item_state = "cigarpacket"
-	w_class = ITEM_SIZE_TINY
+	w_class = SIZE_MINUSCULE
 	throwforce = 2
 	var/cigarcount = 6
 	flags = ONBELT */
@@ -497,7 +535,7 @@
 	icon = 'icons/obj/power.dmi'
 	icon_state = "wire1"
 	flags = NOBLUDGEON | NOATTACKANIMATION | CONDUCT
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 
 	var/obj/machinery/machine
 
@@ -509,7 +547,7 @@
 	icon_state = "plastic-explosive0"
 	item_state = "plasticx"
 	flags = NOBLUDGEON
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	origin_tech = "syndicate=2"
 	var/timer = 10
 	var/atom/target = null
@@ -521,7 +559,7 @@
 	desc = "Special mechanical module made to store, sort, and apply standard machine parts."
 	icon_state = "RPED"
 	item_state = "RPED"
-	w_class = ITEM_SIZE_HUGE
+	w_class = SIZE_BIG
 	can_hold = list(/obj/item/weapon/stock_parts)
 	storage_slots = 50
 	use_to_pickup = 1
@@ -529,15 +567,18 @@
 	allow_quick_empty = 1
 	collection_mode = 1
 	display_contents_with_number = 1
-	max_w_class = ITEM_SIZE_NORMAL
+	max_w_class = SIZE_SMALL
 	var/works_from_distance = 0
 	var/pshoom_or_beepboopblorpzingshadashwoosh = 'sound/items/rped.ogg'
 	var/alt_sound = null
 
-/obj/item/weapon/storage/part_replacer/afterattack(obj/machinery/T, mob/living/carbon/human/user, flag)
-	if(flag)
+/obj/item/weapon/storage/part_replacer/afterattack(atom/target, mob/user, proximity, params)
+	if(proximity)
 		return
-	if(works_from_distance && istype(T) && T.component_parts)
+	if(!istype(target, /obj/machinery))
+		return
+	var/obj/machinery/T = target
+	if(works_from_distance && T.component_parts)
 		T.exchange_parts(user, src)
 		user.Beam(T,icon_state="rped_upgrade",icon='icons/effects/effects.dmi',time=5)
 
@@ -546,9 +587,9 @@
 	desc = "A version of the RPED that allows for replacement of parts and scanning from a distance, along with higher capacity for parts."
 	icon_state = "BS_RPED"
 	item_state = "BS_RPED"
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	storage_slots = 400
-	max_w_class = ITEM_SIZE_NORMAL
+	max_w_class = SIZE_SMALL
 	works_from_distance = 1
 	pshoom_or_beepboopblorpzingshadashwoosh = 'sound/items/PSHOOM.ogg'
 	alt_sound = 'sound/items/PSHOOM_2.ogg'
@@ -561,7 +602,7 @@
 		playsound(src, pshoom_or_beepboopblorpzingshadashwoosh, VOL_EFFECTS_MASTER)
 
 //Sorts stock parts inside an RPED by their rating.
-//Only use /obj/item/weapon/stock_parts/ with this sort proc!
+//Only use /obj/item/weapon/stock_parts with this sort proc!
 /proc/cmp_rped_sort(obj/item/weapon/stock_parts/A, obj/item/weapon/stock_parts/B)
 	return B.rating - A.rating
 
@@ -569,7 +610,7 @@
 	name = "stock part"
 	desc = "What?"
 	icon = 'icons/obj/stock_parts.dmi'
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	var/rating = 1
 
 /obj/item/weapon/stock_parts/atom_init()
@@ -828,7 +869,7 @@
 	icon_state = "broom_sauna"
 
 /obj/item/weapon/broom/attack(mob/living/carbon/human/M, mob/living/user, def_zone)
-	if(!istype(M) || user.a_intent == "hurt")
+	if(!istype(M) || user.a_intent == INTENT_HARM)
 		return ..()
 	if(wet - 5 < 0)
 		to_chat(user, "<span class='userdanger'>Soak this [src] first!</span>")
@@ -840,7 +881,7 @@
 		to_chat(user, "<span class='userdanger'>[M] Must be lie down first!</span>")
 		return
 
-	var/zone = check_zone(user.zone_sel.selecting)
+	var/zone = check_zone(user.get_targetzone())
 	var/obj/item/organ/external/BP = M.get_bodypart(zone)
 	for(var/obj/item/clothing/C in M.get_equipped_items())
 		if(C.body_parts_covered & BP.body_part)

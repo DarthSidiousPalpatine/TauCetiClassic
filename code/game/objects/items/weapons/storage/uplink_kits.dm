@@ -106,6 +106,14 @@
 	desc = "A sleek, sturdy box."
 	icon_state = "doom_box"
 
+/obj/item/weapon/storage/box/syndie_kit/bonepen
+	name = "Prototype Bone Repair Kit"
+	desc = "Bonehurting feeling erupts you."
+/obj/item/weapon/storage/box/syndie_kit/bonepen/atom_init()
+	. = ..()
+	for(var/i in 0 to 3)
+		new /obj/item/weapon/reagent_containers/hypospray/autoinjector/bonepen(src)
+
 /obj/item/weapon/storage/box/syndie_kit/imp_freedom
 	name = "boxed freedom implant (with injector)"
 
@@ -211,8 +219,20 @@
 
 /obj/item/weapon/storage/box/syndie_kit/rig/atom_init()
 	. = ..()
-	new /obj/item/clothing/suit/space/rig/syndi(src)
+
 	new /obj/item/clothing/head/helmet/space/rig/syndi(src)
+	new /obj/item/clothing/suit/space/rig/syndi(src)
+	new /obj/item/clothing/shoes/magboots/syndie(src)
+	make_exact_fit()
+
+/obj/item/weapon/storage/box/syndie_kit/heavy_rig
+	name = "box (H)"
+
+/obj/item/weapon/storage/box/syndie_kit/heavy_rig/atom_init()
+	. = ..()
+
+	new /obj/item/clothing/head/helmet/space/rig/syndi/heavy(src)
+	new /obj/item/clothing/suit/space/rig/syndi/heavy(src)
 	new /obj/item/clothing/shoes/magboots/syndie(src)
 	make_exact_fit()
 
@@ -226,6 +246,16 @@
 		new /obj/item/clothing/head/helmet/syndiassault(src)
 	else
 		new /obj/item/clothing/head/helmet/syndiassault/alternate(src)
+	make_exact_fit()
+
+
+/obj/item/weapon/storage/box/syndie_kit/light_armor
+	name = "box (L)"
+
+/obj/item/weapon/storage/box/syndie_kit/light_armor/atom_init()
+	. = ..()
+	new /obj/item/clothing/suit/armor/syndilight(src)
+	new /obj/item/clothing/head/helmet/syndilight(src)
 	make_exact_fit()
 
 /obj/item/weapon/storage/box/syndie_kit/fake
@@ -256,4 +286,18 @@
 	new /obj/item/clothing/head/soft/red(src)
 	new /obj/item/clothing/suit/syndieshirt(src)
 	new /obj/item/toy/syndicateballoon(src)
+	make_exact_fit()
+
+/obj/item/weapon/storage/box/syndie_kit/chemical
+	name = "box (CH)"
+	desc = "Box containing Spacegeneva violation."
+	icon_state = "syndie_box"
+
+/obj/item/weapon/storage/box/syndie_kit/chemical/atom_init()
+	. = ..()
+	new /obj/item/clothing/head/helmet/space/rig/syndi/hazmat(src)
+	new /obj/item/clothing/suit/space/rig/syndi/hazmat(src)
+	new /obj/item/clothing/shoes/magboots/syndie(src)
+	new /obj/item/weapon/reagent_containers/watertank_backpack/syndie(src)
+	new /obj/item/weapon/storage/box/matches(src)
 	make_exact_fit()

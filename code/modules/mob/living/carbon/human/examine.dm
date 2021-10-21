@@ -24,8 +24,13 @@
 	if(wear_mask)
 		skipface |= wear_mask.flags_inv & HIDEFACE
 
+	var/obj/item/organ/external/head/MyHead = bodyparts_by_name[BP_HEAD]
+	if(!istype(MyHead) || MyHead.is_stump)
+		skipface = TRUE
+
 	// crappy hacks because you can't do \his[src] etc. I'm sorry this proc is so unreadable, blame the text macros :<
 	var/t_He = "It" //capitalised for use at the start of each line.
+	var/t_His = "Its"
 	var/t_his = "its"
 	var/t_him = "it"
 	var/t_has = "has"
@@ -35,6 +40,7 @@
 
 	if( skipjumpsuit && skipface ) //big suits/masks/helmets make it hard to tell their gender
 		t_He = "They"
+		t_His = "Their"
 		t_his = "their"
 		t_him = "them"
 		t_has = "have"
@@ -43,16 +49,18 @@
 		switch(gender)
 			if(MALE)
 				t_He = "He"
+				t_His = "His"
 				t_his = "his"
 				t_him = "him"
 			if(FEMALE)
 				t_He = "She"
+				t_His = "Her"
 				t_his = "her"
 				t_him = "her"
 
 	msg += "<EM>[src.name]"
 	if(!(skipface && skipjumpsuit))
-		var/species_name = "\improper [get_species()]"
+		var/species_name = "[get_species()]"
 		msg += ", <span color='[species.flesh_color]'>\a [species_name]</span>"
 	msg += "</EM>!\n"
 
@@ -64,7 +72,7 @@
 			var/obj/item/clothing/under/U = w_uniform
 			for(var/accessory in U.accessories)
 				ties += "[bicon(accessory)] \a [accessory]"
-		var/tie_msg = ties.len ? ". Attached to it is [english_list(ties)]" : ""
+		var/tie_msg = ties.len ? ". Attached to it is [get_english_list(ties)]" : ""
 
 		if(w_uniform.dirt_overlay)
 			msg += "<span class='warning'>[t_He] [t_is] wearing [bicon(w_uniform)] [w_uniform.gender==PLURAL?"some":"a"] [w_uniform.dirt_description()][tie_msg]!</span>\n"
@@ -201,6 +209,16 @@
 	//ID
 	if(wear_id)
 		msg += "[t_He] [t_is] wearing [bicon(wear_id)] \a [wear_id].\n"
+		var/id_card = wear_id.GetID()
+		if(istype(id_card, /obj/item/weapon/card/id))
+			var/obj/item/weapon/card/id/ID = id_card
+			if(ID.disabilities.len)
+				msg += "\a [ENTITY_TAB][ID.GetDisabilities()]\n"
+
+	//Status effects
+	var/list/status_examines = status_effect_examines()
+	if (length(status_examines))
+		msg += status_examines
 
 	//Jitters
 	if(is_jittery)
@@ -220,12 +238,6 @@
 	if(suiciding)
 		msg += "<span class='warning'>[t_He] appears to have commited suicide... there is no hope of recovery.</span>\n"
 
-	if(SMALLSIZE in mutations)
-		if(gnomed)
-			msg += "[t_He] [t_is] a gnome!\n"
-		else
-			msg += "[t_He] [t_is] a small halfling!\n"
-
 	var/distance = get_dist(user,src)
 	if(istype(user, /mob/dead/observer) || user.stat == DEAD) // ghosts can see anything
 		distance = 1
@@ -234,8 +246,7 @@
 		if((stat == DEAD || src.losebreath || iszombie(src)) && distance <= 3)
 			msg += "<span class='warning'>[t_He] does not appear to be breathing.</span>\n"
 		if(istype(user, /mob/living/carbon/human) && !user.stat && distance <= 1)
-			for(var/mob/O in viewers(user.loc, null))
-				O.show_message("[user] checks [src]'s pulse.", 1)
+			user.visible_message("[user] checks [src]'s pulse.")
 		spawn(15)
 			if(distance <= 1 && user && user.stat != UNCONSCIOUS)
 				if(pulse == PULSE_NONE)
@@ -245,21 +256,33 @@
 
 	msg += "<span class='warning'>"
 
-	if(nutrition < 100)
-		msg += "[t_He] [t_is] severely malnourished.\n"
-	else if(nutrition >= 500)
-		msg += "[t_He] [t_is] quite chubby.\n"
+	if(!species.flags[IS_SYNTHETIC])
+		if(nutrition < 100)
+			msg += "[t_He] [t_is] severely malnourished.\n"
+		else if(nutrition >= 500)
+			msg += "[t_He] [t_is] quite chubby.\n"
+	else
+		var/obj/item/organ/internal/liver/IO = organs_by_name[O_LIVER]
+		var/obj/item/weapon/stock_parts/cell/C = locate(/obj/item/weapon/stock_parts/cell) in IO
+		if(C)
+			if(nutrition < (C.maxcharge*0.1))
+				msg += "His indicator of charge blinks red.\n"
+		else
+			msg += "[t_He] has no battery!\n"
+
+	if(fire_stacks > 0)
+		msg += "[t_He] [t_is] covered in something flammable.\n"
+	if(fire_stacks < 0)
+		msg += "[t_He] look[t_is] a little soaked.\n"
 
 	msg += "</span>"
 
-	if(stat == UNCONSCIOUS)
-		msg += "[t_He] [t_is]n't responding to anything around [t_him] and seems to be asleep.\n"
-	else if(getBrainLoss() >= 60)
+	if(bodyparts_by_name[BP_HEAD] && getBrainLoss() >= 60)
 		msg += "[t_He] [t_has] a stupid expression on [t_his] face.\n"
 
-	if(!key && brain_op_stage != 4 && stat != DEAD)
+	if(!key && has_brain() && stat != DEAD)
 		msg += "<span class='deadsay'>[t_He] [t_is] totally catatonic. The stresses of life in deep-space must have been too much for [t_him]. Any recovery is unlikely</span>\n"
-	else if(!client && brain_op_stage != 4 && stat != DEAD)
+	else if(!client && has_brain() && stat != DEAD)
 		msg += "[t_He] [t_has] suddenly fallen asleep.\n"
 
 	var/list/wound_flavor_text = list()
@@ -424,10 +447,23 @@
 		msg += "<span class='warning'><b>[src] has \a [implant] sticking out of their [BP.name]!</b></span>\n"
 	if(digitalcamo)
 		msg += "<span class='warning'>[t_He] [t_is] moving [t_his] body in an unnatural and blatantly inhuman manner.</span>\n"
-	if(mind && mind.changeling && mind.changeling.isabsorbing)
-		msg += "<span class='warning'><b>[t_He] sucking fluids from someone through a giant proboscis!</b></span>\n"
+	if(ischangeling(src))
+		var/datum/role/changeling/C = mind.GetRoleByType(/datum/role/changeling)
+		if(C.isabsorbing)
+			msg += "<span class='warning'><b>[t_He] sucking fluids from someone through a giant proboscis!</b></span>\n"
 
+	if(!skipface)
+		var/obj/item/organ/external/head/BP = bodyparts_by_name[BP_HEAD]
+		if(istype(BP) && BP.disfigured)
+			msg += "<span class='warning'><b>[t_His] face is violently disfigured!</b></span>\n"
 
+	if((!skipface || !skipjumpsuit || !skipgloves) && (HUSK in mutations))
+		msg += "<span class='warning'><b>[t_His] skin is looking cadaveric!</b></span>\n"
+
+	if(!skipface)
+		var/obj/item/organ/external/head/robot/ipc/BP = bodyparts_by_name[BP_HEAD]
+		if(istype(BP) && !BP.disfigured && BP.ipc_head == "Default" && length(BP.display_text) && h_style == "IPC text screen")
+			msg += "Отображает на экране: \"<span class=\"emojify\">[BP.display_text]</span>\"\n"
 
 	if(hasHUD(user,"security"))
 		var/perpname = "wot"
@@ -476,17 +512,36 @@
 		msg += "<span class = 'deptradio'>Physical status:</span> <a href='?src=\ref[src];medical=1'>\[[medical]\]</a>\n"
 		msg += "<span class = 'deptradio'>Medical records:</span> <a href='?src=\ref[src];medrecord=`'>\[View\]</a> <a href='?src=\ref[src];medrecordadd=`'>\[Add comment\]</a>\n"
 
+	var/datum/component/mood/mood = GetComponent(/datum/component/mood)
+	if(!skipface && mood)
+		switch(mood.shown_mood)
+			if(-INFINITY to MOOD_LEVEL_SAD4)
+				msg += "[t_He] appears to be depressed.\n"
+			if(MOOD_LEVEL_SAD4 to MOOD_LEVEL_SAD3)
+				msg += "[t_He] appears to be very sad.\n"
+			if(MOOD_LEVEL_SAD3 to MOOD_LEVEL_SAD2)
+				msg += "[t_He] appears to be a bit down.\n"
+			if(MOOD_LEVEL_HAPPY2 to MOOD_LEVEL_HAPPY3)
+				msg += "[t_He] appears to be quite happy.\n"
+			if(MOOD_LEVEL_HAPPY3 to MOOD_LEVEL_HAPPY4)
+				msg += "[t_He] appears to be very happy.\n"
+			if(MOOD_LEVEL_HAPPY4 to INFINITY)
+				msg += "[t_He] appears to be ecstatic.\n"
+
+	if(w_class)
+		msg += "[t_He] [t_is] a [get_size_flavor()] sized creature.\n"
 
 	if(!skipface && print_flavor_text())
 		msg += "[print_flavor_text()]\n"
 
 	msg += "*---------*</span><br>"
+
 	if(applying_pressure)
 		msg += applying_pressure
 	else if(busy_with_action)
 		msg += "<span class='info'>[t_He] is busy with something!</span><br>"
 	if (pose)
-		if( findtext(pose,".",lentext(pose)) == 0 && findtext(pose,"!",lentext(pose)) == 0 && findtext(pose,"?",lentext(pose)) == 0 )
+		if( findtext(pose,".",-1) == 0 && findtext(pose,"!",-1) == 0 && findtext(pose,"?",-1) == 0 )
 			pose = addtext(pose,".") //Makes sure all emotes end with a period.
 		msg += "\n[t_He] is [pose]"
 
@@ -504,27 +559,33 @@
 		if(O.started_as_observer)
 			msg += "<span class='notice'>[t_He] has these traits: [get_trait_string()].</span>"
 
+	if(!isobserver(user) && user.IsAdvancedToolUser() && !HAS_TRAIT(src, TRAIT_NATURECHILD) && user != src && !check_covered_bodypart(src, LOWER_TORSO))
+		SEND_SIGNAL(src, COMSIG_ADD_MOOD_EVENT, "naked", /datum/mood_event/naked)
+
 	to_chat(user, msg)
 
 //Helper procedure. Called by /mob/living/carbon/human/examine() and /mob/living/carbon/human/Topic() to determine HUD access to security and medical records.
+// Only used for humans and other personal of station.
 /proc/hasHUD(mob/M, hudtype)
-	if(istype(M, /mob/living/carbon/human))
-		var/mob/living/carbon/human/H = M
-		switch(hudtype)
-			if("security")
-				return istype(H.glasses, /obj/item/clothing/glasses/hud/security) || istype(H.glasses, /obj/item/clothing/glasses/sunglasses/sechud) || istype(H.glasses, /obj/item/clothing/glasses/sunglasses/hud/secmed)
-			if("medical")
-				return istype(H.glasses, /obj/item/clothing/glasses/hud/health) || istype(H.glasses, /obj/item/clothing/glasses/sunglasses/hud/secmed)
-			else
-				return 0
-	else if(istype(M, /mob/living/silicon/robot))
-		var/mob/living/silicon/robot/R = M
-		switch(hudtype)
-			if("security")
-				return istype(R.module_state_1, /obj/item/borg/sight/hud/sec) || istype(R.module_state_2, /obj/item/borg/sight/hud/sec) || istype(R.module_state_3, /obj/item/borg/sight/hud/sec)
-			if("medical")
-				return istype(R.module_state_1, /obj/item/borg/sight/hud/med) || istype(R.module_state_2, /obj/item/borg/sight/hud/med) || istype(R.module_state_3, /obj/item/borg/sight/hud/med)
-			else
-				return 0
-	else
-		return 0
+	if(isobserver(M))
+		return FALSE
+
+	var/datum/atom_hud/A
+	if(hudtype == "security")
+		A = huds[DATA_HUD_SECURITY]
+	else if(hudtype == "medical")
+		A = huds[DATA_HUD_MEDICAL]
+
+	if(M in A.hudusers)
+		return TRUE
+
+	return FALSE
+
+/mob/living/proc/status_effect_examines() //You can include this in any mob's examine() to show the examine texts of status effects!
+	var/list/dat = list()
+	for(var/V in status_effects)
+		var/datum/status_effect/E = V
+		if(E.examine_text)
+			dat += "[E.examine_text]\n" //dat.Join("\n") doesn't work here, for some reason
+	if(dat.len)
+		return dat.Join()

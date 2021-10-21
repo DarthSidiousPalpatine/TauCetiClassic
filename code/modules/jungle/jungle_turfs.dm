@@ -4,7 +4,7 @@
 	var/plants_spawn = 1
 	name = "wet grass"
 	desc = "Thick, long wet grass."
-	icon = 'code/modules/jungle/jungle.dmi'
+	icon = 'icons/misc/jungle.dmi'
 	icon_state = "grass1"
 	var/icon_spawn_state = "grass1"
 
@@ -16,7 +16,7 @@
 		if(prob(90))
 			var/image/I
 			if(prob(35))
-				I = image('code/modules/jungle/jungle.dmi',"plant[rand(1,7)]")
+				I = image('icons/misc/jungle.dmi',"plant[rand(1,7)]")
 			else
 				if(prob(30))
 					I = image('icons/obj/flora/ausflora.dmi',"reedbush_[rand(1,4)]")
@@ -28,7 +28,7 @@
 					I = image('icons/obj/flora/ausflora.dmi',"stalkybush_[rand(1,3)]")
 			I.pixel_x = rand(-6,6)
 			I.pixel_y = rand(-6,6)
-			overlays += I
+			add_overlay(I)
 		else
 			var/obj/structure/jungle_plant/J = new(src)
 			J.pixel_x = rand(-6,6)
@@ -46,7 +46,7 @@
 	bushes_spawn = 0
 	name = "wet grass"
 	desc = "Thick, long wet grass."
-	icon = 'code/modules/jungle/jungle.dmi'
+	icon = 'icons/misc/jungle.dmi'
 	icon_state = "grass_path"
 	icon_spawn_state = "grass2"
 
@@ -71,7 +71,7 @@
 		if(J.type == src.type)
 			P = J
 		else
-			P = new src.type(J)
+			P = new type(J)
 
 		if(P && prob(probability))
 			P.Spread(probability - prob_loss)
@@ -90,7 +90,7 @@
 /turf/unsimulated/jungle/rock
 	bushes_spawn = 0
 	plants_spawn = 0
-	density = 1
+	density = TRUE
 	name = "rock wall"
 	icon = 'icons/turf/walls.dmi'
 	icon_state = "rock"
@@ -105,19 +105,19 @@
 	if(!istype(get_step(src, NORTH), /turf/unsimulated/jungle/rock) && !istype(get_step(src, NORTH), /turf/unsimulated/wall))
 		T = get_step(src, NORTH)
 		if (T)
-			T.overlays += image('icons/turf/walls.dmi', "rock_side_s")
+			T.add_overlay(image('icons/turf/walls.dmi', "rock_side_s"))
 	if(!istype(get_step(src, SOUTH), /turf/unsimulated/jungle/rock) && !istype(get_step(src, SOUTH), /turf/unsimulated/wall))
 		T = get_step(src, SOUTH)
 		if (T)
-			T.overlays += image('icons/turf/walls.dmi', "rock_side_n", layer=6)
+			T.add_overlay(image('icons/turf/walls.dmi', "rock_side_n", layer=6))
 	if(!istype(get_step(src, EAST), /turf/unsimulated/jungle/rock) && !istype(get_step(src, EAST), /turf/unsimulated/wall))
 		T = get_step(src, EAST)
 		if (T)
-			T.overlays += image('icons/turf/walls.dmi', "rock_side_w", layer=6)
+			T.add_overlay(image('icons/turf/walls.dmi', "rock_side_w", layer=6))
 	if(!istype(get_step(src, WEST), /turf/unsimulated/jungle/rock) && !istype(get_step(src, WEST), /turf/unsimulated/wall))
 		T = get_step(src, WEST)
 		if (T)
-			T.overlays += image('icons/turf/walls.dmi', "rock_side_e", layer=6)
+			T.add_overlay(image('icons/turf/walls.dmi', "rock_side_e", layer=6))
 
 /turf/unsimulated/jungle/water
 	bushes_spawn = 0
@@ -173,14 +173,14 @@
 
 /turf/unsimulated/jungle/water/deep
 	plants_spawn = 0
-	density = 1
+	density = TRUE
 	icon_state = "water2"
 	icon_spawn_state = "water2"
 
 /turf/unsimulated/jungle/temple_wall
 	name = "temple wall"
 	desc = ""
-	density = 1
+	density = TRUE
 	icon = 'icons/turf/walls.dmi'
 	icon_state = "phoron0"
 	var/mineral = "phoron"

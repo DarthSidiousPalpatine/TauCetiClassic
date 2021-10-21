@@ -49,18 +49,18 @@ field_generator power level display
 	return ..()
 
 /obj/machinery/field_generator/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	if(warming_up)
-		overlays += "+a[warming_up]"
-	if(LAZYLEN(fields))
-		overlays += "+on"
+		add_overlay("+a[warming_up]")
+	if(length(fields))
+		add_overlay("+on")
 	// Power level indicator
 	// Scale % power to % FG_POWER_LEVELS and truncate value
 	var/level = round(FG_POWER_LEVELS * power / FG_MAX_POWER)
 	// Clamp between 0 and FG_POWER_LEVELS for out of range power values
 	level = between(0, level, FG_POWER_LEVELS)
 	if(level)
-		overlays += "+p[level]"
+		add_overlay("+p[level]")
 
 /obj/machinery/field_generator/process()
 	if(var_edit_start)
@@ -85,7 +85,7 @@ field_generator power level display
 	if(.)
 		return
 	if(state == FG_WELDED)
-		if(in_range(src, user) || isobserver(user))//Need to actually touch the thing to turn it on
+		if(Adjacent(user) || isobserver(user))//Need to actually touch the thing to turn it on
 			if(active != FG_OFFLINE)
 				to_chat(user, "<span class='red'>You are unable to turn off the [src] once it is online.</span>")
 				return 1
@@ -96,7 +96,7 @@ field_generator power level display
 					"<span class='notice'>You hear heavy droning.</span>")
 				turn_on()
 				playsound(src, 'sound/machines/cfieldbeforestart.ogg', VOL_EFFECTS_MASTER, null, FALSE)
-				investigate_log("<font color='green'>activated</font> by [user.key].","singulo")
+				log_investigate("<font color='green'>activated</font> by [key_name(user)].",INVESTIGATE_SINGULO)
 	else
 		to_chat(user, "<span class='notice'>The [src] needs to be firmly secured to the floor first.</span>")
 		return 1
@@ -161,9 +161,6 @@ field_generator power level display
 	else
 		..()
 
-/obj/machinery/containment_field/meteorhit()
-	return FALSE
-
 /obj/machinery/field_generator/bullet_act(obj/item/projectile/Proj)
 	if(Proj.flag != "bullet")
 		power += Proj.damage
@@ -206,12 +203,12 @@ field_generator power level display
 
 	power = min(power, FG_MAX_POWER)
 
-	var/power_draw = 2 + LAZYLEN(fields)
+	var/power_draw = 2 + length(fields)
 	if(!draw_power(round(power_draw / 2, 1)))
 		visible_message("<span class='warning'>The [src] shuts down!</span>")
 		turn_off()
 		playsound(src, 'sound/machines/cfieldfail.ogg', VOL_EFFECTS_MASTER, null, FALSE)
-		investigate_log("ran out of power and <font color='red'>deactivated</font>","singulo")
+		log_investigate("ran out of power and <font color='red'>deactivated</font>",INVESTIGATE_SINGULO)
 		power = 0
 
 // This could likely be better, it tends to start loopin if you have a complex generator loop setup.
@@ -294,7 +291,7 @@ field_generator power level display
 			var/obj/machinery/containment_field/CF = new
 			CF.set_master(src, G)
 			CF.loc = T
-			CF.dir = field_dir
+			CF.set_dir(field_dir)
 
 	connected_gens |= G
 	G.connected_gens |= src
@@ -306,12 +303,12 @@ field_generator power level display
 
 	clean_up = TRUE
 
-	if(LAZYLEN(fields))
+	if(length(fields))
 		for(var/obj/machinery/containment_field/CF in fields)  // `fileds` list will be cleared by field themself in `Destroy()` so no `Cut()`.
 			if(!QDESTROYING(CF))
 				qdel(CF)
 
-	if(LAZYLEN(connected_gens))
+	if(length(connected_gens))
 		for(var/obj/machinery/field_generator/FG in connected_gens)
 			FG.connected_gens -= src
 			FG.cleanup()
@@ -332,8 +329,8 @@ field_generator power level display
 			if((world.time - O.last_warning) > 50) //to stop message-spam
 				temp = FALSE
 				message_admins("<span class='danger'>A singulo exists and a containment field has failed. [ADMIN_JMP(O)]</span>")
-				investigate_log("has <font color='red'>failed</font> whilst a singulo exists.","singulo")
-		O.last_warning = world.time
+				log_investigate("has <font color='red'>failed</font> whilst a singulo exists.",INVESTIGATE_SINGULO)
+			O.last_warning = world.time
 
 
 #undef FG_MAX_POWER

@@ -6,10 +6,8 @@ Contains helper procs for airflow, handled in /connection_group.
 /mob/proc/airflow_stun()
 	if(stat == 2)
 		return FALSE
-
 	if(last_airflow_stun > world.time - vsc.airflow_stun_cooldown)
 		return FALSE
-
 	if(!(status_flags & CANSTUN) && !(status_flags & CANWEAKEN))
 		to_chat(src, "<span class='notice'>You stay upright as the air rushes past you.</span>")
 		return FALSE
@@ -41,7 +39,7 @@ Contains helper procs for airflow, handled in /connection_group.
 		return FALSE
 	if(wear_suit && (wear_suit.flags & NOSLIP))
 		return FALSE
-	if(FAT in mutations)
+	if(HAS_TRAIT(src, TRAIT_FAT))
 		to_chat(src, "<span class='notice'>Air suddenly rushes past you!</span>")
 		return FALSE
 	..()
@@ -127,7 +125,7 @@ Contains helper procs for airflow, handled in /connection_group.
 		return
 	if(airflow_dest == loc)
 		step_away(src, loc)
-	if(!src.AirflowCanMove(n))
+	if(!AirflowCanMove(n))
 		return
 	if(ismob(src))
 		to_chat(src, "<span class='danger'>You are sucked away by airflow!</span>")
@@ -190,7 +188,7 @@ Contains helper procs for airflow, handled in /connection_group.
 		return
 	if(airflow_dest == loc)
 		step_away(src, loc)
-	if(!src.AirflowCanMove(n))
+	if(!AirflowCanMove(n))
 		return
 	if(ismob(src))
 		to_chat(src, "<span clas='danger'>You are pushed away by airflow!</span>")
@@ -254,8 +252,7 @@ Contains helper procs for airflow, handled in /connection_group.
 	airborne_acceleration = 0
 
 /obj/airflow_hit(atom/A)
-	for(var/mob/M in hearers(src))
-		M.show_message("<span class='danger'>\The [src] slams into \a [A]!</span>",1 , "<span class='danger'>You hear a loud slam!</span>", 2)
+	visible_message("<span class='danger'>\The [src] slams into \a [A]!</span>", blind_message = "<span class='danger'>You hear a loud slam!</span>")
 	playsound(src, 'sound/weapons/smash.ogg', VOL_EFFECTS_MASTER, 25)
 	. = ..()
 
@@ -264,8 +261,7 @@ Contains helper procs for airflow, handled in /connection_group.
 	airflow_dest = null
 
 /mob/airflow_hit(atom/A)
-	for(var/mob/M in hearers(src))
-		M.show_message("<span class='danger'>\The [src] slams into \a [A]!</span>", 1, "<span class='danger'>You hear a loud slam!</span>", 2)
+	visible_message("<span class='danger'>\The [src] slams into \a [A]!</span>", blind_message = "<span class='danger'>You hear a loud slam!</span>")
 	playsound(src, 'sound/weapons/smash.ogg', VOL_EFFECTS_MASTER, 25)
 	var/weak_amt = istype(A,/obj/item) ? A:w_class : rand(1, 5) //Heheheh
 	Weaken(weak_amt)

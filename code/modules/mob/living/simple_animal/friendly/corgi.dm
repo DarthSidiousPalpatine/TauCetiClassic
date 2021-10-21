@@ -1,6 +1,6 @@
 //Corgi
 /mob/living/simple_animal/corgi
-	name = "\improper corgi"
+	name = "corgi"
 	real_name = "corgi"
 	desc = "It's a corgi."
 	icon_state = "corgi"
@@ -17,6 +17,11 @@
 	response_disarm = "bops the"
 	response_harm   = "kicks the"
 	see_in_dark = 5
+	w_class = SIZE_BIG
+
+	has_head = TRUE
+	has_leg = TRUE
+
 	var/facehugger
 
 /obj/item/weapon/reagent_containers/food/snacks/meat/corgi
@@ -24,34 +29,33 @@
 	desc = "Tastes like... well you know..."
 
 /mob/living/simple_animal/corgi/regenerate_icons()
-	overlays.Cut()
+	cut_overlays()
 	if(facehugger)
 		if(istype(src, /mob/living/simple_animal/corgi/puppy))
-			overlays += image('icons/mob/mask.dmi',"facehugger_corgipuppy")
+			add_overlay(image('icons/mob/mask.dmi',"facehugger_corgipuppy"))
 		else
-			overlays += image('icons/mob/mask.dmi',"facehugger_corgi")
+			add_overlay(image('icons/mob/mask.dmi',"facehugger_corgi"))
 
 /mob/living/simple_animal/corgi/attackby(obj/item/O, mob/user)
 	if(istype(O, /obj/item/weapon/newspaper))
 		user.SetNextMove(CLICK_CD_MELEE)
 		if(!stat)
-			for(var/mob/M in viewers(user, null))
-				if ((M.client && !( M.blinded )))
-					M.show_message("<span class='notice'>[user] baps [name] on the nose with the rolled up [O]</span>")
+			user.visible_message("<span class='notice'>[user] baps [name] on the nose with the rolled up [O]</span>")
 			spawn(0)
 				for(var/i in list(1,2,4,8,4,2,1,2))
-					dir = i
+					set_dir(i)
 					sleep(1)
 	else
 		..()
 
 /mob/living/simple_animal/corgi/puppy
-	name = "\improper corgi puppy"
+	name = "corgi puppy"
 	real_name = "corgi"
 	desc = "It's a corgi puppy."
 	icon_state = "puppy"
 	icon_living = "puppy"
 	icon_dead = "puppy_dead"
+	w_class = SIZE_SMALL
 
 //LISA! SQUEEEEEEEEE~
 /mob/living/simple_animal/corgi/Lisa
@@ -99,9 +103,10 @@
 			emote("me",1,pick("dances around","chases her tail"))
 			spawn(0)
 				for(var/i in list(1,2,4,8,4,2,1,2,4,8,4,2,1,2,4,8,4,2))
-					dir = i
+					set_dir(i)
 					sleep(1)
 
+ADD_TO_GLOBAL_LIST(/mob/living/simple_animal/corgi/borgi, chief_animal_list)
 /mob/living/simple_animal/corgi/borgi
 	name = "E-N"
 	real_name = "E-N"	//Intended to hold the name without altering it.
@@ -117,14 +122,12 @@
 		emagged = 1
 		visible_message("<span class='warning'>[user] swipes a card through [src].</span>", "<span class='notice'>You overload [src]s internal reactor.</span>")
 		spawn (1000)
-			src.explode()
+			explode()
 		return TRUE
 	return FALSE
 
 /mob/living/simple_animal/corgi/borgi/proc/explode()
-	for(var/mob/M in viewers(src, null))
-		if (M.client)
-			M.show_message("<span class='warning'>[src] makes an odd whining noise.</span>")
+	visible_message("<span class='warning'>[src] makes an odd whining noise.</span>")
 	sleep(10)
 	explosion(get_turf(src), 0, 1, 4, 7)
 	Die()
@@ -162,7 +165,6 @@
 		s.start()
 
 /mob/living/simple_animal/corgi/borgi/proc/Die()
-	..()
 	visible_message("<b>[src]</b> blows apart!")
 	new /obj/effect/decal/cleanable/blood/gibs/robot(src.loc)
 	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread

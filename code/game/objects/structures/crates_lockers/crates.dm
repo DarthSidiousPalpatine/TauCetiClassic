@@ -1,5 +1,3 @@
-//This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:32
-
 /obj/structure/closet/crate
 	name = "crate"
 	desc = "A rectangular steel crate."
@@ -7,7 +5,7 @@
 	icon_state = "crate"
 	icon_opened = "crateopen"
 	icon_closed = "crate"
-	climbable = 1
+	climbable = TRUE
 //	mouse_drag_pointer = MOUSE_ACTIVE_POINTER	//???
 	var/rigged = 0
 
@@ -20,7 +18,7 @@
 /obj/structure/closet/crate/open()
 	if(src.opened)
 		return 0
-	if(!src.can_open())
+	if(!can_open())
 		return 0
 
 	if(rigged && locate(/obj/item/device/radio/electropack) in src)
@@ -32,7 +30,7 @@
 				s.start()
 				return 2
 
-	playsound(src, 'sound/machines/click.ogg', VOL_EFFECTS_MASTER, 15, null, -3)
+	playsound(src, 'sound/machines/click.ogg', VOL_EFFECTS_MASTER, 15, FALSE, null, -3)
 	for(var/obj/O in src)
 		O.forceMove(get_turf(src))
 	icon_state = icon_opened
@@ -46,10 +44,10 @@
 /obj/structure/closet/crate/close()
 	if(!src.opened)
 		return 0
-	if(!src.can_close())
+	if(!can_close())
 		return 0
 
-	playsound(src, 'sound/machines/click.ogg', VOL_EFFECTS_MASTER, 15, null, -3)
+	playsound(src, 'sound/machines/click.ogg', VOL_EFFECTS_MASTER, 15, FALSE, null, -3)
 	var/itemcount = 0
 	for(var/obj/O in get_turf(src))
 		if(itemcount >= storage_capacity)
@@ -68,15 +66,10 @@
 	return 1
 
 /obj/structure/closet/crate/attackby(obj/item/weapon/W, mob/user)
-	if(opened)
-		if(isrobot(user))
-			return
-		if(!W.canremove || W.flags & NODROP)
-			return
-		user.drop_item()
-		if(W)
-			W.forceMove(src.loc)
-	else if(istype(W, /obj/item/weapon/packageWrap) || istype(W, /obj/item/weapon/extraction_pack))	//OOP? Doesn't heard.
+	if(opened || istype(W, /obj/item/weapon/grab))
+		return ..()
+
+	else if(istype(W, /obj/item/weapon/packageWrap))	//OOP? Doesn't heard.
 		return
 	else if(iscoil(W))
 		if(rigged)
@@ -92,8 +85,7 @@
 	else if(istype(W, /obj/item/device/radio/electropack))
 		if(rigged)
 			to_chat(user, "<span class='notice'>You attach [W] to [src].</span>")
-			user.drop_item()
-			W.forceMove(src)
+			user.drop_from_inventory(W, src)
 	else if(iswirecutter(W))
 		if(rigged)
 			to_chat(user, "<span class='notice'>You cut away the wiring.</span>")
@@ -138,14 +130,19 @@
 /obj/structure/closet/crate/secure/atom_init()
 	. = ..()
 	if(locked)
-		overlays.Cut()
-		overlays += redlight
+		cut_overlays()
+		add_overlay(redlight)
 	else
-		overlays.Cut()
-		overlays += greenlight
+		cut_overlays()
+		add_overlay(greenlight)
 
 /obj/structure/closet/crate/secure/can_open()
 	return !locked
+
+/obj/structure/closet/crate/secure/AltClick(mob/user)
+	if(!user.incapacitated() && Adjacent(user) && user.IsAdvancedToolUser())
+		togglelock(user)
+	..()
 
 /obj/structure/closet/crate/secure/proc/togglelock(mob/user)
 	if(src.opened)
@@ -154,13 +151,13 @@
 	if(src.broken)
 		to_chat(user, "<span class='warning'>The crate appears to be broken.</span>")
 		return
-	if(src.allowed(user))
+	if(allowed(user))
 		src.locked = !src.locked
 		for(var/mob/O in viewers(user, 3))
 			if((O.client && !( O.blinded )))
 				to_chat(O, "<span class='notice'>The crate has been [locked ? null : "un"]locked by [user].</span>")
-		overlays.Cut()
-		overlays += locked ? redlight : greenlight
+		cut_overlays()
+		add_overlay(locked ? redlight : greenlight)
 	else
 		to_chat(user, "<span class='notice'>Access Denied</span>")
 
@@ -169,22 +166,22 @@
 	set category = "Object"
 	set name = "Toggle Lock"
 
-	if(!usr.canmove || usr.stat || usr.restrained()) // Don't use it if you're not able to! Checks for stuns, ghost and restrain
+	if(usr.incapacitated()) // Don't use it if you're not able to! Checks for stuns, ghost and restrain
 		return
 
 	if(ishuman(usr))
-		src.add_fingerprint(usr)
-		src.togglelock(usr)
+		add_fingerprint(usr)
+		togglelock(usr)
 	else
 		to_chat(usr, "<span class='warning'>This mob type can't use this verb.</span>")
 
 /obj/structure/closet/crate/secure/attack_hand(mob/user)
-	src.add_fingerprint(user)
+	add_fingerprint(user)
 	user.SetNextMove(CLICK_CD_RAPID)
 	if(locked)
-		src.togglelock(user)
+		togglelock(user)
 	else
-		src.toggle(user)
+		toggle(user)
 
 /obj/structure/closet/crate/secure/attackby(obj/item/weapon/W, mob/user)
 	if(is_type_in_list(W, list(/obj/item/weapon/packageWrap, /obj/item/stack/cable_coil, /obj/item/device/radio/electropack, /obj/item/weapon/wirecutters)))
@@ -193,7 +190,7 @@
 		emag_act(user)
 		return
 	if(!opened)
-		src.togglelock(user)
+		togglelock(user)
 		return
 	return ..()
 
@@ -201,10 +198,10 @@
 	if(!locked)
 		return FALSE
 	user.SetNextMove(CLICK_CD_MELEE)
-	overlays.Cut()
-	overlays += emag
-	overlays += sparks
-	spawn(6) overlays -= sparks //Tried lots of stuff but nothing works right. so i have to use this *sadface*
+	cut_overlays()
+	add_overlay(emag)
+	add_overlay(sparks)
+	spawn(6) cut_overlay(sparks) //Tried lots of stuff but nothing works right. so i have to use this *sadface*
 	playsound(src, pick(SOUNDIN_SPARKS), VOL_EFFECTS_MASTER)
 	src.locked = 0
 	src.broken = 1
@@ -213,17 +210,17 @@
 
 /obj/structure/closet/crate/secure/emp_act(severity)
 	for(var/obj/O in src)
-		O.emp_act(severity)
+		O.emplode(severity)
 	if(!broken && !opened  && prob(50/severity))
 		if(!locked)
 			src.locked = 1
-			overlays.Cut()
-			overlays += redlight
+			cut_overlays()
+			add_overlay(redlight)
 		else
-			overlays.Cut()
-			overlays += emag
-			overlays += sparks
-			spawn(6) overlays -= sparks //Tried lots of stuff but nothing works right. so i have to use this *sadface*
+			cut_overlays()
+			add_overlay(emag)
+			add_overlay(sparks)
+			spawn(6) cut_overlay(sparks) //Tried lots of stuff but nothing works right. so i have to use this *sadface*
 			playsound(src, 'sound/effects/sparks4.ogg', VOL_EFFECTS_MASTER)
 			src.locked = 0
 	if(!opened && prob(20/severity))
@@ -408,6 +405,14 @@
 	icon_state = "hydrosecurecrate"
 	icon_opened = "hydrosecurecrateopen"
 	icon_closed = "hydrosecurecrate"
+
+/obj/structure/closet/crate/secure/miningsec
+	desc = "Crate for incredulous miners."
+	name = "secure mining crate"
+	icon_state = "miningsecurecrate"
+	icon_opened = "miningsecurecrateopen"
+	icon_closed = "miningsecurecrate"
+	req_access = list(access_mining)
 
 /obj/structure/closet/crate/secure/woodseccrate
 	desc = "A secure wooden crate."

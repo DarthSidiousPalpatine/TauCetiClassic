@@ -43,6 +43,7 @@
 	prob(20);/obj/item/clothing/glasses/thermal/syndi,\
 	prob(20);/obj/item/weapon/storage/firstaid/small_firstaid_kit/combat,\
 	prob(20);/obj/item/weapon/pen/edagger,\
+	prob(20);/obj/item/device/encryptionkey/binary,\
 	prob(25);/obj/item/weapon/storage/backpack/dufflebag/surgery,\
 	prob(25);/obj/item/weapon/storage/backpack/dufflebag/c4,\
 	prob(25);/obj/item/weapon/reagent_containers/syringe/mulligan,\
@@ -56,6 +57,7 @@
 	prob(33);/obj/item/ammo_box/a357,\
 	prob(33);/obj/item/device/encryptionkey/binary,\
 	prob(33);/obj/item/clothing/mask/gas/voice,\
+	prob(33);/obj/item/clothing/gloves/black/silence,\
 	prob(33);/obj/item/clothing/gloves/black/strip,\
 	prob(50);/obj/item/device/encryptionkey/syndicate,\
 	prob(50);/obj/item/device/multitool/ai_detect,\

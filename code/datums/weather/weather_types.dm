@@ -159,10 +159,12 @@
 	end_message = "<span class='notice'>The air seems to be cooling off again.</span>"
 
 	area_type = /area
-	protected_areas = list(/area/maintenance, /area/crew_quarters/male, /area/crew_quarters/female, /area/storage/emergency, /area/storage/emergency2, /area/storage/emergency3, /area/storage/tech)
+	protected_areas = list(/area/station/maintenance, /area/station/civilian/dormitories/male, /area/station/civilian/dormitories/female, /area/station/storage/emergency, /area/station/storage/emergency2, /area/station/storage/emergency3, /area/station/storage/tech)
 	target_ztrait = ZTRAIT_STATION
 
 	immunity_type = "rad"
+
+	var/datum/announcement/centcomm/anomaly/radstorm_passed/announcement = new
 
 /datum/weather/rad_storm/telegraph()
 	..()
@@ -174,6 +176,10 @@
 	if(prob(40))
 		if(ishuman(L))
 			var/mob/living/carbon/human/H = L
+
+			if(HULK in H.mutations)
+				H.try_mutate_to_hulk()
+
 			if(H.dna && H.dna.species && !H.species.flags[IS_SYNTHETIC])
 				if(prob(max(0,100-resist)) && prob(10))
 					if (prob(75))
@@ -186,7 +192,7 @@
 /datum/weather/rad_storm/end()
 	if(..())
 		return
-	command_alert("The station has passed the radiation belt. Please report to medbay if you experience any unusual symptoms. Maintenance will lose all access again shortly.", "Anomaly Alert", "radpassed")
+	announcement.play()
 	if(timer_maint_revoke_id)
 		deltimer(timer_maint_revoke_id)
 		timer_maint_revoke_id = 0

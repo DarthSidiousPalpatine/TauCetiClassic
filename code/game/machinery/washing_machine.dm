@@ -3,8 +3,8 @@
 	desc = "Washes your bloody clothes."
 	icon = 'icons/obj/machines/washing_machine.dmi'
 	icon_state = "wm_10"
-	density = 1
-	anchored = 1.0
+	density = TRUE
+	anchored = TRUE
 	use_power = NO_POWER_USE
 	var/state = 1
 	//1 = empty, open door
@@ -82,6 +82,9 @@
 			var/new_softcap_icon_state = ""
 			var/new_softcap_name = ""
 			var/new_desc = "The colors are a bit dodgy."
+			/*
+				ADD /proc/machine_wash TO CLOTHING AND REMOVE THIS SPAGHETTI HELL WE HAVE BEEN DOOMED TO.
+			*/
 			for(var/T in typesof(/obj/item/clothing/under))
 				var/obj/item/clothing/under/J = new T
 				//world << "DEBUG: [color] == [J.color]"
@@ -172,6 +175,12 @@
 						var/obj/item/clothing/shoes/orange/L = S
 						if (L.chained)
 							L.remove_cuffs()
+					if(new_shoe_icon_state == "orange1")
+						new_shoe_icon_state = "orange"
+					if(new_shoe_name == "shackles")
+						new_shoe_name = "orange shoes"
+					if(S.item_state == "o_shoes1")
+						S.item_state = "o_shoes"
 					S.icon_state = new_shoe_icon_state
 					S.item_color = wash_color
 					S.name = new_shoe_name
@@ -193,6 +202,8 @@
 		qdel(crayon)
 		crayon = null
 
+	for(var/obj/item/clothing/under/U in contents)
+		U.fresh_laundered_until = world.time + 5 MINUTES
 
 	if( locate(/mob,contents) )
 		state = 7
@@ -221,9 +232,8 @@
 	if(istype(W,/obj/item/toy/crayon) ||istype(W,/obj/item/weapon/stamp))
 		if( state in list(	1, 3, 6 ) )
 			if(!crayon)
-				user.drop_item()
+				user.drop_from_inventory(W, src)
 				crayon = W
-				crayon.loc = src
 			else
 				..()
 		else
@@ -292,8 +302,7 @@
 
 		if(contents.len < 5)
 			if ( state in list(1, 3) )
-				user.drop_item()
-				W.loc = src
+				user.drop_from_inventory(W, src)
 				state = 3
 			else
 				to_chat(user, "<span class='notice'>You can't put the item in right now.</span>")

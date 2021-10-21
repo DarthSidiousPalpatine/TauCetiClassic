@@ -13,6 +13,7 @@
 	var/current_heat_capacity = 50
 	var/efficiency
 	var/obj/item/weapon/reagent_containers/glass/beaker = null
+	var/list/cryo_medicine = list("cryoxadone", "clonexadone")
 
 /obj/machinery/atmospherics/components/unary/cryo_cell/atom_init()
 	. = ..()
@@ -61,7 +62,7 @@
 
 		if(air1.gas.len)
 			if(occupant.bodytemperature < T0C && occupant.health < 100)
-				occupant.sleeping = max(5/efficiency, (1 / occupant.bodytemperature)*2000/efficiency)
+				occupant.SetSleeping(max(10 / efficiency, (1 / occupant.bodytemperature) * 4000 / efficiency) SECONDS)
 				occupant.Paralyse(max(5/efficiency, (1 / occupant.bodytemperature)*3000/efficiency))
 
 				if(air1.gas["oxygen"] > 2)
@@ -77,12 +78,19 @@
 					var/heal_fire = occupant.getFireLoss() ? min(efficiency, 20*(efficiency**2) / occupant.getFireLoss()) : 0
 					occupant.heal_bodypart_damage(heal_brute, heal_fire)
 
-			var/has_cryo = occupant.reagents.get_reagent_amount("cryoxadone") >= 1
-			var/has_clonexa = occupant.reagents.get_reagent_amount("clonexadone") >= 1
-			var/has_cryo_medicine = has_cryo || has_clonexa
-
-			if(beaker && !has_cryo_medicine)
-				beaker.reagents.trans_to(occupant, 1, 10)
+			var/occupant_has_cryo_medicine = FALSE
+			for(var/M in cryo_medicine)
+				if(occupant.reagents.get_reagent_amount(M) >= 1)
+					occupant_has_cryo_medicine = TRUE
+					break
+			if(beaker && beaker.reagents && !occupant_has_cryo_medicine)
+				var/initial_volume = beaker.reagents.total_volume
+				for(var/datum/reagent/R in beaker.reagents.reagent_list)
+					var/transfer_amt = 1 * R.volume / initial_volume
+					if(R.id in cryo_medicine)
+						beaker.reagents.trans_id_to(occupant, R.id, transfer_amt, 10)
+					else
+						beaker.reagents.trans_id_to(occupant, R.id, transfer_amt)
 				beaker.reagents.reaction(occupant)
 
 	updateUsrDialog()
@@ -117,7 +125,10 @@
 
 
 /obj/machinery/atmospherics/components/unary/cryo_cell/MouseDrop_T(mob/target, mob/user)
-	if(user.stat || user.lying || !Adjacent(user) || !target.Adjacent(user) || !iscarbon(target))
+	if(user.incapacitated() || !iscarbon(target))
+		return
+	if(!user.IsAdvancedToolUser())
+		to_chat(user, "<span class='warning'>Вы не можете понять, что с этим делать.</span>")
 		return
 	close_machine(target)
 
@@ -131,21 +142,21 @@
 	if(user.is_busy(null, FALSE)) // prevents spam too.
 		return
 
-	to_chat(user, "<span class='notice'>You struggle inside the cryotube, kicking the release with your foot... (This will take around 30 seconds.)</span>")
-	audible_message("<span class='notice'>You hear a thump from [src].</span>")
+	to_chat(user, "<span class='notice'>Вы пытаетесь выбраться из криокамеры, толкаясь ногами... (Потребуется около 30 секунд.)</span>")
+	audible_message("<span class='notice'>Вы слышите глухой стук из криокамеры.</span>")
 	if(do_after(user, 300, target = src))
 		if(occupant == user) // Check they're still here.
 			open_machine()
 
 /obj/machinery/atmospherics/components/unary/cryo_cell/verb/move_eject()
 	set name = "Eject Cryo Cell"
-	set desc = "Begin the release sequence inside the cryo tube."
+	set desc = "Начать процедуру открытия криокамеры."
 	set category = "Object"
 	set src in oview(1)
 	if(usr == occupant || contents.Find(usr))	//If the user is inside the tube...
 		if(usr.stat == DEAD)	//and he's not dead....
 			return
-		to_chat(usr, "<span class='notice'>Release sequence activated. This will take about a minute.</span>")
+		to_chat(usr, "<span class='notice'>Процедура открытия активирована. Это займет около минуты.</span>")
 		sleep(600)
 		if(!src || !usr || (!occupant && !contents.Find(usr)))	//Check if someone's released/replaced/bombed him already
 			return
@@ -160,11 +171,11 @@
 	..()
 	if(occupant)
 		if(on)
-			to_chat(user, "Someone's inside [src]!")
+			to_chat(user, "Кто-то внутри криокамеры!")
 		else
-			to_chat(user, "You can barely make out a form floating in [src].")
+			to_chat(user, "Вы едва можете различить форму того, что плавает в криокамере.")
 	else
-		to_chat(user, "[src] seems empty.")
+		to_chat(user, "Криокамера выглядит пустой.")
 
  /**
   * The ui_interact proc is used to open and update Nano UIs
@@ -234,6 +245,33 @@
 		ui.push_data(data)
 		return
 
+/obj/machinery/atmospherics/components/unary/cryo_cell/CtrlClick(mob/user)
+	if(!user.IsAdvancedToolUser())
+		to_chat(user, "<span class='warning'>Вы не можете понять, что с этим делать.</span>")
+		return
+
+	if(user == occupant)
+		return
+
+	if(!user.incapacitated() && Adjacent(user))
+		if(!state_open)
+			on = !on
+			update_icon()
+
+/obj/machinery/atmospherics/components/unary/cryo_cell/AltClick(mob/user)
+	if(!user.IsAdvancedToolUser())
+		to_chat(user, "<span class='warning'>Вы не можете понять, что с этим делать.</span>")
+		return
+
+	if(user == occupant)
+		return
+
+	if(!user.incapacitated() && Adjacent(user))
+		if(state_open)
+			close_machine()
+		else
+			open_machine()
+
 /obj/machinery/atmospherics/components/unary/cryo_cell/Topic(href, href_list)
 	. = ..()
 	if(!. || usr == occupant || panel_open)
@@ -265,15 +303,14 @@
 /obj/machinery/atmospherics/components/unary/cryo_cell/attackby(obj/item/I, mob/user)
 	if(istype(I, /obj/item/weapon/reagent_containers/glass))
 		if(beaker)
-			to_chat(user, "<span class='warning'>A beaker is already loaded into [src]!</span>")
+			to_chat(user, "<span class='warning'>Что-то уже загружено в криокамеру!</span>")
 			return
-		if(!user.drop_item())
+		if(!user.drop_from_inventory(I, src))
 			return
 		beaker = I
-		I.forceMove(src)
 		user.visible_message(
-			"[user] places [I] in [src].",
-			"<span class='notice'>You place [I] in [src].</span>")
+			"[user] помещает [I] в криокамеру.",
+			"<span class='notice'>Вы помещаете [I] в криокамеру.</span>")
 		var/reagentlist = pretty_string_from_reagent_list(I.reagents.reagent_list)
 		log_game("[key_name(user)] added an [I] to cryo containing [reagentlist]")
 		return
@@ -306,7 +343,7 @@
 		return occupant
 
 /obj/machinery/atmospherics/components/unary/cryo_cell/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	var/image/I
 
 	if(panel_open)
@@ -315,7 +352,7 @@
 		I = image(icon, "pod-o_top")
 		I.layer = 5 // this needs to be fairly high so it displays over most things, but it needs to be under lighting (at 10)
 		I.pixel_z = 32
-		overlays += I
+		add_overlay(I)
 
 	else if(state_open)
 		icon_state = "pod-open"
@@ -323,30 +360,30 @@
 		I = image(icon, "pod-open_top")
 		I.layer = 5
 		I.pixel_z = 32
-		overlays += I
+		add_overlay(I)
 	else
 		icon_state = "pod-[on]"
 
 		I = image(icon, "pod-[on]_top")
 		I.layer = 5
 		I.pixel_z = 32
-		overlays += I
+		add_overlay(I)
 
 		if(occupant)
 			var/image/pickle = image(occupant.icon, occupant.icon_state)
-			pickle.overlays = occupant.overlays
+			pickle.copy_overlays(occupant)
 			pickle.pixel_z = 20
 			pickle.layer = 5
-			overlays += pickle
+			add_overlay(pickle)
 
 		I = image(icon, "lid-[on]")
 		I.layer = 5
-		overlays += I
+		add_overlay(I)
 
 		I = image(icon, "lid-[on]_top")
 		I.layer = 5
 		I.pixel_z = 32
-		overlays += I
+		add_overlay(I)
 
 /obj/machinery/atmospherics/components/unary/cryo_cell/can_crawl_through()
 	return //can't ventcrawl in or out of cryo.

@@ -81,6 +81,12 @@
 /obj/item/projectile/beam/emitter/singularity_pull()
 	return //don't want the emitters to miss
 
+/obj/item/projectile/beam/emitter/on_hit(atom/target, def_zone = BP_CHEST, blocked = 0)
+	if(ishuman(target))
+		var/mob/living/carbon/human/H = target
+		if((HULK in H.mutations) && H.hulk_activator == ACTIVATOR_EMITTER_BEAM)
+			H.try_mutate_to_hulk(H)
+
 /obj/item/projectile/beam/lasertag
 	name = "lasertag beam"
 	pass_flags = PASSTABLE | PASSGLASS | PASSGRILLE
@@ -95,13 +101,13 @@
 	. = ..()
 	proj_act_sound = null
 
-/obj/item/projectile/beam/lasertag/on_hit(atom/target, blocked = 0)
+/obj/item/projectile/beam/lasertag/on_hit(atom/target, def_zone = BP_CHEST, blocked = 0)
 	if(ishuman(target))
 		var/mob/living/carbon/human/H = target
 		if(istype(H.wear_suit, /obj/item/clothing/suit/lasertag))
 			var/obj/item/clothing/suit/lasertag/L = H.wear_suit
 			if(L.lasertag_color != lasertag_color)
-				H.Weaken(5)
+				H.Weaken(2)
 	return TRUE
 
 /obj/item/projectile/beam/lasertag/blue
@@ -114,7 +120,6 @@
 
 /obj/item/projectile/beam/lasertag/red
 	icon_state = "laser"
-
 	lasertag_color = "red"
 
 	/*
@@ -177,3 +182,21 @@
 /obj/item/projectile/beam/stun/atom_init()
 	. = ..()
 	proj_act_sound = null
+
+/obj/item/projectile/beam/cult_laser
+	name = "beam"
+	icon_state = "emitter"
+	damage = 5
+
+	muzzle_type = /obj/effect/projectile/emitter/muzzle/cult
+	tracer_type = /obj/effect/projectile/emitter/tracer/cult
+	impact_type = /obj/effect/projectile/emitter/impact/cult
+
+/obj/item/projectile/beam/cult_laser/atom_init()
+	. = ..()
+	def_zone = ran_zone()
+
+/obj/item/projectile/beam/cult_laser/Bump(atom/A, forced=0)
+	if(istype(A, /mob/living/simple_animal/hostile/pylon) || istype(A, /obj/structure/cult/pylon) || istype(A, /mob/living/simple_animal/construct) || istype(A, /obj/effect/anomaly/bluespace/cult_portal))
+		return FALSE
+	return ..()

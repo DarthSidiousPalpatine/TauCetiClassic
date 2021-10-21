@@ -5,12 +5,9 @@
 	item_state = "pulse"
 	force = 10
 	ammo_type = list(/obj/item/ammo_casing/energy/laser/pulse, /obj/item/ammo_casing/energy/electrode, /obj/item/ammo_casing/energy/laser)
-	cell_type = "/obj/item/weapon/stock_parts/cell/super"
+	cell_type = /obj/item/weapon/stock_parts/cell/super
 	var/mode = 2
 	fire_delay = 25
-
-/obj/item/weapon/gun/energy/pulse_rifle/attack_self(mob/living/user)
-	select_fire(user)
 
 /obj/item/weapon/gun/energy/pulse_rifle/cyborg/newshot()
 	if(isrobot(src.loc))
@@ -36,7 +33,7 @@
 /obj/item/weapon/gun/energy/pulse_rifle/destroyer
 	name = "pulse destroyer"
 	desc = "A heavy-duty, pulse-based energy weapon."
-	cell_type = "/obj/item/weapon/stock_parts/cell/infinite"
+	cell_type = /obj/item/weapon/stock_parts/cell/infinite
 	ammo_type = list(/obj/item/ammo_casing/energy/laser/pulse)
 
 /obj/item/weapon/gun/energy/pulse_rifle/destroyer/attack_self(mob/living/user)
@@ -48,4 +45,4 @@
 	icon_state = "m1911-p"
 	item_state = "gun"
 	can_be_holstered = TRUE
-	cell_type = "/obj/item/weapon/stock_parts/cell/infinite"
+	cell_type = /obj/item/weapon/stock_parts/cell/infinite

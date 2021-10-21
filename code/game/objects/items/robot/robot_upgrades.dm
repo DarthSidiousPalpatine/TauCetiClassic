@@ -30,6 +30,7 @@
 	R.icon_state = "robot"
 	qdel(R.module)
 	R.module = null
+	R.sensor_huds = R.def_sensor_huds
 	R.camera.remove_networks(list("Engineering","Medical","MINE"))
 	R.updatename("Default")
 	R.status_flags |= CANPUSH
@@ -71,6 +72,7 @@
 				R.key = ghost.key
 
 	R.stat = CONSCIOUS
+	playsound(src, 'sound/misc/robot_restart.ogg', VOL_EFFECTS_MASTER, 70, FALSE)
 	return 1
 
 
@@ -161,6 +163,22 @@
 	if(R.emagged == 1)
 		return 0
 
-	R.throw_alert("hacked")
+	R.throw_alert("hacked", /atom/movable/screen/alert/hacked)
 	R.emagged = 1
 	return 1
+
+/obj/item/borg/upgrade/security
+	name = "security safety protocols module"
+	desc = "Unlocks the ability to become a security cyborg."
+	icon_state = "cyborg_upgrade3"
+	require_module = FALSE
+
+/obj/item/borg/upgrade/security/action(mob/living/silicon/robot/R)
+	if(..())
+		return FALSE
+
+	if(R.can_be_security)
+		return FALSE
+
+	R.can_be_security = TRUE
+	return TRUE

@@ -41,6 +41,44 @@
 	construction_time = 70
 	category = list("Spacesuit")
 
+//Science buble
+/datum/design/space_suit_science
+	name = "Science Space Suit"
+	id = "space_suit_science"
+	build_type = MINEFAB
+	build_path = /obj/item/clothing/suit/space/globose/science
+	materials = list(MAT_METAL=32500,MAT_GLASS=2000,MAT_PLASTIC=5000,MAT_SILVER=1000)
+	construction_time = 400
+	category = list("Spacesuit")
+
+/datum/design/space_suit_helmet_science
+	name = "Science space suit helmet"
+	id = "space_suit_helmet_science"
+	build_type = MINEFAB
+	build_path = /obj/item/clothing/head/helmet/space/globose/science
+	materials = list(MAT_METAL=5000,MAT_GLASS=3000,MAT_SILVER=500)
+	construction_time = 100
+	category = list("Spacesuit")
+
+//Recycler buble
+/datum/design/space_suit_recycler
+	name = "Recycler Space Suit"
+	id = "space_suit_recycler"
+	build_type = MINEFAB
+	build_path = /obj/item/clothing/suit/space/globose/recycler
+	materials = list(MAT_METAL=35000,MAT_GLASS=2000,MAT_PLASTIC=5000,MAT_SILVER=1500)
+	construction_time = 400
+	category = list("Spacesuit")
+
+/datum/design/space_suit_helmet_recycler
+	name = "Recycler space suit helmet"
+	id = "space_suit_helmet_recycler"
+	build_type = MINEFAB
+	build_path = /obj/item/clothing/head/helmet/space/globose/recycler
+	materials = list(MAT_METAL=5000,MAT_GLASS=3000,MAT_SILVER=1000)
+	construction_time = 100
+	category = list("Spacesuit")
+
 //Mining buble
 /datum/design/space_suit_mining
 	name = "Mining Space suit"
@@ -190,6 +228,16 @@
 	starts_unlocked = TRUE
 	category = list("Tools")
 
+//meson_geo_hud
+/datum/design/meson_geo_hud
+	name = "Geological Meson Optical Scanner"
+	id = "meson_geo_glasses"
+	build_type = MINEFAB
+	build_path = /obj/item/clothing/glasses/hud/mining/meson
+	materials = list(MAT_METAL = 50, MAT_GLASS = 50,MAT_SILVER=20, MAT_GOLD=20)
+	construction_time = 100
+	category = list("Tools")
+
 //mine_flashlight
 /datum/design/mine_flashlight
 	name = "Mining flashlight"
@@ -225,7 +273,7 @@
 	build_type = MINEFAB
 	build_path = /mob/living/simple_animal/hostile/mining_drone
 	materials = list(MAT_METAL=6000,MAT_GLASS=2000,MAT_PLASTIC=1000,MAT_GOLD=500,MAT_URANIUM=2000)
-	construction_time = 1200
+	construction_time = 800
 	category = list("Tools")
 
 /datum/design/mining_jetpack

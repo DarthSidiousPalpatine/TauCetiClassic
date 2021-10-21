@@ -6,6 +6,7 @@
 	var/list/fields = list()
 
 /obj/item/device/camera/siliconcam
+	flash_enabled = FALSE
 	var/in_camera_mode = 0
 	var/photos_taken = 0
 	var/list/aipictures = list()
@@ -26,6 +27,7 @@
 
 /obj/item/device/camera/siliconcam/proc/injectmasteralbum(datum/picture/P) //stores image information to a list similar to that of the datacore
 	var/mob/living/silicon/robot/C = src.loc
+	playsound(src, 'sound/items/polaroid3.ogg', VOL_EFFECTS_MASTER, 75, FALSE)
 	if(C.connected_ai)
 		var/mob/A = P.fields["author"]
 		C.connected_ai.aiCamera.injectaialbum(P, " (taken by [A.name])")

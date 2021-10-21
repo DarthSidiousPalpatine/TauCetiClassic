@@ -5,7 +5,7 @@
 	icon_state = "signmaker"
 	item_state = "electronic"
 	force = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	throwforce = 0
 	throw_speed = 3
 	throw_range = 7
@@ -13,8 +13,8 @@
 	var/list/signs = list()
 	var/max_signs = 10
 
-/obj/item/weapon/holosign_creator/afterattack(atom/target, mob/user, flag)
-	if(flag)
+/obj/item/weapon/holosign_creator/afterattack(atom/target, mob/user, proximity, params)
+	if(proximity)
 		if(!check_allowed_items(target, 1)) return
 		var/turf/T = get_turf(target)
 		var/obj/effect/overlay/holograph/H = locate() in T
@@ -47,7 +47,7 @@
 	desc = "The words flicker as if they mean nothing."
 	icon = 'icons/obj/janitor.dmi'
 	icon_state = "holosign"
-	anchored = 1
+	anchored = TRUE
 
 
 /obj/item/weapon/caution
@@ -59,5 +59,5 @@
 	throwforce = 3
 	throw_speed = 2
 	throw_range = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	attack_verb = list("warned", "cautioned", "smashed")

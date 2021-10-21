@@ -48,6 +48,10 @@
 			if (prob(8))
 				to_chat(affected_mob, "<span class='warning'>You can feel... something...inside you.</span>")
 		if(5)
+			if(QDELETED(affected_mob))
+				return
+			if(affected_mob.notransform)
+				return
 			to_chat(affected_mob, "<span class='warning'>Your skin feels as if it's about to burst off...</span>")
 			affected_mob.adjustToxLoss(10)
 			affected_mob.updatehealth()
@@ -55,7 +59,7 @@
 				if(src.gibbed != 0) return 0
 				var/turf/T = find_loc(affected_mob)
 				gibs(T)
-				src.cure(0)
+				cure(0)
 				gibbed = 1
 				var/mob/living/carbon/human/H = affected_mob
 				if(istype(H) && !jobban_isbanned(affected_mob, "Cyborg"))

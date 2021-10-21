@@ -1,4 +1,3 @@
-
 /obj/machinery/artifact_analyser
 	name = "Anomaly Analyser"
 	desc = "Studies the emissions of anomalous materials to discover their uses."
@@ -29,7 +28,7 @@
 		owned_scanner = locate(/obj/machinery/artifact_scanpad) in orange(1, src)
 
 /obj/machinery/artifact_analyser/ui_interact(mob/user)
-	if(stat & (NOPOWER|BROKEN) || !in_range(src, user) && !issilicon(user) && !isobserver(user))
+	if(stat & (NOPOWER|BROKEN) || !Adjacent(user) && !issilicon(user) && !isobserver(user))
 		user.unset_machine(src)
 		return
 
@@ -42,16 +41,15 @@
 		dat += "<b><font color=red>Unable to locate analysis pad.</font></b><br>"
 	else if(scan_in_progress)
 		dat += "Please wait. Analysis in progress.<br>"
-		dat += "<a href='?src=\ref[src];halt_scan=1'>Halt scanning.</a><br>"
+		dat += "<a href='?src=\ref[src];halt_scan=1'>Halt scanning</a><br>"
 	else
 		dat += "Scanner is ready.<br>"
-		dat += "<a href='?src=\ref[src];begin_scan=1'>Begin scanning.</a><br>"
+		dat += "<a href='?src=\ref[src];begin_scan=1'>Begin scanning</a><br>"
 
 	dat += "<br>"
 	dat += "<hr>"
-	dat += "<a href='?src=\ref[src]'>Refresh</a> <a href='?src=\ref[src];close=1'>Close</a>"
 
-	var/datum/browser/popup = new(user, "artanalyser", name, 450, 500)
+	var/datum/browser/popup = new(user, "artanalyser", name, 450, 500, nref = src)
 	popup.set_content(dat)
 	popup.open()
 
@@ -80,21 +78,13 @@
 		else
 			results = get_scan_info(scanned_object)
 		owned_scanner.icon_state = "xenoarch_scanner"
-		src.visible_message("<b>[name]</b> states, \"Scanning complete.\"")
+		visible_message("<b>[name]</b> states, \"Scanning complete.\"")
 		var/obj/item/weapon/paper/artifact_info/P = new(src.loc)
 		P.name = "[src] report #[++report_num]"
 		P.info = "<b>[src] analysis report #[report_num]</b><br>"
 		P.info += "<br>"
 		P.info += "[bicon(scanned_object)] [results]"
 		P.update_icon()
-		if(scanned_object)
-			P.artifact_type = scanned_object.type
-			if(istype(scanned_object, /obj/machinery/artifact))
-				var/obj/machinery/artifact/A = scanned_object
-				if(A.my_effect)
-					P.artifact_first_effect = A.my_effect.effect_type
-				if(A.secondary_effect)
-					P.artifact_second_effect = A.secondary_effect.effect_type
 
 		var/obj/item/weapon/stamp/S = new
 		S.stamp_paper(P)
@@ -102,19 +92,21 @@
 
 		if(scanned_object && istype(scanned_object, /obj/machinery/artifact))
 			var/obj/machinery/artifact/A = scanned_object
+			P.artifact_type = A.name
+			if(A.first_effect)
+				P.artifact_first_effect = A.first_effect.log_name
+			if(A.secondary_effect)
+				P.artifact_second_effect = A.secondary_effect.log_name
 			A.being_used = 0
 
 /obj/machinery/artifact_analyser/Topic(href, href_list)
-	if(href_list["close"])
-		playsound(src, pick(SOUNDIN_KEYBOARD), VOL_EFFECTS_MASTER, null, FALSE)
-		usr.unset_machine(src)
-		usr << browse(null, "window=artanalyser")
-		return FALSE
-
 	. = ..()
 	if(!.)
 		return
-
+	if(href_list["close"])
+		playsound(src, pick(SOUNDIN_KEYBOARD), VOL_EFFECTS_MASTER, null, FALSE)
+		usr.unset_machine(src)
+		return FALSE
 	if(href_list["begin_scan"])
 		playsound(src, pick(SOUNDIN_KEYBOARD), VOL_EFFECTS_MASTER, null, FALSE)
 		if(!owned_scanner)
@@ -134,23 +126,23 @@
 						A.being_used = 1
 
 				if(artifact_in_use)
-					src.visible_message("<b>[name]</b> states, \"Cannot harvest. Too much interference.\"")
+					visible_message("<b>[name]</b> states, \"Cannot scan. Too much interference.\"")
 					playsound(src, 'sound/machines/buzz-two.ogg', VOL_EFFECTS_MASTER, 20)
 				else
 					scanned_object = O
 					scan_in_progress = 1
 					scan_completion_time = world.time + scan_duration
-					src.visible_message("<b>[name]</b> states, \"Scanning begun.\"")
+					visible_message("<b>[name]</b> states, \"Scanning begun.\"")
 					owned_scanner.icon_state = "xenoarch_scanner_scanning"
 					flick("xenoarch_console_working", src)
 				break
 			if(!scanned_object)
-				src.visible_message("<b>[name]</b> states, \"Unable to isolate scan target.\"")
+				visible_message("<b>[name]</b> states, \"Unable to isolate scan target.\"")
 	if(href_list["halt_scan"])
 		playsound(src, pick(SOUNDIN_KEYBOARD), VOL_EFFECTS_MASTER, null, FALSE)
 		owned_scanner.icon_state = "xenoarch_scanner"
 		scan_in_progress = 0
-		src.visible_message("<b>[name]</b> states, \"Scanning halted.\"")
+		visible_message("<b>[name]</b> states, \"Scanning halted.\"")
 
 	updateDialog()
 
@@ -186,97 +178,18 @@
 		if(/obj/machinery/power/crystal)
 			return "Crystal formation - Pseudo organic crystalline matrix, unlikely to have formed naturally. No known technology exists to synthesize this exact composition. \
 			Attention: energetic excitement is noticed. The appearance of current is possible. Connect the crystal to the network, using wrench and wires on it. Make sure there is a cable underneath."
-		if(/obj/machinery/artifact)
-			// the fun one
+		if(/obj/machinery/artifact) // a fun one
 			var/obj/machinery/artifact/A = scanned_obj
-			var/out = "Anomalous alien device - Composed of an unknown alloy, "
+			var/out = "Anomalous alien device - composed of an unknown alloy.<br><br>"
 
-			// primary effect
-			if(A.my_effect)
-				// what kind of effect the artifact has
-				switch(A.my_effect.effect_type)
-					if(1)
-						out += "concentrated energy emissions"
-					if(2)
-						out += "intermittent psionic wavefront"
-					if(3)
-						out += "electromagnetic energy"
-					if(4)
-						out += "high frequency particles"
-					if(5)
-						out += "organically reactive exotic particles"
-					if(6)
-						out += "interdimensional/bluespace? phasing"
-					if(7)
-						out += "atomic synthesis"
-					else
-						out += "low level energy emissions"
-				out += " have been detected "
+			if(A.first_effect)
+				out += A.first_effect.getDescription()
 
-				// how the artifact does it's effect
-				switch(A.my_effect.effect)
-					if(1)
-						out += " emitting in an ambient energy field."
-					if(2)
-						out += " emitting in periodic bursts."
-					else
-						out += " interspersed throughout substructure and shell."
+			if(A.secondary_effect)
+				out += "<br><br>Internal scans indicate ongoing secondary activity<br><br>"
+				out += A.secondary_effect.getDescription()
 
-				if(A.my_effect.trigger >= 0 && A.my_effect.trigger <= 4)
-					out += " Activation index involves physical interaction with artifact surface."
-				else if(A.my_effect.trigger >= 5 && A.my_effect.trigger <= 8)
-					out += " Activation index involves energetic interaction with artifact surface."
-				else if(A.my_effect.trigger >= 9 && A.my_effect.trigger <= 12)
-					out += " Activation index involves precise local atmospheric conditions."
-				else
-					out += " Unable to determine any data about activation trigger."
-
-			// secondary:
-			if(A.secondary_effect && A.secondary_effect.activated)
-				// sciencey words go!
-				out += "<br><br>Warning, internal scans indicate ongoing [pick("subluminous","subcutaneous","superstructural")] activity operating \
-				independantly from primary systems. Auxiliary activity involves "
-
-				// what kind of effect the artifact has
-				switch(A.secondary_effect.effect_type)
-					if(1)
-						out += "concentrated energy emissions"
-					if(2)
-						out += "intermittent psionic wavefront"
-					if(3)
-						out += "electromagnetic energy"
-					if(4)
-						out += "high frequency particles"
-					if(5)
-						out += "organically reactive exotic particles"
-					if(6)
-						out += "interdimensional/bluespace? phasing"
-					if(7)
-						out += "atomic synthesis"
-					else
-						out += "low level radiation"
-
-				// how the artifact does it's effect
-				switch(A.secondary_effect.effect)
-					if(1)
-						out += " emitting in an ambient energy field."
-					if(2)
-						out += " emitting in periodic bursts."
-					else
-						out += " interspersed throughout substructure and shell."
-
-				if(A.secondary_effect.trigger >= 0 && A.secondary_effect.trigger <= 4)
-					out += " Activation index involves physical interaction with artifact surface, but subsystems indicate \
-					anomalous interference with standard attempts at triggering."
-				else if(A.secondary_effect.trigger >= 5 && A.secondary_effect.trigger <= 8)
-					out += " Activation index involves energetic interaction with artifact surface, but subsystems indicate \
-					anomalous interference with standard attempts at triggering."
-				else if(A.secondary_effect.trigger >= 9 && A.secondary_effect.trigger <= 12)
-					out += " Activation index involves precise local atmospheric conditions, but subsystems indicate \
-					anomalous interference with standard attempts at triggering."
-				else
-					out += " Unable to determine any data about activation trigger."
 			return out
 		else
 			// it was an ordinary item
-			return "[scanned_obj.name] - Mundane application, composed of carbo-ferritic alloy composite."
+			return "[scanned_obj.name] - Mundane application."

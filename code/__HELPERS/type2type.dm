@@ -49,7 +49,7 @@
 		placeholder = 2
 	if (!( isnum(num) ))
 		return
-	
+
 	var/hex = ""
 	if (num)
 		var/i = 0
@@ -95,6 +95,12 @@
 	for(var/x in splittext(text, delimiter))
 		num_list += text2num(x)
 	return num_list
+
+/proc/hex2color(hex)
+	if(!hex_by_color)
+		gen_hex_by_color()
+
+	return hex_by_color[hex]
 
 //Splits the text of a file at seperator and returns them in a list.
 /proc/file2list(filename, seperator="\n")
@@ -215,14 +221,6 @@
 	if(rights & R_EVENT)       . += "[seperator]+EVENT"
 	if(rights & R_LOG)		   . += "[seperator]+LOG"
 	return .
-
-/proc/ui_style2icon(ui_style)
-	switch(ui_style)
-		if("old")		return 'icons/mob/screen1_old.dmi'
-		if("Orange")	return 'icons/mob/screen1_Orange.dmi'
-		if("Midnight")	return 'icons/mob/screen1_Midnight.dmi'
-		else			return 'icons/mob/screen1_White.dmi'
-
 
 // heat2color functions. Adapted from: http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
 /proc/heat2color(temp)

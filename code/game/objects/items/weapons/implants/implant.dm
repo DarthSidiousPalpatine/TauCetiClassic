@@ -18,10 +18,14 @@
 
 /obj/item/weapon/implant/Destroy()
 	implant_list -= src
+	implanted = FALSE
+	imp_in = null
 	if(part)
 		part.implants.Remove(src)
 		part = null
-	imp_in = null
+		if(isliving(imp_in))
+			var/mob/living/L = imp_in
+			L.sec_hud_set_implants()
 	return ..()
 
 /obj/item/weapon/implant/proc/trigger(emote, source)
@@ -44,10 +48,12 @@
 	implanted = TRUE
 	if(ishuman(C))
 		var/mob/living/carbon/human/H = C
-		var/obj/item/organ/external/BP = H.bodyparts_by_name[def_zone ? def_zone : BP_HEAD]
+		var/obj/item/organ/external/BP = H.get_bodypart(def_zone)
+		if(!BP)
+			return
 		BP.implants += src
+		C.sec_hud_set_implants()
 		part = BP
-		H.hud_updateflag |= 1 << IMPLOYAL_HUD
 
 /obj/item/weapon/implant/proc/get_data()
 	return "No information available"
@@ -65,6 +71,7 @@
 	else
 		var/mob/living/M = imp_in
 		M.apply_damage(15,BURN)
+		M.sec_hud_set_implants()
 	name = "melted implant"
 	desc = "Charred circuit in melted plastic case. Wonder what that used to be..."
 	icon_state = "implant_melted"
@@ -128,14 +135,14 @@ Implant Specifics:<BR>"}
 
 /obj/item/weapon/implant/dexplosive/trigger(emote, source)
 	if(emote == "deathgasp")
-		src.activate("death")
+		activate("death")
 	return
 
 /obj/item/weapon/implant/dexplosive/activate(cause)
 	if((!cause) || (!src.imp_in))	return 0
 	explosion(src, -1, 0, 2, 3, 0)//This might be a bit much, dono will have to see.
 	if(src.imp_in)
-		src.imp_in.gib()
+		imp_in.gib()
 
 /obj/item/weapon/implant/dexplosive/islegal()
 	return 0
@@ -167,7 +174,7 @@ Implant Specifics:<BR>"}
 
 /obj/item/weapon/implant/explosive/hear(msg)
 	var/list/replacechars = list("'" = "","\"" = "",">" = "","<" = "","(" = "",")" = "")
-	msg = sanitize(msg, replacechars)
+	msg = replace_characters(msg, replacechars)
 	if(findtext(msg,phrase))
 		activate()
 		qdel(src)
@@ -179,8 +186,8 @@ Implant Specifics:<BR>"}
 	var/need_gib = null
 	if(istype(imp_in, /mob))
 		var/mob/T = imp_in
-		message_admins("Explosive implant triggered in [T] ([T.key]). [ADMIN_JMP(T)]")
-		log_game("Explosive implant triggered in [T] ([T.key]).")
+		message_admins("Explosive implant triggered in [T] ([key_name_admin(T)]). [ADMIN_JMP(T)]")
+		log_game("Explosive implant triggered in [T] ([key_name(T)]).")
 		need_gib = 1
 
 		if(ishuman(imp_in))
@@ -192,7 +199,7 @@ Implant Specifics:<BR>"}
 					if (istype(part,/obj/item/organ/external/chest) ||	\
 						istype(part,/obj/item/organ/external/groin) ||	\
 						istype(part,/obj/item/organ/external/head))
-						part.createwound(BRUISE, 60)	//mangle them instead
+						part.take_damage(60, used_weapon = "Explosion") //mangle them instead
 						explosion(get_turf(imp_in), -1, -1, 2, 3)
 						qdel(src)
 					else
@@ -218,7 +225,7 @@ Implant Specifics:<BR>"}
 		t.hotspot_expose(3500,125)
 
 /obj/item/weapon/implant/explosive/implanted(mob/source)
-	elevel = alert("What sort of explosion would you prefer?", "Implant Intent", "Localized Limb", "Destroy Body", "Full Explosion")
+	elevel = tgui_alert(usr, "What sort of explosion would you prefer?", "Implant Intent", list("Localized Limb", "Destroy Body", "Full Explosion"))
 	var/list/replacechars = list("'" = "","\"" = "",">" = "","<" = "","(" = "",")" = "")
 	phrase = sanitize_safe(replace_characters(input("Choose activation phrase:") as text, replacechars))
 	usr.mind.store_memory("Explosive implant in [source] can be activated by saying something containing the phrase ''[src.phrase]'', <B>say [src.phrase]</B> to attempt to activate.", 0)
@@ -259,7 +266,7 @@ Implant Specifics:<BR>"}
 				if (istype(part,/obj/item/organ/external/chest) ||	\
 					istype(part,/obj/item/organ/external/groin) ||	\
 					istype(part,/obj/item/organ/external/head))
-					part.createwound(BRUISE, 60)	//mangle them instead
+					part.take_damage(60, used_weapon = "Explosion")	//mangle them instead
 				else
 					part.droplimb(null, null, DROPLIMB_BLUNT)
 			explosion(get_turf(imp_in), -1, -1, 2, 3)
@@ -315,10 +322,11 @@ Implant Specifics:<BR>"}
 	action_button_is_hands_free = TRUE
 
 /obj/item/weapon/implant/emp/ui_action_click()
-	uses--
-	empulse(imp_in, 3, 5)
-	if(!uses)
-		qdel(src)
+	if (uses > 0)
+		empulse(imp_in, 3, 5)
+		uses--
+		if (!uses)
+			qdel(src)
 
 /obj/item/weapon/implant/chem
 	name = "chemical implant"
@@ -353,14 +361,14 @@ the implant may become unstable and either pre-maturely inject the subject or si
 
 /obj/item/weapon/implant/chem/trigger(emote, source)
 	if(emote == "deathgasp")
-		src.activate(src.reagents.total_volume)
+		activate(src.reagents.total_volume)
 	return
 
 
 /obj/item/weapon/implant/chem/activate(cause)
 	if((!cause) || (!src.imp_in))	return 0
 	var/mob/living/carbon/R = src.imp_in
-	src.reagents.trans_to(R, cause)
+	reagents.trans_to(R, cause)
 	to_chat(R, "You hear a faint *beep*.")
 	if(!src.reagents.total_volume)
 		to_chat(R, "You hear a faint click from your chest.")
@@ -388,6 +396,10 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	name = "death alarm implant"
 	desc = "An alarm which monitors host vital signs and transmits a radio message upon death."
 	var/mobname = "Will Robinson"
+
+/obj/item/weapon/implant/death_alarm/inject(mob/living/carbon/C, def_zone)
+	. = ..()
+	implanted(C)
 
 /obj/item/weapon/implant/death_alarm/get_data()
 	var/dat = {"
@@ -417,7 +429,7 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	switch (cause)
 		if("death")
 			var/obj/item/device/radio/headset/a = new /obj/item/device/radio/headset(null)
-			if(istype(t, /area/syndicate_station) || istype(t, /area/syndicate_mothership) || istype(t, /area/shuttle/syndicate_elite) )
+			if(istype(t, /area/shuttle/syndicate) || istype(t, /area/custom/syndicate_mothership) || istype(t, /area/shuttle/syndicate_elite) || istype(t, /area/custom/cult))
 				//give the syndies a bit of stealth
 				a.autosay("[mobname] has died in Space!", "[mobname]'s Death Alarm")
 			else
@@ -493,7 +505,7 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	qdel(src)
 
 /obj/item/weapon/implant/compressed/implanted(mob/source)
-	src.activation_emote = input("Choose activation emote:") in list("blink", "blink_r", "eyebrow", "chuckle", "twitch_s", "frown", "nod", "blush", "giggle", "grin", "groan", "shrug", "smile", "pale", "sniff", "whimper", "wink")
+	src.activation_emote = input("Choose activation emote:") in list("blink", "eyebrow", "twitch", "frown", "nod", "blush", "giggle", "grin", "groan", "shrug", "smile", "sniff", "whimper", "wink")
 	if (source.mind)
 		source.mind.store_memory("Compressed matter implant can be activated by using the [src.activation_emote] emote, <B>say *[src.activation_emote]</B> to attempt to activate.", 0)
 	to_chat(source, "The implanted compressed matter implant can be activated by using the [src.activation_emote] emote, <B>say *[src.activation_emote]</B> to attempt to activate.")
@@ -509,7 +521,7 @@ the implant may become unstable and either pre-maturely inject the subject or si
 	///////////////////////////////////////////////////////////
 /obj/item/weapon/storage/internal/imp
 	name = "bluespace pocket"
-	max_w_class = ITEM_SIZE_NORMAL
+	max_w_class = SIZE_SMALL
 	storage_slots = 2
 	cant_hold = list(/obj/item/weapon/disk/nuclear)
 

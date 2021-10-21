@@ -16,7 +16,7 @@
 /obj/item/weapon/reagent_containers/glass/rag
 	name = "damp rag"
 	desc = "For cleaning up messes, you suppose."
-	w_class = ITEM_SIZE_TINY
+	w_class = SIZE_MINUSCULE
 	icon = 'icons/obj/toy.dmi'
 	icon_state = "rag"
 	amount_per_transfer_from_this = 5
@@ -30,28 +30,28 @@
 /obj/item/weapon/reagent_containers/glass/rag/attack(atom/target, mob/user , flag)
 	if(ismob(target) && target.reagents && reagents.total_volume)
 		user.visible_message("<span class='warning'>\The [target] has been smothered with \the [src] by \the [user]!</span>", "<span class='warning'>You smother \the [target] with \the [src]!</span>", "You hear some struggling and muffled cries of surprise")
-		src.reagents.reaction(target, TOUCH)
-		spawn(5) src.reagents.clear_reagents()
+		// Yeah, it turns out the rag splashes.
+		reagents.standard_splash(target, user=user)
 		return
 	else
 		..()
 
-/obj/item/weapon/reagent_containers/glass/rag/afterattack(atom/A, mob/user, proximity)
-	if (!proximity || user.is_busy()) 
+/obj/item/weapon/reagent_containers/glass/rag/afterattack(atom/target, mob/user, proximity, params)
+	if (!proximity || user.is_busy())
 		return
 
-	var/is_glass = istype(A, /obj/item/weapon/reagent_containers/food/drinks/drinkingglass)
+	var/is_glass = istype(target, /obj/item/weapon/reagent_containers/food/drinks/drinkingglass)
 
-	if (!is_glass && (A in user.client.screen))
-		to_chat(user, "<span class='notice'>You need to take that [A] off before cleaning it.</span>")
+	if (!is_glass && (target in user.client.screen))
+		to_chat(user, "<span class='notice'>You need to take that [target] off before cleaning it.</span>")
 	else if (src in user)
-		user.visible_message("<span class='notice'>[user] starts to wipe down [A] with [src].</span>")
+		user.visible_message("<span class='notice'>[user] starts to wipe down [target] with [src].</span>")
 
-		var/target = is_glass ? user : A
+		var/new_target = is_glass ? user : target
 
-		if (do_after(user, 30, target = target))
-			user.visible_message("<span class='notice'>[user] finishes wiping off the [A].</span>")
-			A.clean_blood()
+		if (do_after(user, 30, target = new_target))
+			user.visible_message("<span class='notice'>[user] finishes wiping off the [new_target].</span>")
+			target.clean_blood()
 
 /obj/item/weapon/reagent_containers/glass/rag/examine()
 	if (!usr)

@@ -3,8 +3,8 @@
 	desc = "This machine generates directional gravity rays which catch trash orbiting around."
 	icon = 'icons/obj/structures/scrap/scrap_beacon.dmi'
 	icon_state = "beacon0"
-	anchored = 1
-	density = 1
+	anchored = TRUE
+	density = TRUE
 	layer = MOB_LAYER+1
 	var/summon_cooldown = 1200
 	var/impact_speed = 3
@@ -29,6 +29,7 @@
 	set waitfor = FALSE
 
 	active = 1
+	playsound(src, 'sound/machines/scrap_beacon_start.ogg', VOL_EFFECTS_MASTER, null, FALSE)
 	update_icon()
 	sleep(30)
 	var/list/flooring_near_beacon = list()

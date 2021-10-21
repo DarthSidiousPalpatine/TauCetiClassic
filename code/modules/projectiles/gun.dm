@@ -7,7 +7,7 @@
 	flags =  CONDUCT
 	slot_flags = SLOT_FLAGS_BELT
 	m_amt = 2000
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	throwforce = 5
 	throw_speed = 4
 	throw_range = 5
@@ -46,7 +46,7 @@
 	return 0
 
 /obj/item/weapon/gun/proc/special_check(mob/M, atom/target) //Placeholder for any special checks, like detective's revolver. or wizards
-	if(M.mind.special_role == "Wizard")
+	if(iswizard(M))
 		return FALSE
 	return TRUE
 
@@ -60,34 +60,40 @@
 		shake_camera(user, recoil + 1, recoil)
 
 	if(silenced)
-		playsound(user, fire_sound, VOL_EFFECTS_MASTER, 30, null, -4)
+		playsound(user, fire_sound, VOL_EFFECTS_MASTER, 30, FALSE, null, -4)
 	else
 		playsound(user, fire_sound, VOL_EFFECTS_MASTER)
-		user.visible_message("<span class='danger'>[user] fires [src]!</span>", "<span class='danger'>You fire [src]!</span>", "You hear a [istype(src, /obj/item/weapon/gun/energy) ? "laser blast" : "gunshot"]!")
+		announce_shot(user)
+
+/obj/item/weapon/gun/proc/announce_shot(mob/living/user)
+	user.visible_message("<span class='danger'>[user] fires [src]!</span>", "<span class='danger'>You fire [src]!</span>", "You hear a gunshot!")
 
 /obj/item/weapon/gun/emp_act(severity)
 	for(var/obj/O in contents)
-		O.emp_act(severity)
+		O.emplode(severity)
 
 /obj/item/weapon/gun/Destroy()
 	qdel(chambered)
 	chambered = null
 	return ..()
 
-/obj/item/weapon/gun/afterattack(atom/A, mob/living/user, flag, params)
-	if(flag)	return //It's adjacent, is the user, or is on the user's person
+/obj/item/weapon/gun/afterattack(atom/target, mob/user, proximity, params)
+	if(proximity)	return //It's adjacent, is the user, or is on the user's person
 	if(istype(target, /obj/machinery/recharger) && istype(src, /obj/item/weapon/gun/energy))	return//Shouldnt flag take care of this?
-	if(user && user.client && user.client.gun_mode && !(A in target))
-		PreFire(A,user,params) //They're using the new gun system, locate what they're aiming at.
+	if(user && user.client && user.client.gun_mode && !(target in src.target))
+		PreFire(target,user,params) //They're using the new gun system, locate what they're aiming at.
 	else
-		Fire(A,user,params) //Otherwise, fire normally.
+		Fire(target,user,params) //Otherwise, fire normally.
 
 /mob/living/carbon/AltClickOn(atom/A)
+	if(next_move > world.time) // CD for clicks is checked before clicks with modifiers(shift, alt)
+		return
 	var/obj/item/I = get_active_hand()
 	if(istype(I, /obj/item/weapon/gun))
 		var/obj/item/weapon/gun/G = I
-		if(src.client.gun_mode)
-			G.Fire(A, src)
+		if(client.gun_mode)
+			if(G.can_fire())
+				G.Fire(A, src)
 		else
 			if(isliving(A))
 				var/mob/living/M = A
@@ -131,7 +137,6 @@
 					explosion(user.loc, 0, 0, 1, 1)
 					to_chat(H, "<span class='danger'>[src] blows up in your face.</span>")
 					H.take_bodypart_damage(0, 20)
-					H.drop_item()
 					qdel(src)
 					return
 
@@ -146,7 +151,8 @@
 		return
 	if(chambered)
 		if(point_blank)
-			user.visible_message("<span class='red'><b> \The [user] fires \the [src] point blank at [target]!</b></span>")
+			if(!chambered.BB.fake)
+				user.visible_message("<span class='red'><b> \The [user] fires \the [src] point blank at [target]!</b></span>")
 			chambered.BB.damage *= 1.3
 		if(!chambered.fire(target, user, params, , silenced))
 			shoot_with_empty_chamber(user)
@@ -175,7 +181,7 @@
 		user.visible_message("*click click*", "<span class='red'><b>*click*</b></span>")
 		playsound(user, 'sound/weapons/guns/empty.ogg', VOL_EFFECTS_MASTER)
 	else
-		src.visible_message("*click click*")
+		visible_message("*click click*")
 		playsound(src, 'sound/weapons/guns/empty.ogg', VOL_EFFECTS_MASTER)
 
 /obj/item/weapon/gun/attack(mob/living/M, mob/living/user, def_zone)
@@ -209,13 +215,13 @@
 				user.apply_effect(5,WEAKEN,0)
 				return
 
-			chambered.BB.on_hit(M)
-			if (chambered.BB.damage_type != HALLOSS)
-				user.apply_damage(chambered.BB.damage * 2.5, chambered.BB.damage_type, BP_HEAD, null, chambered.BB.damage_flags(), "Point blank shot in the mouth with \a [chambered.BB]")
-				user.death()
-			else
+			chambered.BB.on_hit(M, O_MOUTH, 0)
+			if(chambered.BB.damage_type == HALLOSS)
 				to_chat(user, "<span class = 'notice'>Ow...</span>")
 				user.apply_effect(110,AGONY,0)
+			else if(!chambered.BB.nodamage)
+				user.apply_damage(chambered.BB.damage * 2.5, chambered.BB.damage_type, BP_HEAD, null, chambered.BB.damage_flags(), "Point blank shot in the mouth with \a [chambered.BB]")
+				user.death()
 			chambered.BB = null
 			chambered.update_icon()
 			update_icon()
@@ -227,10 +233,10 @@
 
 	if (can_fire())
 		//Point blank shooting if on harm intent or target we were targeting.
-		if(user.a_intent == "hurt")
+		if(user.a_intent == INTENT_HARM)
 			Fire(M, user, null, null, TRUE)
 			return
-		else if(target && M in target)
+		else if(target && (M in target))
 			Fire(M,user) ///Otherwise, shoot!
 			return
 	else

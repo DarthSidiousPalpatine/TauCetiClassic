@@ -2,13 +2,6 @@
 //CONTAINS: Air Alarms and Fire Alarms//
 ////////////////////////////////////////
 
-#define AALARM_MODE_SCRUBBING	1
-#define AALARM_MODE_REPLACEMENT	2 //like scrubbing, but faster.
-#define AALARM_MODE_PANIC		3 //constantly sucks all air
-#define AALARM_MODE_CYCLE		4 //sucks off all air, then refill and switches to scrubbing
-#define AALARM_MODE_FILL		5 //emergency fill
-#define AALARM_MODE_OFF			6 //Shuts it all down.
-
 #define AALARM_SCREEN_MAIN		1
 #define AALARM_SCREEN_VENT		2
 #define AALARM_SCREEN_SCRUB		3
@@ -44,7 +37,6 @@
 	req_one_access = list(access_atmospherics, access_engine_equip)
 	frequency = 1439
 	allowed_checks = ALLOWED_CHECK_NONE
-	unacidable = TRUE
 
 	var/breach_detection = TRUE // Whether to use automatic breach detection or not
 	//var/skipprocess = 0 //Experimenting
@@ -103,7 +95,7 @@
 			src.loc = loc
 
 		if(dir)
-			src.dir = dir
+			set_dir(dir)
 
 		buildstage = 0
 		wiresexposed = 1
@@ -501,7 +493,7 @@
 		ui.open()
 		ui.set_auto_update(1)
 
-/obj/machinery/alarm/proc/populate_status(var/data)
+/obj/machinery/alarm/proc/populate_status(data)
 	var/turf/location = get_turf(src)
 	var/datum/gas_mixture/environment = location.return_air()
 	var/total = environment.total_moles
@@ -522,7 +514,7 @@
 	data["target_temperature"] = "[target_temperature - T0C]C"
 	data["thermoregulation"] = allow_regulate
 
-/obj/machinery/alarm/proc/populate_controls(var/list/data)
+/obj/machinery/alarm/proc/populate_controls(list/data)
 	switch(screen)
 		if(AALARM_SCREEN_MAIN)
 			data["mode"] = mode
@@ -684,6 +676,8 @@
 					"adjust_external_pressure",
 					"set_external_pressure",
 					"checks",
+					"o2_scrub",
+					"n2_scrub",
 					"co2_scrub",
 					"tox_scrub",
 					"n2o_scrub",
@@ -693,10 +687,10 @@
 					send_signal(device_id, list(href_list["command"] = text2num(href_list["val"]) ) )
 					if(href_list["command"] == "adjust_external_pressure")
 						var/new_val = text2num(href_list["val"])
-						investigate_log("[usr.key] has changed adjust_external_pressure > added [new_val], id_tag = [device_id]","atmos")
+						log_investigate("[key_name(usr)] has changed adjust_external_pressure > added [new_val], id_tag = [device_id]",INVESTIGATE_ATMOS)
 					if(href_list["command"] == "checks")
 						var/new_val = text2num(href_list["val"])
-						investigate_log("[usr.key] has changed pressure_checks > now [new_val](1 = ext, 2 = int, 3 = both), id_tag = [device_id]","atmos")
+						log_investigate("[key_name(usr)] has changed pressure_checks > now [new_val](1 = ext, 2 = int, 3 = both), id_tag = [device_id]",INVESTIGATE_ATMOS)
 
 				if("set_threshold")
 					var/env = href_list["env"]
@@ -779,8 +773,8 @@
 			return FALSE
 
 
-/obj/machinery/alarm/attack_alien(mob/living/carbon/alien/humanoid/user)
-	user.show_message("You don't want to break these things", 1);
+/obj/machinery/alarm/attack_alien(mob/living/carbon/xenomorph/humanoid/user)
+	to_chat(user, "You don't want to break these things");
 	return
 
 /obj/machinery/alarm/attackby(obj/item/W, mob/user)
@@ -888,7 +882,7 @@ Just a object used in constructing air alarms
 	icon = 'icons/obj/doors/door_electronics.dmi'
 	icon_state = "door_electronics"
 	desc = "Looks like a circuit. Probably is."
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	m_amt = 50
 	g_amt = 50
 
@@ -905,13 +899,13 @@ Code shamelessly copied from apc_frame
 	icon_state = "alarm_bitem"
 	flags = CONDUCT
 
-/obj/item/alarm_frame/attackby(obj/item/weapon/W, mob/user)
-	if(iswrench(W))
+/obj/item/alarm_frame/attackby(obj/item/I, mob/user, params)
+	if(iswrench(I))
 		user.SetNextMove(CLICK_CD_RAPID)
 		new /obj/item/stack/sheet/metal(loc, 2)
 		qdel(src)
 		return
-	..()
+	return ..()
 
 /obj/item/alarm_frame/proc/try_build(turf/on_wall)
 	if (get_dist(on_wall,usr)>1)
@@ -941,7 +935,7 @@ Code shamelessly copied from apc_frame
 FIRE ALARM
 */
 /obj/machinery/firealarm
-	name = "fire alarm"
+	name = "Fire Alarm"
 	desc = "<i>\"Pull this in case of emergency\"</i>. Thus, keep pulling it forever."
 	icon = 'icons/obj/monitors.dmi'
 	icon_state = "fire0"
@@ -950,7 +944,7 @@ FIRE ALARM
 	var/time = 10.0
 	var/timing = 0.0
 	var/lockdownbyai = 0
-	anchored = 1.0
+	anchored = TRUE
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 2
 	active_power_usage = 6
@@ -1101,9 +1095,12 @@ FIRE ALARM
 			d2 = text("<A href='?src=\ref[];time=1'>Initiate Time Lock</A>", src)
 		var/second = round(time) % 60
 		var/minute = (round(time) - second) / 60
-		var/dat = "<HTML><HEAD></HEAD><BODY><TT><B>Fire alarm</B> [d1]\n<HR><b>The current alert level is: [get_security_level()]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? "[minute]:" : null)][second] <A href='?src=\ref[src];tp=-30'>-</A> <A href='?src=\ref[src];tp=-1'>-</A> <A href='?src=\ref[src];tp=1'>+</A> <A href='?src=\ref[src];tp=30'>+</A>\n</TT></BODY></HTML>"
-		user << browse(entity_ja(dat), "window=firealarm")
-		onclose(user, "firealarm")
+		var/dat = "[d1]\n<HR><b>The current alert level is: [get_security_level()]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? "[minute]:" : null)][second] <A href='?src=\ref[src];tp=-30'>-</A> <A href='?src=\ref[src];tp=-1'>-</A> <A href='?src=\ref[src];tp=1'>+</A> <A href='?src=\ref[src];tp=30'>+</A>\n"
+
+		var/datum/browser/popup = new(user, "window=firealarm", src.name)
+		popup.set_content(dat)
+		popup.open()
+
 	else
 		if (A.fire)
 			d1 = text("<A href='?src=\ref[];reset=1'>[]</A>", src, stars("Reset - Lockdown"))
@@ -1115,9 +1112,11 @@ FIRE ALARM
 			d2 = text("<A href='?src=\ref[];time=1'>[]</A>", src, stars("Initiate Time Lock"))
 		var/second = round(time) % 60
 		var/minute = (round(time) - second) / 60
-		var/dat = "<HTML><HEAD></HEAD><BODY><TT><B>[stars("Fire alarm")]</B> [d1]\n<HR><b>The current alert level is: [stars(get_security_level())]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? text("[]:", minute) : null)][second] <A href='?src=\ref[src];tp=-30'>-</A> <A href='?src=\ref[src];tp=-1'>-</A> <A href='?src=\ref[src];tp=1'>+</A> <A href='?src=\ref[src];tp=30'>+</A>\n</TT></BODY></HTML>"
-		user << browse(entity_ja(dat), "window=firealarm")
-		onclose(user, "firealarm")
+		var/dat = "[d1]\n<HR><b>The current alert level is: [stars(get_security_level())]</b><br><br>\nTimer System: [d2]<BR>\nTime Left: [(minute ? text("[]:", minute) : null)][second] <A href='?src=\ref[src];tp=-30'>-</A> <A href='?src=\ref[src];tp=-1'>-</A> <A href='?src=\ref[src];tp=1'>+</A> <A href='?src=\ref[src];tp=30'>+</A>\n"
+
+		var/datum/browser/popup = new(user, "window=firealarm", stars(src.name))
+		popup.set_content(dat)
+		popup.open()
 
 /obj/machinery/firealarm/Topic(href, href_list)
 	. = ..()
@@ -1161,6 +1160,20 @@ FIRE ALARM
 		FA.update_icon()
 		playsound(src, 'sound/machines/alarm_fire.ogg', VOL_EFFECTS_MASTER, null, FALSE)
 
+/obj/machinery/firealarm/examine(mob/user)
+	. = ..()
+	var/msg
+	switch(get_security_level())
+		if("green")
+			msg = "<font color='green'><b>Green</b></font>"
+		if("blue")
+			msg = "<font color='blue'><b>Blue</b></font>"
+		if("red")
+			msg = "<font color='red'><b>Red</b></font>"
+		if("delta")
+			msg = "<font color='purple'><b>Delta</b></font>"
+	to_chat(user, "The small light indicates [msg] security level.")
+
 /obj/machinery/firealarm/atom_init(mapload, dir, building)
 	. = ..()
 
@@ -1170,7 +1183,7 @@ FIRE ALARM
 		src.loc = loc
 
 	if(dir)
-		src.dir = dir
+		set_dir(dir)
 
 	if(building)
 		buildstage = 0
@@ -1180,9 +1193,9 @@ FIRE ALARM
 
 	if(is_station_level(z) || is_mining_level(z))
 		if(security_level)
-			overlays += image('icons/obj/monitors.dmi', "overlay_[get_security_level()]")
+			add_overlay(image('icons/obj/monitors.dmi', "overlay_[get_security_level()]"))
 		else
-			overlays += image('icons/obj/monitors.dmi', "overlay_green")
+			add_overlay(image('icons/obj/monitors.dmi', "overlay_green"))
 
 	update_icon()
 
@@ -1199,7 +1212,7 @@ Just a object used in constructing fire alarms
 	icon = 'icons/obj/doors/door_electronics.dmi'
 	icon_state = "door_electronics"
 	desc = "A circuit. It has a label on it, it says \"Can handle heat levels up to 40 degrees celsius!\""
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	m_amt = 50
 	g_amt = 50
 
@@ -1216,13 +1229,13 @@ Code shamelessly copied from apc_frame
 	icon_state = "fire_bitem"
 	flags = CONDUCT
 
-/obj/item/firealarm_frame/attackby(obj/item/weapon/W, mob/user)
-	if(iswrench(W))
+/obj/item/firealarm_frame/attackby(obj/item/I, mob/user, params)
+	if(iswrench(I))
 		user.SetNextMove(CLICK_CD_RAPID)
 		new /obj/item/stack/sheet/metal(loc, 2)
 		qdel(src)
 		return
-	..()
+	return ..()
 
 /obj/item/firealarm_frame/proc/try_build(turf/on_wall)
 	if (get_dist(on_wall,usr) > 1)

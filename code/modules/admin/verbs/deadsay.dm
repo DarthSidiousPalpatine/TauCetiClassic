@@ -15,7 +15,7 @@
 		to_chat(src, "<span class='warning'>You have deadchat muted.</span>")
 		return
 
-	if (src.handle_spam_prevention(msg,MUTE_DEADCHAT))
+	if (handle_spam_prevention(msg,MUTE_DEADCHAT))
 		return
 
 	var/stafftype = null
@@ -36,9 +36,15 @@
 			continue
 
 		if(M.client && M.client.holder && (M.client.prefs.chat_toggles & CHAT_DEAD)) // show the message to admins who have deadchat toggled on
-			M.show_message(rendered, 2)
+			to_chat(M, rendered)
 
 		else if(M.stat == DEAD && (M.client.prefs.chat_toggles & CHAT_DEAD)) // show the message to regular ghosts who have deadchat toggled on
-			M.show_message(rendered, 2)
+			to_chat(M, rendered)
 
 	feedback_add_details("admin_verb","D") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+
+/client/proc/get_dead_say()
+	var/msg = input(src, null, "dsay \"text\"") as text|null
+	if(isnull(msg))
+		return
+	dsay(msg)

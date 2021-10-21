@@ -1,13 +1,14 @@
 #define MINE_SCI_SHUTTLE_COOLDOWN 150
+#define MINE_SHUTTLE_MOVE_TIME 40
 
 #define STATION_DOCK /area/shuttle/mining/station
 #define MINE_DOCK /area/shuttle/mining/outpost
-#define SCI_DOCK /area/shuttle/research
+#define SCI_DOCK /area/shuttle/mining/research
 
 #define M_S_SHUTTLE_FLOOR /turf/simulated/shuttle/floor/mining
 
 var/global/obj/machinery/computer/mine_sci_shuttle/flight_comp/autopilot = null
-var/global/area/mine_sci_curr_location = null
+var/global/area/asteroid/mine_sci_curr_location = null
 
 /obj/machinery/computer/mine_sci_shuttle
 	name = "Mine-Science Shuttle Console"
@@ -25,17 +26,19 @@ var/global/area/mine_sci_curr_location = null
 			shuttle_location = "Mining Station"
 		else if(istype(autopilot.mine_sci_curr_location, SCI_DOCK))
 			shuttle_location = "Research Outpost"
-		dat = {"Location: [shuttle_location]<br>
-		Ready to move[max(autopilot.lastMove + MINE_SCI_SHUTTLE_COOLDOWN - world.time, 0) ? " in [max(round((autopilot.lastMove + MINE_SCI_SHUTTLE_COOLDOWN - world.time) * 0.1), 0)] seconds" : ": now"]<br>
-		<a href='?src=\ref[src];mine=1'>Mining Station</a> |
-		<a href='?src=\ref[src];station=1'>[station_name()]</a> |
-		<a href='?src=\ref[src];sci=1'>Research Outpost</a><br>
-		<a href='?src=\ref[user];mach_close=flightcomputer'>Close</a>"}
+		dat += "<ul><li>Location: [shuttle_location]</li>"
+		dat += {"<li>Ready to move[max(autopilot.lastMove + MINE_SCI_SHUTTLE_COOLDOWN - world.time, 0) ? " in [max(round((autopilot.lastMove + MINE_SCI_SHUTTLE_COOLDOWN - world.time) * 0.1), 0)] seconds" : ": now"]</li>"}
+		dat += "</ul>"
+		dat += "<a href='?src=\ref[src];mine=1'>Mining Station</a> |"
+		dat += "<a href='?src=\ref[src];station=1'>[station_name()]</a> |"
+		dat += "<a href='?src=\ref[src];sci=1'>Research Outpost</a><br>"
 	else
 		dat = "Cannot find shuttle"
 
-	user << browse(entity_ja(dat), "window=flightcomputer;size=575x450")
-	onclose(user, "flightcomputer")
+	var/datum/browser/popup = new(user, "flightcomputer", "[src.name]", 365, 200)
+	popup.set_content(dat)
+	popup.open()
+
 
 /obj/machinery/computer/mine_sci_shuttle/Topic(href, href_list)
 	. = ..()
@@ -67,11 +70,11 @@ var/global/area/mine_sci_curr_location = null
 
 /obj/machinery/computer/mine_sci_shuttle/flight_comp
 	name = "Shuttle Console"
-	icon = 'code/modules/locations/shuttles/computer_shuttle_mining.dmi'
+	icon = 'icons/locations/shuttles/computer_shuttle_mining.dmi'
 	state_broken_preset = null
 	state_nopower_preset = null
 	circuit = /obj/item/weapon/circuitboard/mine_sci_shuttle/flight_comp
-	var/area/mine_sci_curr_location
+	var/area/asteroid/mine_sci_curr_location
 	var/moving = 0
 	var/lastMove = 0
 
@@ -81,7 +84,7 @@ var/global/area/mine_sci_curr_location = null
 	if(istype(get_turf(src),M_S_SHUTTLE_FLOOR) &&\
 		   is_type_in_list(my_area,list(STATION_DOCK, MINE_DOCK, SCI_DOCK))) //if we build console not in shuttle area
 		autopilot = src
-		dir = WEST
+		set_dir(WEST)
 		if(!mine_sci_curr_location)
 			mine_sci_curr_location = my_area
 
@@ -108,6 +111,25 @@ var/global/area/mine_sci_curr_location = null
 	if(moving)
 		var/list/dstturfs = list()
 		var/throwx = world.maxx
+		var/area/transit_location = locate(/area/shuttle/mining/transit)
+
+		if(istype(mine_sci_curr_location, STATION_DOCK))
+			SSshuttle.undock_act(/area/station/hallway/secondary/mine_sci_shuttle, "stat_dock")
+			SSshuttle.undock_act(mine_sci_curr_location)
+		else if(istype(mine_sci_curr_location, MINE_DOCK))
+			SSshuttle.undock_act(/area/asteroid/mine/production, "mine_dock")
+			SSshuttle.undock_act(mine_sci_curr_location)
+		else if(istype(mine_sci_curr_location, SCI_DOCK))
+			SSshuttle.undock_act(/area/asteroid/research_outpost/entry, "sci_dock")
+			SSshuttle.undock_act(mine_sci_curr_location)
+
+		transit_location.parallax_movedir = EAST
+		mine_sci_curr_location.move_contents_to(transit_location)
+		SSshuttle.shake_mobs_in_area(transit_location, WEST)
+
+		sleep(MINE_SHUTTLE_MOVE_TIME)
+		transit_location.parallax_slowdown()
+		sleep(PARALLAX_LOOP_TIME)
 
 		for(var/turf/T in destination)
 			dstturfs += T
@@ -130,18 +152,19 @@ var/global/area/mine_sci_curr_location = null
 		for(var/mob/living/simple_animal/pest in destination) // And for the other kind of bug...
 			pest.gib()
 
-		mine_sci_curr_location.move_contents_to(destination)
+		transit_location.move_contents_to(destination)
 
-		for(var/mob/M in destination)
-			if(M.client)
-				spawn(0)
-					if(M.buckled)
-						shake_camera(M, 3, 1) // buckled, not a lot of shaking
-					else
-						shake_camera(M, 10, 1) // unbuckled, HOLY SHIT SHAKE THE ROOM
-			if(istype(M, /mob/living/carbon))
-				if(!M.buckled)
-					M.Weaken(3)
+		SSshuttle.shake_mobs_in_area(destination, EAST)
+
+		if(istype(destination, STATION_DOCK))
+			SSshuttle.dock_act(/area/station/hallway/secondary/mine_sci_shuttle, "stat_dock")
+			SSshuttle.dock_act(destination)
+		else if(istype(destination, MINE_DOCK))
+			SSshuttle.dock_act(/area/asteroid/mine/production, "mine_dock")
+			SSshuttle.dock_act(destination)
+		else if(istype(destination, SCI_DOCK))
+			SSshuttle.dock_act(/area/asteroid/research_outpost/entry, "sci_dock")
+			SSshuttle.dock_act(destination)
 
 		mine_sci_curr_location = destination
 		moving = FALSE

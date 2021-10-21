@@ -67,7 +67,6 @@ var/const/tk_maxrange = 15
 	icon_state = "2"
 	flags = NOBLUDGEON | ABSTRACT
 	//item_state = null
-	w_class = ITEM_SIZE_NO_CONTAINER
 	layer = ABOVE_HUD_LAYER
 	plane = ABOVE_HUD_PLANE
 
@@ -77,6 +76,7 @@ var/const/tk_maxrange = 15
 
 
 /obj/item/tk_grab/dropped(mob/user)
+	..()
 	if(focus && user && loc != user && loc != user.loc) // drop_item() gets called when you tk-attack a table/closet with an item
 		if(focus.Adjacent(loc))
 			focus.loc = loc
@@ -87,7 +87,9 @@ var/const/tk_maxrange = 15
 
 	//stops TK grabs being equipped anywhere but into hands
 /obj/item/tk_grab/equipped(mob/user, slot)
-	if( (slot == SLOT_L_HAND) || (slot == SLOT_R_HAND) )	return
+	..()
+	if( (slot == SLOT_L_HAND) || (slot == SLOT_R_HAND) )
+		return
 	qdel(src)
 	return
 
@@ -96,7 +98,7 @@ var/const/tk_maxrange = 15
 	if(focus)
 		focus.attack_self_tk(user)
 
-/obj/item/tk_grab/afterattack(atom/target, mob/living/user, proximity, params)//TODO: go over this
+/obj/item/tk_grab/afterattack(atom/target, mob/user, proximity, params) //TODO: go over this
 	if(!target || !user)	return
 	if(last_throw+3 > world.time)	return
 	if(!host || host != user)
@@ -165,10 +167,10 @@ var/const/tk_maxrange = 15
 	if(!focus)	return
 	var/obj/effect/overlay/O = new /obj/effect/overlay(locate(focus.x,focus.y,focus.z))
 	O.name = "sparkles"
-	O.anchored = 1
-	O.density = 0
+	O.anchored = TRUE
+	O.density = FALSE
 	O.layer = FLY_LAYER
-	O.dir = pick(cardinal)
+	O.set_dir(pick(cardinal))
 	O.icon = 'icons/effects/effects.dmi'
 	O.icon_state = "nothing"
 	flick("empdisable",O)
@@ -177,9 +179,9 @@ var/const/tk_maxrange = 15
 
 
 /obj/item/tk_grab/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	if(focus && focus.icon && focus.icon_state)
-		overlays += icon(focus.icon,focus.icon_state)
+		add_overlay(icon(focus.icon,focus.icon_state))
 	return
 
 /*Not quite done likely needs to use something thats not get_step_to

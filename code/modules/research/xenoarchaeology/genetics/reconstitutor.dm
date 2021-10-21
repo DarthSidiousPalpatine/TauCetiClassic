@@ -13,7 +13,7 @@
 	name = "Flora reconstitution console"
 	icon = 'icons/obj/computer.dmi'
 	icon_state = "dna"
-	circuit = "/obj/item/weapon/circuitboard/reconstitutor"
+	circuit = /obj/item/weapon/circuitboard/reconstitutor
 	req_access = list(access_xenoarch) //Only used for record deletion right now. //xenoarch couldn't use it when it was access_heads
 	var/obj/machinery/clonepod/pod1 = 1 //Linked cloning pod.
 	var/last_used = 0 // We don't want seeds getting spammed
@@ -38,7 +38,7 @@
 
 /obj/machinery/computer/reconstitutor/animal
 	name = "Fauna reconstitution console"
-	accepted_fossil_types = list(/obj/item/weapon/fossil/bone,/obj/item/weapon/fossil/shell,/obj/item/weapon/fossil/skull)
+	accepted_fossil_types = list(/obj/item/weapon/fossil/bone,/obj/item/weapon/fossil/shell,/obj/item/weapon/fossil/skull,/obj/item/weapon/fossil/skull/horned)
 	pod1 = null
 	circuit = /obj/item/weapon/circuitboard/reconstitutor/animal
 
@@ -48,15 +48,14 @@
 
 /obj/machinery/computer/reconstitutor/attackby(obj/item/W, mob/user)
 	if(istype(W,/obj/item/weapon/fossil))
-		user.drop_item()
-		W.loc = src.loc
+		user.drop_from_inventory(W, loc)
 		switch(scan_fossil(W))
 			if(1)
-				src.visible_message("<span class='red'> [bicon(src)] [src] scans the fossil and rejects it.</span>")
+				visible_message("<span class='red'> [bicon(src)] [src] scans the fossil and rejects it.</span>")
 			if(2)
 				visible_message("<span class='red'> [bicon(src)] [src] can not extract any more genetic data from new fossils.</span>")
 			if(4)
-				src.visible_message("<span class='notice'>[bicon(src)] [user] inserts [W] into [src], the fossil is consumed as [src] extracts genetic data from it.</span>")
+				visible_message("<span class='notice'>[bicon(src)] [user] inserts [W] into [src], the fossil is consumed as [src] extracts genetic data from it.</span>")
 				qdel(W)
 				updateDialog()
 	else if (istype(W, /obj/item/weapon/storage))
@@ -93,15 +92,15 @@
 		user.unset_machine(src)
 		return
 
-	var/dat = "<B>Garland Corp genetic reconstitutor</B><BR>"
+	var/dat = ""
 	dat += "<HR>"
 	if(!pod1)
 		pod1 = locate() in orange(1, src)
 
 	if(!pod1)
-		dat += "<b><font color=red>Unable to locate cloning pod.</font></b><br>"
+		dat += "<span class='red bold'>Unable to locate cloning pod.</span><br>"
 	else if(istype(pod1))
-		dat += "<b><font color=green>Cloning pod connected.</font></b><br>"
+		dat += "<span class='green bold'>Cloning pod connected.</span><br>"
 
 	dat += "<table border=1>"
 	dat += "<tr>"
@@ -163,16 +162,13 @@
 
 	dat += "<br>"
 	dat += "<hr>"
-	dat += "<a href='?src=\ref[src];close=1'>Close</a>"
-	user << browse(entity_ja(dat), "window=reconstitutor;size=600x500")
-	onclose(user, "reconstitutor")
+
+	var/datum/browser/popup = new(user, "reconstitutor", "Garland Corp genetic reconstitutor", 600, 500)
+	popup.set_content(dat)
+	popup.open()
+
 
 /obj/machinery/computer/reconstitutor/Topic(href, href_list)
-	if(href_list["close"])
-		usr.unset_machine(src)
-		usr << browse(null, "window=reconstitutor")
-		return FALSE
-
 	. = ..()
 	if(!.)
 		return
@@ -218,7 +214,7 @@
 	if(world.time > src.last_used + 150)
 		var/datum/genesequence/cloned_genesequence = completed_genesequences[sequence_num]
 		visible_message("<span class='notice'>[bicon(src)] [src] clones a packet of seeds from a reconstituted gene sequence!</span>")
-		playsound(src, 'sound/effects/screech.ogg', VOL_EFFECTS_MASTER, null, null, -3)
+		playsound(src, 'sound/effects/screech.ogg', VOL_EFFECTS_MASTER, null, FALSE, null, -3)
 		new cloned_genesequence.spawned_type(src.loc)
 		src.last_used = world.time
 	else
@@ -235,7 +231,7 @@
 			visible_message("<span class='red'>[bicon(src)] Error: clonepod malfunction.</span>")
 		else
 			visible_message("<span class='notice'>[bicon(src)] [src] clones something from a reconstituted gene sequence!</span>")
-			playsound(src, 'sound/effects/screech.ogg', VOL_EFFECTS_MASTER, null, null, -3)
+			playsound(src, 'sound/effects/screech.ogg', VOL_EFFECTS_MASTER, null, FALSE, null, -3)
 			pod1.occupant = new cloned_genesequence.spawned_type(pod1)
 			pod1.locked = 1
 			pod1.icon_state = "pod_1"
@@ -245,42 +241,49 @@
 		to_chat(usr, "<span class='red'>[bicon(src)] Unable to locate cloning pod!</span>")
 
 /obj/machinery/computer/reconstitutor/proc/scan_fossil(obj/item/weapon/fossil/scan_fossil)
-	//see whether we accept these kind of fossils
+	// see whether we accept these kind of fossils
 	if(accepted_fossil_types.len && !accepted_fossil_types.Find(scan_fossil.type))
 		return SCANFOSSIL_RETVAL_WRONGTYPE
 
-	//see whether we are going to discover a new sequence, new genome for existing sequence or nothing
-	var/new_genome_prob = discovered_genesequences.len * 50
+	if(undiscovered_genesequences.len)
 
-	if( (new_genome_prob >= 100 || prob(new_genome_prob)) && undiscovered_genomes.len)
-		//create a new genome for an existing gene sequence
-		var/newly_discovered_genome = pick(undiscovered_genomes)
-		undiscovered_genomes -= newly_discovered_genome
-		discovered_genomes.Add(newly_discovered_genome)
+		// calculate a chance to discover a new gensequence (the more unfinished gensequences we got - the less chance to get another one)
+		var/new_gensequence_prob = 100 / max(1, discovered_genesequences.len * 5)
 
-		//chance to discover a second genome
-		if(prob(75) && undiscovered_genomes.len)
-			newly_discovered_genome = pick(undiscovered_genomes)
+		if(!undiscovered_genomes.len || prob(new_gensequence_prob))
+			// discover new gene sequence
+			var/datum/genesequence/newly_discovered_genesequence = pick(undiscovered_genesequences)
+			undiscovered_genesequences -= newly_discovered_genesequence
+			discovered_genesequences += newly_discovered_genesequence
+
+			// add genomes for new gene sequence to pool of discoverable genomes
+			undiscovered_genomes.Add(newly_discovered_genesequence.full_genome_sequence)
+			manually_placed_genomes.Add(null)
+			manually_placed_genomes[manually_placed_genomes.len] = new/list(5)
+
+
+		// add new genomes (we can get from 1 to 3 genomes for each time)
+		if(undiscovered_genomes.len)
+
+			// create a new genome for an existing gene sequence
+			var/newly_discovered_genome = pick(undiscovered_genomes)
 			undiscovered_genomes -= newly_discovered_genome
 			discovered_genomes.Add(newly_discovered_genome)
-			//chance to discover a third genome
-			if(prob(50) && undiscovered_genomes.len)
+
+			// chance to discover a second genome
+			if(prob(75) && undiscovered_genomes.len)
 				newly_discovered_genome = pick(undiscovered_genomes)
 				undiscovered_genomes -= newly_discovered_genome
 				discovered_genomes.Add(newly_discovered_genome)
 
-	else if(undiscovered_genesequences.len)
-		//discover new gene sequence
-		var/datum/genesequence/newly_discovered_genesequence = pick(undiscovered_genesequences)
-		undiscovered_genesequences -= newly_discovered_genesequence
-		discovered_genesequences += newly_discovered_genesequence
-		//add genomes for new gene sequence to pool of discoverable genomes
-		undiscovered_genomes.Add(newly_discovered_genesequence.full_genome_sequence)
-		manually_placed_genomes.Add(null)
-		manually_placed_genomes[manually_placed_genomes.len] = new/list(5)
+				// chance to discover a third genome
+				if(prob(50) && undiscovered_genomes.len)
+					newly_discovered_genome = pick(undiscovered_genomes)
+					undiscovered_genomes -= newly_discovered_genome
+					discovered_genomes.Add(newly_discovered_genome)
 
 	else
-		//there's no point scanning any more fossils, we've already discovered everything
+		// there's no point scanning any more fossils, we've already discovered everything
 		return SCANFOSSIL_RETVAL_NOMOREGENESEQ
 
 	return SCANFOSSIL_RETVAL_SUCCESS

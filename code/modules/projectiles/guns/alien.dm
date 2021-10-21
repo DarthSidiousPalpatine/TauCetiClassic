@@ -7,7 +7,7 @@
 	sharp = 1
 	edge = 0
 	throwforce = 5
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	icon = 'icons/obj/weapons.dmi'
 	icon_state = "metal-rod"
 	item_state = "bolt"
@@ -47,7 +47,7 @@
 /obj/item/weapon/spikethrower/process()
 
 	if(spikes < max_spikes && world.time > last_regen + spike_gen_time)
-		playsound(src, 'sound/weapons/guns/reload_newspike.ogg', VOL_EFFECTS_MASTER, 30, null, -5)
+		playsound(src, 'sound/weapons/guns/reload_newspike.ogg', VOL_EFFECTS_MASTER, 30, FALSE, null, -5)
 		spikes++
 		last_regen = world.time
 		update_icon()
@@ -60,13 +60,13 @@
 /obj/item/weapon/spikethrower/update_icon()
 	icon_state = "spikethrower[spikes]"
 
-/obj/item/weapon/spikethrower/afterattack(atom/A, mob/living/user, flag, params)
-	if(flag) return
-	if(user && user.client && user.client.gun_mode && !(A in target))
+/obj/item/weapon/spikethrower/afterattack(atom/target, mob/user, proximity, params)
+	if(proximity) return
+	if(user && user.client && user.client.gun_mode && !(target in target))
 		//TODO: Make this compatible with targetting (prolly have to actually make it a gun subtype, ugh.)
 		//PreFire(A,user,params)
 	else
-		Fire(A,user,params)
+		Fire(target,user,params)
 
 /obj/item/weapon/spikethrower/attack(mob/living/M, mob/living/user, def_zone)
 	if (M == user && def_zone == O_MOUTH)
@@ -74,11 +74,11 @@
 		return
 
 	if (spikes > 0)
-		if(user.a_intent == "hurt")
+		if(user.a_intent == INTENT_HARM)
 			user.visible_message("<span class='warning'><b> \The [user] fires \the [src] point blank at [M]!</b></span>")
 			Fire(M,user)
 			return
-		else if(target && M in target)
+		else if(target && (M in target))
 			Fire(M,user)
 			return
 	else
@@ -107,7 +107,7 @@
 		return
 
 	if(spikes <= 0)
-		playsound(src, 'sound/weapons/guns/outofspikes.ogg', VOL_EFFECTS_MASTER, null, null, -6)
+		playsound(src, 'sound/weapons/guns/outofspikes.ogg', VOL_EFFECTS_MASTER, null, FALSE, null, -6)
 		to_chat(user, "<span class='warning'>The weapon has nothing to fire!</span>")
 		return
 
@@ -117,7 +117,7 @@
 		spikes--
 
 	user.visible_message("<span class='warning'>[user] fires [src]!</span>", "<span class='warning'>You fire [src]!</span>")
-	playsound(src, 'sound/weapons/guns/gunshot_spikethrower.ogg', VOL_EFFECTS_MASTER, null, null, -5)
+	playsound(src, 'sound/weapons/guns/gunshot_spikethrower.ogg', VOL_EFFECTS_MASTER, null, FALSE, null, -5)
 	spike.loc = get_turf(src)
 	spike.throw_at(target, 10, fire_force, user)
 	spike = null
@@ -136,7 +136,7 @@
 
 	force = 10
 	ammo_type = list(/obj/item/ammo_casing/energy/sonic)
-	cell_type = "/obj/item/weapon/stock_parts/cell/super"
+	cell_type = /obj/item/weapon/stock_parts/cell/super
 	fire_delay = 40
 
 

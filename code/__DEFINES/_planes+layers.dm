@@ -71,6 +71,7 @@ What is the naming convention for planes or layers?
 
 #define LIGHTING_PLANE         15
 #define LIGHTING_LAYER         15
+#define ABOVE_LIGHTING_PLANE   16
 #define ABOVE_LIGHTING_LAYER   16
 
 //HUD layer defines
@@ -84,7 +85,8 @@ What is the naming convention for planes or layers?
 #define ABOVE_HUD_PLANE   20
 #define ABOVE_HUD_LAYER   20
 
-//efine TURF_LAYER                      2     // For easy recordkeeping; this is a byond define
+#define BELOW_TURF_LAYER                1.9
+//define TURF_LAYER                     2     // For easy recordkeeping; this is a byond define
 #define ABOVE_NORMAL_TURF_LAYER         2.08  // Currently used only by /obj/structure/fans/tiny
 #define GAS_PIPE_HIDDEN_SUPPLY_LAYER    2.33
 #define GAS_PIPE_HIDDEN_SCRUBBER_LAYER  2.34
@@ -108,9 +110,12 @@ What is the naming convention for planes or layers?
 //efine MOB_LAYER                       4     // For easy recordkeeping; this is a byond define
 #define INFRONT_MOB_LAYER               4.25
 //efine FLY_LAYER                       5     // For easy recordkeeping; this is a byond define
-
+#define INDICATOR_LAYER                 5.01  // Emotes should be above this as they are shown only temporary.
+#define EMOTE_LAYER                     5.02
+#define SINGULARITY_LAYER				6
+#define SINGULARITY_EFFECT_LAYER		6.1
 
 //modifiers for /obj/machinery/door (and subtypes) layers
 #define DOOR_CLOSED_MOD     0.3          // how much the layer is increased when the door is closed
-#define PODDOOR_CLOSED_MOD  0.3
+#define PODDOOR_CLOSED_MOD  0.31
 #define FIREDOOR_CLOSED_MOD 0.31

@@ -10,7 +10,7 @@ Variables:
 - design_by_id contains all existing /datum/design.
 - known_designs contains all researched /datum/design.
 - experiments contains data related to earning research points, more info in experiment.dm
-- research_points is an ammount of points that can be spend on researching technologies
+- research_points is an amount of points that can be spend on researching technologies
 - design_categories_protolathe stores all unlocked categories for protolathe designs
 - design_categories_imprinter stores all unlocked categories for circuit imprinter designs
 
@@ -28,8 +28,8 @@ The tech datums are the actual "tech trees" that you improve through researching
 - Name:		Pretty obvious. This is often viewable to the players.
 - Desc:		Pretty obvious. Also player viewable.
 - ID:		This is the unique ID of the tech that is used by the various procs to find and/or maniuplate it.
-- Level:	This is the current level of the tech. Based on the ammount of researched technologies
-- MaxLevel: Maxium level possible for this tech. Based on the ammount of technologies of that tech
+- Level:	This is the current level of the tech. Based on the amount of researched technologies
+- MaxLevel: Maxium level possible for this tech. Based on the amount of technologies of that tech
 
 */
 /***************************************************************
@@ -40,10 +40,13 @@ The tech datums are the actual "tech trees" that you improve through researching
 /datum/research								//Holder for all the existing, archived, and known tech. Individual to console.
 	var/list/known_designs = list()			//List of available designs (at base reliability).
 	var/list/design_by_id = list()
+	//Increased by each created prototype with formula: reliability += reliability * (RND_RELIABILITY_EXPONENT^created_prototypes)
+	var/list/design_reliabilities = list()
+	var/list/design_created_prototypes = list()
 	var/list/design_categories_protolathe = list()
 	var/list/design_categories_imprinter = list()
 
-	var/list/tech_trees = list() // associative
+	var/list/datum/tech/tech_trees = list() // associative
 	var/list/all_technologies = list() // associative
 	var/list/researched_tech = list()
 
@@ -55,6 +58,12 @@ The tech datums are the actual "tech trees" that you improve through researching
 	for(var/D in subtypesof(/datum/design))
 		var/datum/design/d = new D(src)
 		design_by_id[d.id] = d
+		if(d.starts_unlocked)
+			design_reliabilities[d.id] = 120
+			design_created_prototypes[d.id] = 15
+		else
+			design_reliabilities[d.id] = 10
+			design_created_prototypes[d.id] = 0
 
 	for(var/T in subtypesof(/datum/tech))
 		var/datum/tech/Tech_Tree = new T
@@ -70,7 +79,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 
 	for(var/tech_tree_id in tech_trees)
 		var/datum/tech/Tech_Tree = tech_trees[tech_tree_id]
-		Tech_Tree.maxlevel = 1 + all_technologies[tech_tree_id].len
+		Tech_Tree.maxlevel = 1 + length(all_technologies[tech_tree_id])
 
 	for(var/design_id in design_by_id)
 		var/datum/design/D = design_by_id[design_id]
@@ -78,6 +87,8 @@ The tech datums are the actual "tech trees" that you improve through researching
 			AddDesign2Known(D)
 
 	experiments = new /datum/experiment_data()
+	// This is a science station. Most tech is already at least somewhat known.
+	experiments.init_known_tech()
 
 /datum/research/proc/IsResearched(datum/technology/T)
 	return !!researched_tech[T.id]
@@ -101,6 +112,39 @@ The tech datums are the actual "tech trees" that you improve through researching
 
 	return TRUE
 
+/datum/research/proc/CanUpgrade(datum/technology/T)
+	if(T.reliability_upgrade_cost > research_points)
+		return FALSE
+	return TRUE
+
+/datum/research/proc/GetReliabilityUpgradeCost(datum/technology/T)
+	if(!T.unlocks_designs || !T.unlocks_designs.len)
+		return 0
+
+	var/reliability_increase = 0
+	var/total_reliability = 0
+
+	for(var/t in T.unlocks_designs)
+		reliability_increase += design_reliabilities[t] * (RND_RELIABILITY_EXPONENT ** design_created_prototypes[t])
+		total_reliability += design_reliabilities[t]
+
+	var/tech_cost_modifier = 1.0
+	if(T.cost > 0.0)
+		tech_cost_modifier = T.cost
+
+	return round((tech_cost_modifier * (total_reliability + reliability_increase)) / (100 * T.unlocks_designs.len))
+
+/datum/research/proc/GetAverageDesignReliability(datum/technology/T)
+	if(!T.unlocks_designs || !T.unlocks_designs.len)
+		return 0
+
+	var/total_reliability = 0
+
+	for(var/id in T.unlocks_designs)
+		total_reliability += design_reliabilities[id]
+
+	return round(total_reliability / T.unlocks_designs.len)
+
 /datum/research/proc/UnlockTechology(datum/technology/T, force = FALSE)
 	if(IsResearched(T))
 		return
@@ -117,7 +161,31 @@ The tech datums are the actual "tech trees" that you improve through researching
 
 		AddDesign2Known(D)
 
+	T.reliability_upgrade_cost = GetReliabilityUpgradeCost(T)
+	T.avg_reliability = GetAverageDesignReliability(T)
+
+/datum/research/proc/UpgradeTechology(datum/technology/T, force = FALSE)
+	if(!IsResearched(T))
+		return
+
+	T.reliability_upgrade_cost = GetReliabilityUpgradeCost(T)
+
+	if(!CanUpgrade(T) && !force)
+		return
+
+	if(!force)
+		research_points -= T.reliability_upgrade_cost
+
+	for(var/t in T.unlocks_designs)
+		design_reliabilities[t] += design_reliabilities[t] * (RND_RELIABILITY_EXPONENT ** design_created_prototypes[t])
+		design_reliabilities[t] = max(round(design_reliabilities[t], 5), 1)
+		design_created_prototypes[t]++ // Since we don't want to be able to increase it infinitely.
+
+	T.reliability_upgrade_cost = GetReliabilityUpgradeCost(T)
+	T.avg_reliability = GetAverageDesignReliability(T)
+
 /datum/research/proc/download_from(datum/research/O)
+
 	for(var/tech_tree_id in O.tech_trees)
 		var/datum/tech/Tech_Tree = O.tech_trees[tech_tree_id]
 		var/datum/tech/Our_Tech_Tree = tech_trees[tech_tree_id]
@@ -128,6 +196,12 @@ The tech datums are the actual "tech trees" that you improve through researching
 	for(var/tech_id in O.researched_tech)
 		var/datum/technology/T = O.researched_tech[tech_id]
 		UnlockTechology(T, force = TRUE)
+
+		for(var/D in T.unlocks_designs)
+			if(O.design_reliabilities[D] > design_reliabilities[D]) //check, is the reliability better in the downloadable
+				design_reliabilities[D] = O.design_reliabilities[D]
+				design_created_prototypes[D] = O.design_created_prototypes[D]
+
 	experiments.merge_with(O.experiments)
 
 /datum/research/proc/forget_techology(datum/technology/T)
@@ -210,7 +284,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	icon = 'icons/obj/cloning.dmi'
 	icon_state = "datadisk2"
 	item_state = "card-id"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	m_amt = 30
 	g_amt = 10
 	var/datum/tech/stored
@@ -227,7 +301,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	var/id = "id"              //An easily referenced ID. Must be alphanumeric, lower-case, and no symbols.
 	var/level = 1              //A simple number scale of the research level. Level 0 = Secret tech.
 	var/rare = 1               //How much CentCom wants to get that tech. Used in supply shuttle tech cost calculation.
-	var/maxlevel               //Calculated based on the ammount of technologies
+	var/maxlevel               //Calculated based on the amount of technologies
 	var/shown = TRUE           //Used to hide tech that is not supposed to be shown from the start
 	var/item_tech_req          //Deconstructing items with this tech will unlock this tech tree
 
@@ -274,9 +348,9 @@ The tech datums are the actual "tech trees" that you improve through researching
 	id = RESEARCH_POWERSTORAGE
 
 /datum/tech/bluespace
-	name = "'Blue-space' Research"
-	shortname = "Blue-space"
-	desc = "Research into the sub-reality known as 'blue-space'."
+	name = "'Bluespace' Research"
+	shortname = "Bluespace"
+	desc = "Research into the sub-reality known as 'bluespace'."
 	id = RESEARCH_BLUESPACE
 	rare = 2
 
@@ -309,6 +383,9 @@ The tech datums are the actual "tech trees" that you improve through researching
 	var/list/required_technologies = list() // Ids of techologies that are required to be unlocked before this one. Should have same tech_type
 	var/list/required_tech_levels = list()  // list("biotech" = 5, ...) Ids and required levels of tech
 	var/cost = 100                          // How much research points required to unlock this techology
+
+	var/reliability_upgrade_cost = 0        // Is set after researched, updated each time it is upgraded.
+	var/avg_reliability = 0                 // Shows the average reliability of designs in this tech. Is set after researched, updated each time it is upgraded.
 
 	var/list/unlocks_designs = list()       // Ids of designs that this technology unlocks
 
@@ -360,7 +437,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 500
 
-	unlocks_designs = list("space_heater", "gasheater", "gascooler")
+	unlocks_designs = list("space_heater", "gasheater", "gascooler", "universal_pyrometer")
 
 /datum/technology/adv_engineering
 	name = "Advanced Engineering"
@@ -424,7 +501,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 1000
 
-	unlocks_designs = list("ore_redemption", "mining_equipment_vendor", "mining_fabricator", "drill", "excavation_drill", "scaner_imp", "mining_hud", "pick_diamond", "space_suit_mining", "space_suit_helmet_mining", "space_suit_engineering", "space_suit_helmet_engineering", "space_suit_atmospherics", "space_suit_helmet_atmospherics", "stimpack_imp")
+	unlocks_designs = list("ore_redemption", "mining_equipment_vendor", "mining_fabricator", "drill", "excavation_drill", "scaner_imp", "mining_hud", "pick_diamond", "space_suit_science", "space_suit_helmet_science", "space_suit_recycler", "space_suit_helmet_recycler", "space_suit_mining", "space_suit_helmet_mining", "space_suit_engineering", "space_suit_helmet_engineering", "space_suit_atmospherics", "space_suit_helmet_atmospherics", "stimpack_imp")
 
 /datum/technology/advanced_mining
 	name = "Advanced Mining"
@@ -440,7 +517,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 2000
 
-	unlocks_designs = list("mining_drill", "mining_drill_brace", "excavation_drill_diamond", "drill_diamond", "scaner_adv", "jackhammer", "space_suit_medical", "space_suit_helmet_medical", "space_suit_mining_rig", "space_suit_helmet_mining_rig", "space_suit_security", "space_suit_helmet_security", "resonator", "kinetic_accelerator", "mining_drone", "mining_jetpack", "stimpack_adv")
+	unlocks_designs = list("mining_drill", "mining_drill_brace", "excavation_drill_diamond", "drill_diamond", "scaner_adv", "jackhammer", "space_suit_medical", "space_suit_helmet_medical", "space_suit_mining_rig", "space_suit_helmet_mining_rig", "space_suit_security", "space_suit_helmet_security", "resonator", "kinetic_accelerator", "mining_drone", "mining_jetpack", "stimpack_adv", "meson_geo_glasses")
 
 /datum/technology/basic_handheld
 	name = "Basic Handheld"
@@ -908,7 +985,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 3000
 
-	unlocks_designs = list("temp_gun")
+	unlocks_designs = list("temp_gun", "emp_mine")
 
 /datum/technology/adv_exotic_weaponry
 	name = "Advanced Exotic Weaponry"
@@ -956,7 +1033,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 5000
 
-	unlocks_designs = list("nuclear_gun", "l10", "l10_mag", "lasercannon")
+	unlocks_designs = list("nuclear_gun", "plasma_10_gun", "plasma_104_gun", "plasma_mag", "lasercannon", "laserrifle")
 
 // Powerstorage
 
@@ -1107,8 +1184,8 @@ The tech datums are the actual "tech trees" that you improve through researching
 // Bluespace
 
 /datum/technology/basic_bluespace
-	name = "Basic 'Blue-space'"
-	desc = "Basic 'Blue-space'"
+	name = "Basic 'Bluespace'"
+	desc = "Basic 'Bluespace'"
 	id = "basic_bluespace"
 	tech_type = RESEARCH_BLUESPACE
 
@@ -1216,7 +1293,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 1500
 
-	unlocks_designs = list("teleconsole", "tele_station", "tele_hub", "bluespace_crystal", "jaunter")
+	unlocks_designs = list("teleconsole", "tele_station", "tele_hub", "bluespace_crystal", "jaunter", "slime_management")
 
 /datum/technology/bluespace_tools
 	name = "Bluespace Tools"
@@ -1314,7 +1391,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 	required_tech_levels = list()
 	cost = 1000
 
-	unlocks_designs = list("mechacontrol", "mechapower", "mechfab", "robocontrol", "dronecontrol", "mmi_radio", "intellicard", "paicard", "posibrain")
+	unlocks_designs = list("mechacontrol", "mechapower", "mechfab", "robocontrol", "dronecontrol", "mmi_radio", "intellicard", "paicard", "posibrain", "borg_upgrade_security")
 
 /datum/technology/artificial_intelligence
 	name = "Artificial intelligence"
@@ -1494,7 +1571,7 @@ The tech datums are the actual "tech trees" that you improve through researching
 
 /datum/technology/advanced_hardsuit_modules
 	name = "Advanced Hardsuit Modules"
-	desc = "Basic Hardsuit Modules"
+	desc = "Advanced Hardsuit Modules"
 	id = "advanced_hardsuit_modules"
 	tech_type = RESEARCH_ROBOTICS
 

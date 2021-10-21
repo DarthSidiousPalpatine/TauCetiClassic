@@ -5,7 +5,7 @@
 	icon_state = "away"
 
 /area/awaymission/challenge/main
-	name = "\improper Danger Room"
+	name = "Danger Room"
 	icon_state = "away1"
 	requires_power = 0
 
@@ -20,8 +20,8 @@
 	desc = "A heavy duty industrial laser"
 	icon = 'icons/obj/singularity.dmi'
 	icon_state = "emitter"
-	anchored = 1
-	density = 1
+	anchored = TRUE
+	density = TRUE
 
 	use_power = NO_POWER_USE
 	idle_power_usage = 0

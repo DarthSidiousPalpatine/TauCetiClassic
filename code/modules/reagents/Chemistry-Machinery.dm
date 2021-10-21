@@ -1,12 +1,10 @@
-#define SOLID 1
-#define LIQUID 2
-#define GAS 3
 #define MAX_PILL_SPRITE 24
 #define MAX_BOTTLE_SPRITE 3
+
 /obj/machinery/chem_dispenser
 	name = "chem dispenser"
-	density = 1
-	anchored = 1
+	density = TRUE
+	anchored = TRUE
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "dispenser"
 	use_power = NO_POWER_USE
@@ -16,13 +14,28 @@
 	var/max_energy = 100
 	var/amount = 30
 	var/accept_glass = 0
-	var/beaker = null
+	var/obj/item/weapon/reagent_containers/beaker = null
 	var/recharged = 0
 	var/recharge_delay = 15
-	var/hackedcheck = 0
-	var/list/dispensable_reagents = list("hydrogen","lithium","carbon","nitrogen","oxygen","fluorine",
-	"sodium","aluminum","silicon","phosphorus","sulfur","chlorine","potassium","iron",
-	"copper","mercury","radium","water","ethanol","sugar","sacid","tungsten")
+	var/hackedcheck = FALSE
+	var/hackable = FALSE
+	var/msg_hack_enable = ""
+	var/msg_hack_disable = ""
+	var/list/dispensable_reagents = list(
+		"hydrogen", "lithium", "carbon", "nitrogen", "oxygen", "fluorine",
+		"sodium", "aluminum", "silicon", "phosphorus", "sulfur", "chlorine", "potassium", "iron",
+		"copper", "mercury", "radium", "water", "ethanol", "sugar", "sacid", "tungsten"
+	)
+	var/list/premium_reagents = list()
+
+/obj/machinery/chem_dispenser/atom_init()
+	. = ..()
+	recharge()
+	dispensable_reagents = sortList(dispensable_reagents)
+
+/obj/machinery/chem_dispenser/Destroy()
+	QDEL_NULL(beaker)
+	return ..()
 
 /obj/machinery/chem_dispenser/proc/recharge()
 	if(stat & (BROKEN|NOPOWER)) return
@@ -34,27 +47,20 @@
 		nanomanager.update_uis(src) // update all UIs attached to src
 
 /obj/machinery/chem_dispenser/power_change()
-	if(powered())
+	if(anchored && powered())
 		stat &= ~NOPOWER
 	else
 		spawn(rand(0, 15))
 			stat |= NOPOWER
 			update_power_use()
-	nanomanager.update_uis(src) // update all UIs attached to src
 	update_power_use()
 
 /obj/machinery/chem_dispenser/process()
-
 	if(recharged <= 0)
 		recharge()
 		recharged = recharge_delay
 	else
 		recharged -= 1
-
-/obj/machinery/chem_dispenser/atom_init()
-	. = ..()
-	recharge()
-	dispensable_reagents = sortList(dispensable_reagents)
 
 /obj/machinery/chem_dispenser/ex_act(severity)
 	switch(severity)
@@ -70,91 +76,105 @@
 	if (prob(50))
 		qdel(src)
 
-/obj/machinery/chem_dispenser/meteorhit()
-	qdel(src)
-	return
+/obj/machinery/chem_dispenser/ui_interact(mob/user)
+	tgui_interact(user)
 
- /**
-  * The ui_interact proc is used to open and update Nano UIs
-  * If ui_interact is not used then the UI will not update correctly
-  * ui_interact is currently defined for /atom/movable
-  *
-  * @param user /mob The mob who is interacting with this ui
-  * @param ui_key string A string key to use for this ui. Allows for multiple unique uis on one obj/mob (defaut value "main")
-  *
-  * @return nothing
-  */
-/obj/machinery/chem_dispenser/ui_interact(mob/user, ui_key = "main",datum/nanoui/ui = null)
-	if(stat & (BROKEN|NOPOWER)) return
-	if((user.stat && !isobserver(user)) || user.restrained()) return
+/obj/machinery/chem_dispenser/tgui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "ChemDispenser", ui_title)
+		ui.open()
 
-	// this is the data which will be sent to the ui
-	var/data[0]
+/obj/machinery/chem_dispenser/tgui_data(mob/user)
+	var/list/data = list()
 	data["amount"] = amount
 	data["energy"] = energy
 	data["maxEnergy"] = max_energy
 	data["isBeakerLoaded"] = beaker ? 1 : 0
 	data["glass"] = accept_glass
-	var/beakerContents[0]
+	var/list/beakerContents = list()
 	var/beakerCurrentVolume = 0
-	if(beaker && beaker:reagents && beaker:reagents.reagent_list.len)
-		for(var/datum/reagent/R in beaker:reagents.reagent_list)
+	if(beaker?.reagents?.reagent_list.len)
+		for(var/datum/reagent/R in beaker.reagents.reagent_list)
 			beakerContents.Add(list(list("name" = R.name, "volume" = R.volume))) // list in a list because Byond merges the first list...
 			beakerCurrentVolume += R.volume
 	data["beakerContents"] = beakerContents
 
 	if (beaker)
 		data["beakerCurrentVolume"] = beakerCurrentVolume
-		data["beakerMaxVolume"] = beaker:volume
+		data["beakerMaxVolume"] = beaker.volume
 	else
 		data["beakerCurrentVolume"] = null
 		data["beakerMaxVolume"] = null
 
-	var/chemicals[0]
+	var/list/chemicals = list()
 	for (var/re in dispensable_reagents)
 		var/datum/reagent/temp = chemical_reagents_list[re]
 		if(temp)
-			chemicals.Add(list(list("title" = temp.name, "id" = temp.id, "commands" = list("dispense" = temp.id)))) // list in a list because Byond merges the first list...
+			chemicals.Add(list(list("title" = temp.name, "id" = temp.id))) // list in a list because Byond merges the first list...
 	data["chemicals"] = chemicals
+	return data
 
-	// update the ui if it exists, returns null if no ui is passed/found
-	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data)
-	if (!ui)
-		// the ui does not exist, so we'll create a new() one
-        // for a list of parameters and their descriptions see the code docs in \code\modules\nano\nanoui.dm
-		ui = new(user, src, ui_key, "chem_dispenser.tmpl", ui_title, 380, 650)
-		// when the ui is first opened this is the data it will use
-		ui.set_initial_data(data)
-		// open the new ui window
-		ui.open()
-
-/obj/machinery/chem_dispenser/Topic(href, href_list)
-	. = ..()
-	if(!.)
+/obj/machinery/chem_dispenser/tgui_act(action, list/params, datum/tgui/ui, datum/tgui_state/state)
+	if(..())
 		return
+	switch(action)
+		if("change_amount")
+			. = TRUE
+			var/new_amount = clamp(round(text2num(params["new_amount"])), 0, 100)
+			if(amount == new_amount)
+				return
 
-	if(href_list["amount"])
-		amount = round(text2num(href_list["amount"]), 5) // round to nearest 5
-		amount = CLAMP(amount, 0, 100) // Since the user can actually type the commands himself, some sanity checking
+			amount = new_amount
 
-	if(href_list["dispense"])
-		if (dispensable_reagents.Find(href_list["dispense"]) && beaker != null)
-			var/obj/item/weapon/reagent_containers/B = src.beaker
-			var/datum/reagents/R = B.reagents
+			if(iscarbon(usr))
+				playsound(src, 'sound/items/buttonswitch.ogg', VOL_EFFECTS_MISC, 20)
+
+		if("dispense")
+			. = TRUE
+			if (!beaker || !dispensable_reagents.Find(params["chemical"]))
+				return
+
+			var/datum/reagents/R = beaker.reagents
 			var/space = R.maximum_volume - R.total_volume
-			R.add_reagent(href_list["dispense"], min(amount, energy * 10, space))
+
+			if(iscarbon(usr))
+				playsound(src, 'sound/items/buttonswitch.ogg', VOL_EFFECTS_MISC, 20)
+
+			if ((space > 0) && (energy * 10 >= min(amount, space)))
+				playsound(src, 'sound/effects/Liquid_transfer_mono.ogg', VOL_EFFECTS_MASTER, 40) // 15 isn't enough
+
+			R.add_reagent(params["chemical"], min(amount, energy * 10, space))
 			energy = max(energy - min(amount, energy * 10, space) / 10, 0)
 
-	if(href_list["ejectBeaker"])
-		if(beaker)
-			var/obj/item/weapon/reagent_containers/B = beaker
-			B.loc = loc
+		if("eject_beaker")
+			. = TRUE
+			if(!beaker)
+				return
+
+			beaker.forceMove(loc)
 			beaker = null
 
+			if(iscarbon(usr))
+				playsound(src, 'sound/items/buttonswitch.ogg', VOL_EFFECTS_MISC, 20)
 
-/obj/machinery/chem_dispenser/attackby(obj/item/weapon/reagent_containers/B, mob/user)
+			playsound(src, 'sound/items/insert_key.ogg', VOL_EFFECTS_MASTER, 25)
+
+/obj/machinery/chem_dispenser/attackby(obj/item/weapon/B, mob/user)
 //	if(isrobot(user))
 //		return
+	if(ismultitool(B) && hackable)
+		hackedcheck = !hackedcheck
+		if(hackedcheck)
+			to_chat(user, msg_hack_enable)
+			dispensable_reagents += premium_reagents
+		else
+			to_chat(user, msg_hack_disable)
+			dispensable_reagents -= premium_reagents
+		return
+	if(default_unfasten_wrench(user, B))
+		power_change()
+		return
 
 	if(src.beaker)
 		to_chat(user, "Something is already loaded into the machine.")
@@ -169,11 +189,14 @@
 				to_chat(user, "<span class='notice'>You need to open the drink!</span>")
 				return
 		src.beaker =  B
-		user.drop_item()
-		B.loc = src
+		user.drop_from_inventory(B, src)
 		to_chat(user, "You set [B] on the machine.")
-		nanomanager.update_uis(src) // update all UIs attached to src
+		playsound(src, 'sound/items/insert_key.ogg', VOL_EFFECTS_MASTER, 25)
 		return
+
+/obj/machinery/chem_dispenser/old/atom_init()
+	. = ..()
+	make_old()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -280,24 +303,10 @@
 	accept_glass = 1
 	max_energy = 100
 	dispensable_reagents = list("water","ice","coffee","cream","tea","icetea","cola","spacemountainwind","dr_gibb","space_up","tonic","sodawater","lemon_lime","sugar","orangejuice","limejuice","watermelonjuice")
-
-/obj/machinery/chem_dispenser/soda/attackby(obj/item/weapon/B, mob/user)
-	..()
-	if(ismultitool(B))
-		if(hackedcheck == 0)
-			to_chat(user, "You change the mode from 'McNano' to 'Pizza King'.")
-			dispensable_reagents += list("thirteenloko","grapesoda")
-			hackedcheck = 1
-			return
-
-		else
-			to_chat(user, "You change the mode from 'Pizza King' to 'McNano'.")
-			dispensable_reagents -= list("thirteenloko")
-			hackedcheck = 0
-			return
-
-	else if(iswrench(B))
-		default_unfasten_wrench(user, B)
+	premium_reagents = list("thirteenloko","grapesoda")
+	hackable = TRUE
+	msg_hack_enable = "You change the mode from 'McNano' to 'Pizza King'."
+	msg_hack_disable = "You change the mode from 'Pizza King' to 'McNano'."
 
 /obj/machinery/chem_dispenser/beer
 	icon_state = "booze_dispenser"
@@ -308,32 +317,19 @@
 	max_energy = 100
 	desc = "A technological marvel, supposedly able to mix just the mixture you'd like to drink the moment you ask for one."
 	dispensable_reagents = list("lemon_lime","sugar","orangejuice","limejuice","sodawater","tonic","beer","kahlua","whiskey","wine","vodka","gin","rum","tequilla","vermouth","cognac","ale","mead")
+	premium_reagents = list("goldschlager","patron","watermelonjuice","berryjuice")
+	hackable = TRUE
+	msg_hack_enable = "You disable the 'nanotrasen-are-cheap-bastards' lock, enabling hidden and very expensive boozes."
+	msg_hack_disable = "You re-enable the 'nanotrasen-are-cheap-bastards' lock, disabling hidden and very expensive boozes."
 
-/obj/machinery/chem_dispenser/beer/attackby(obj/item/weapon/B, mob/user)
-	..()
 
-	if(ismultitool(B))
-		if(hackedcheck == 0)
-			to_chat(user, "You disable the 'nanotrasen-are-cheap-bastards' lock, enabling hidden and very expensive boozes.")
-			dispensable_reagents += list("goldschlager","patron","watermelonjuice","berryjuice")
-			hackedcheck = 1
-			return
-
-		else
-			to_chat(user, "You re-enable the 'nanotrasen-are-cheap-bastards' lock, disabling hidden and very expensive boozes.")
-			dispensable_reagents -= list("goldschlager","patron","watermelonjuice","berryjuice")
-			hackedcheck = 0
-			return
-
-	else if(iswrench(B))
-		default_unfasten_wrench(user, B)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /obj/machinery/chem_master
 	name = "ChemMaster 3000"
-	density = 1
-	anchored = 1
+	density = TRUE
+	anchored = TRUE
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "mixer0"
 	use_power = IDLE_POWER_USE
@@ -370,12 +366,8 @@
 	if (prob(50))
 		qdel(src)
 
-/obj/machinery/chem_master/meteorhit()
-	qdel(src)
-	return
-
 /obj/machinery/chem_master/power_change()
-	if(powered())
+	if(anchored && powered())
 		stat &= ~NOPOWER
 	else
 		spawn(rand(0, 15))
@@ -386,6 +378,7 @@
 /obj/machinery/chem_master/attackby(obj/item/B, mob/user)
 
 	if(default_unfasten_wrench(user, B))
+		power_change()
 		return
 
 	if(istype(B, /obj/item/weapon/reagent_containers/glass))
@@ -393,10 +386,9 @@
 			to_chat(user, "<span class='alert'>A beaker is already loaded into the machine.</span>")
 			return
 		src.beaker = B
-		user.drop_item()
-		B.loc = src
+		user.drop_from_inventory(B, src)
 		to_chat(user, "You add the beaker to the machine!")
-		src.updateUsrDialog()
+		updateUsrDialog()
 		icon_state = "mixer1"
 
 	else if(!condi && istype(B, /obj/item/weapon/storage/pill_bottle))
@@ -405,10 +397,9 @@
 			return
 
 		src.loaded_pill_bottle = B
-		user.drop_item()
-		B.loc = src
+		user.drop_from_inventory(B, src)
 		to_chat(user, "You add the pill bottle into the dispenser slot!")
-		src.updateUsrDialog()
+		updateUsrDialog()
 
 	return
 
@@ -421,17 +412,12 @@
 			loaded_pill_bottle.loc = src.loc
 			loaded_pill_bottle = null
 
-	else if(href_list["close"])
-		usr << browse(null, "window=chemmaster")
-		usr.unset_machine()
-		return FALSE
-
 	else if(href_list["toggle"])
 		mode = !mode
 
 	else if(href_list["createbottle"])
 		if(!condi)
-			var/name = sanitize_safe(input(usr, "Name:","Name your bottle!", (reagents.total_volume ? reagents.get_master_reagent_name() : " ")), MAX_NAME_LEN)
+			var/name = sanitize_safe(input(usr, "Name:","Name your bottle!", (reagents.total_volume ? reagents.get_master_reagent_name() : " ")) as text|null, MAX_NAME_LEN)
 			if(!name)
 				return FALSE
 			var/obj/item/weapon/reagent_containers/glass/bottle/P = new/obj/item/weapon/reagent_containers/glass/bottle(src.loc)
@@ -458,8 +444,7 @@
 
 		var/datum/browser/popup = new(usr, "chem_master", name)
 		popup.set_content(dat)
-		popup.set_title_image(usr.browse_rsc_icon(src.icon, src.icon_state))
-		popup.open(1)
+		popup.open()
 		return
 
 	else if(href_list["changebottle"])
@@ -477,8 +462,7 @@
 
 		var/datum/browser/popup = new(usr, "chem_master", name)
 		popup.set_content(dat)
-		popup.set_title_image(usr.browse_rsc_icon(src.icon, src.icon_state))
-		popup.open(1)
+		popup.open()
 		return
 
 	else if(href_list["set"])
@@ -528,8 +512,7 @@
 					dat += "<BR><A href='?src=\ref[src];main=1'>Back</A>"
 					var/datum/browser/popup = new(usr, "chem_master", name)
 					popup.set_content(dat)
-					popup.set_title_image(usr.browse_rsc_icon(src.icon, src.icon_state))
-					popup.open(1)
+					popup.open()
 					return
 
 
@@ -552,7 +535,7 @@
 				return FALSE
 			if(useramount > 300)
 				return FALSE
-			src.Topic(null, list("amount" = "[useramount]", "add" = "[id]"))
+			Topic(null, list("amount" = "[useramount]", "add" = "[id]"))
 
 		else if(href_list["remove"])
 			if(href_list["amount"])
@@ -576,7 +559,7 @@
 				return FALSE
 			if(useramount > 300)
 				return FALSE
-			src.Topic(null, list("amount" = "[useramount]", "remove" = "[id]"))
+			Topic(null, list("amount" = "[useramount]", "remove" = "[id]"))
 
 		else if(href_list["eject"])
 			if(beaker)
@@ -596,7 +579,7 @@
 					if(!amount)
 						return FALSE
 					vol_each = min(reagents.total_volume / amount, 50)
-				var/name = sanitize_safe(input(usr,"Name:","Name your pill!", "[reagents.get_master_reagent_name()] ([vol_each]u)"), MAX_NAME_LEN)
+				var/name = sanitize_safe(input(usr,"Name:","Name your pill!", "[reagents.get_master_reagent_name()] ([vol_each]u)") as text|null, MAX_NAME_LEN)
 				if(!name || !reagents.total_volume)
 					return FALSE
 				var/obj/item/weapon/reagent_containers/pill/P
@@ -612,7 +595,7 @@
 					P.pixel_y = rand(-7, 7)
 					reagents.trans_to(P,vol_each)
 
-	src.updateUsrDialog()
+	updateUsrDialog()
 
 /obj/machinery/chem_master/ui_interact(mob/user)
 	if(!(user.client in has_sprites))
@@ -622,7 +605,7 @@
 				usr << browse_rsc(icon('icons/obj/chemical.dmi', "pill[i]"), "pill[i].png")
 			for(var/i = 1 to MAX_BOTTLE_SPRITE)
 				usr << browse_rsc(icon('icons/obj/chemical.dmi', "bottle[i]"), "bottle[i].png")
-			src.updateUsrDialog()
+			updateUsrDialog()
 
 	var/dat = ""
 	if(beaker)
@@ -680,25 +663,23 @@
 			dat += "<LI><A href='?src=\ref[src];createpill=1;many=0'>Create pill</A> (50 units max)"
 			dat += "<LI><A href='?src=\ref[src];createpill=1;many=1'>Create multiple pills</A><BR>"
 		else
-			dat += "<LI><span class='linkOff'>Create pill</span> (50 units max)"
-			dat += "<LI><span class='linkOff'>Create multiple pills</span><BR>"
+			dat += "<LI><span class='disabled'>Create pill</span> (50 units max)"
+			dat += "<LI><span class='disabled'>Create multiple pills</span><BR>"
 	else
 		if(beaker && reagents.total_volume)
 			dat += "<LI><A href='?src=\ref[src];createpill=1'>Create pack</A> (10 units max)<BR>"
 		else
-			dat += "<LI><span class='linkOff'>Create pack</span> (10 units max)<BR>"
+			dat += "<LI><span class='disabled'>Create pack</span> (10 units max)<BR>"
 	dat += "<LI><A href='?src=\ref[src];createbottle=1'>Create bottle</A> ([condi ? "50" : "30"] units max)"
 	dat += "</UL>"
-	dat += "<BR><A href='?src=\ref[src];close=1'>Close</A>"
 
 	var/datum/browser/popup = new(user, "chem_master", name, 470, 500)
 	popup.set_content(dat)
-	popup.set_title_image(user.browse_rsc_icon(src.icon, src.icon_state))
-	popup.open(1)
+	popup.open()
 
 /obj/machinery/chem_master/proc/isgoodnumber(num)
 	if(isnum(num))
-		return CLAMP(round(num), 0, 200)
+		return clamp(round(num), 0, 200)
 	else
 		return 0
 
@@ -750,10 +731,9 @@
 			to_chat(user, "<span class='alert'>A beaker is already loaded into the machine.</span>")
 			return
 		src.beaker = B
-		user.drop_item()
-		B.loc = src
+		user.drop_from_inventory(B, src)
 		to_chat(user, "You add the beaker to the machine!")
-		src.updateUsrDialog()
+		updateUsrDialog()
 		icon_state = "mixer1"
 
 	else if(!condi && istype(B, /obj/item/weapon/storage/pill_bottle))
@@ -761,10 +741,9 @@
 			to_chat(user, "<span class='alert'>A pill bottle is already loaded into the machine.</span>")
 			return
 		src.loaded_pill_bottle = B
-		user.drop_item()
-		B.loc = src
+		user.drop_from_inventory(B, src)
 		to_chat(user, "You add the pill bottle into the dispenser slot!")
-		src.updateUsrDialog()
+		updateUsrDialog()
 
 	return
 
@@ -773,8 +752,8 @@
 
 /obj/machinery/computer/pandemic
 	name = "PanD.E.M.I.C 2200"
-	density = 1
-	anchored = 1
+	density = TRUE
+	anchored = TRUE
 	icon = 'icons/obj/chemical.dmi'
 	icon_state = "mixer0"
 	circuit = /obj/item/weapon/circuitboard/pandemic
@@ -841,8 +820,10 @@
 							Blood = L
 							break
 					var/list/res = Blood.data["resistances"]
-					spawn(res.len * 200)
-						src.wait = null
+					if(res)
+						VARSET_IN(src, wait, null, res.len * 200)
+					else
+						wait = null
 		else
 			src.temphtml = "The replicator is not ready yet."
 	else if (href_list["create_virus_culture"])
@@ -859,44 +840,45 @@
 				if(type in diseases) // Make sure this is a disease
 					D = new type(0, null)
 			var/list/data = list("viruses"=list(D))
-			var/name = sanitize_safe(input(usr,"Name:","Name the culture",input_default(D.name)), MAX_NAME_LEN)
+			var/name = sanitize_safe(input(usr,"Name:","Name the culture",input_default(D.name)) as text|null, MAX_NAME_LEN)
 			if(!name || name == " ") name = D.name
 			B.name = "[name] culture bottle"
 			B.desc = "A small bottle. Contains [D.agent] culture in synthblood medium."
-			B.reagents.add_reagent("blood",20,data)
-			src.updateUsrDialog()
+			B.reagents.add_reagent("blood", 20, data)
+			updateUsrDialog()
 			wait = 1
-			spawn(1000)
-				src.wait = null
+			VARSET_IN(src, wait, null, 1000)
 		else
 			src.temphtml = "The replicator is not ready yet."
 	else if (href_list["empty_beaker"])
 		beaker.reagents.clear_reagents()
 	else if (href_list["eject"])
-		beaker:loc = src.loc
+		beaker.loc = src.loc
 		beaker = null
 		icon_state = "mixer0"
 	else if(href_list["clear"])
 		src.temphtml = ""
 	else if(href_list["name_disease"])
-		var/new_name = sanitize_safe(input(usr, "Name the Disease", "New Name"), MAX_NAME_LEN)
 		if(stat & (NOPOWER|BROKEN))
 			return
-		if(usr.stat || usr.restrained())
+		var/new_name = sanitize_safe(input(usr, "Name the Disease", "New Name") as text|null, MAX_NAME_LEN)
+		if(!new_name)
 			return
-		if(!in_range(src, usr))
+		if(usr.incapacitated())
+			return
+		if(!Adjacent(usr))
 			return
 		var/id = href_list["name_disease"]
 		if(archive_diseases[id])
 			var/datum/disease/advance/A = archive_diseases[id]
 			A.AssignName(new_name)
-			for(var/datum/disease/advance/AD in SSdisease.processing)
+			for(var/datum/disease/advance/AD in SSdiseases.processing)
 				AD.Refresh()
 	else
 		usr << browse(null, "window=pandemic")
 		return FALSE
 
-	src.updateUsrDialog()
+	updateUsrDialog()
 
 
 /obj/machinery/computer/pandemic/ui_interact(mob/user)
@@ -905,7 +887,6 @@
 		dat = "[src.temphtml]<BR><BR><A href='?src=\ref[src];clear=1'>Main Menu</A>"
 	else if(!beaker)
 		dat += "Please insert beaker.<BR>"
-		dat += "<A href='?src=\ref[user];mach_close=pandemic'>Close</A>"
 	else
 		var/datum/reagents/R = beaker.reagents
 		var/datum/reagent/blood/Blood = null
@@ -928,7 +909,7 @@
 			if(Blood.data["viruses"])
 				var/list/vir = Blood.data["viruses"]
 				if(vir.len)
-					for(var/datum/disease/D in Blood.data["viruses"])
+					for(var/datum/disease/D in vir)
 						if(!D.hidden[PANDEMIC])
 
 
@@ -956,7 +937,7 @@
 								var/english_symptoms = list()
 								for(var/datum/symptom/S in A.symptoms)
 									english_symptoms += S.name
-								dat += english_list(english_symptoms)
+								dat += get_english_list(english_symptoms)
 
 
 			dat += "<BR><b>Contains antibodies to:</b> "
@@ -982,10 +963,10 @@
 			else
 				dat += "nothing<BR>"
 		dat += "<BR><A href='?src=\ref[src];eject=1'>Eject beaker</A>[((R.total_volume&&R.reagent_list.len) ? "-- <A href='?src=\ref[src];empty_beaker=1'>Empty beaker</A>":"")]<BR>"
-		dat += "<A href='?src=\ref[user];mach_close=pandemic'>Close</A>"
 
-	user << browse("<TITLE>[src.name]</TITLE><BR>[entity_ja(dat)]", "window=pandemic;size=575x400")
-	onclose(user, "pandemic")
+	var/datum/browser/popup = new(user, "pandemic", src.name, 575, 400)
+	popup.set_content(dat)
+	popup.open()
 
 
 /obj/machinery/computer/pandemic/attackby(obj/I, mob/user)
@@ -996,10 +977,9 @@
 			return
 
 		src.beaker =  I
-		user.drop_item()
-		I.loc = src
+		user.drop_from_inventory(I, src)
 		to_chat(user, "You add the beaker to the machine!")
-		src.updateUsrDialog()
+		updateUsrDialog()
 		icon_state = "mixer1"
 
 	else if(isscrewdriver(I))
@@ -1019,8 +999,8 @@
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "juicer1"
 	layer = 2.9
-	density = 1
-	anchored = 1
+	density = TRUE
+	anchored = TRUE
 	use_power = IDLE_POWER_USE
 	idle_power_usage = 5
 	active_power_usage = 100
@@ -1073,6 +1053,8 @@
 		/obj/item/weapon/reagent_containers/food/snacks/grown/lime = list("limejuice" = 0),
 		/obj/item/weapon/reagent_containers/food/snacks/watermelonslice = list("watermelonjuice" = 0),
 		/obj/item/weapon/reagent_containers/food/snacks/grown/poisonberries = list("poisonberryjuice" = 0),
+		/obj/item/weapon/reagent_containers/food/snacks/grown/greengrapes = list("grapejuice" = 0),
+		/obj/item/weapon/reagent_containers/food/snacks/grown/grapes = list("grapejuice" = 0),
 	)
 
 
@@ -1089,11 +1071,9 @@
 
 /obj/machinery/reagentgrinder/attackby(obj/item/O, mob/user)
 
-	if(default_unfasten_wrench(user, O))
-		return
-
 	if(iswrench(O))
 		default_unfasten_wrench(user, O)
+		return
 
 	if (istype(O,/obj/item/weapon/reagent_containers/glass) || \
 		istype(O,/obj/item/weapon/reagent_containers/food/drinks/drinkingglass) || \
@@ -1103,10 +1083,9 @@
 			return 1
 		else
 			src.beaker =  O
-			user.drop_item()
-			O.loc = src
+			user.drop_from_inventory(O, src)
 			update_icon()
-			src.updateUsrDialog()
+			updateUsrDialog()
 			return 0
 
 	if(holdingitems && holdingitems.len >= limit)
@@ -1116,9 +1095,9 @@
 	//Fill machine with the plantbag!
 	if(istype(O, /obj/item/weapon/storage/bag/plants))
 
+		var/obj/item/weapon/storage/bag/plants/P = O
 		for (var/obj/item/weapon/reagent_containers/food/snacks/grown/G in O.contents)
-			O.contents -= G
-			G.loc = src
+			P.remove_from_storage(G, src)
 			holdingitems += G
 			if(holdingitems && holdingitems.len >= limit) //Sanity checking so the blender doesn't overfill
 				to_chat(user, "You fill the All-In-One grinder to the brim.")
@@ -1127,17 +1106,16 @@
 		if(!O.contents.len)
 			to_chat(user, "You empty the plant bag into the All-In-One grinder.")
 
-		src.updateUsrDialog()
+		updateUsrDialog()
 		return 0
 
 	if (!is_type_in_list(O, blend_items) && !is_type_in_list(O, juice_items))
 		to_chat(user, "Cannot refine into a reagent.")
 		return 1
 
-	user.remove_from_mob(O)
-	O.loc = src
+	user.drop_from_inventory(O, src)
 	holdingitems += O
-	src.updateUsrDialog()
+	updateUsrDialog()
 	return 0
 
 /obj/machinery/reagentgrinder/attack_ai(mob/user)
@@ -1186,8 +1164,10 @@
 			dat += "<A href='?src=\ref[src];action=detach'>Detach the beaker</a><BR>"
 	else
 		dat += "Please wait..."
-	user << browse("<HEAD><TITLE>All-In-One Grinder</TITLE></HEAD><TT>[entity_ja(dat)]</TT>", "window=reagentgrinder")
-	onclose(user, "reagentgrinder")
+
+	var/datum/browser/popup = new(user, "reagentgrinder", "All-In-One Grinder")
+	popup.set_content("<TT>[dat]</TT>")
+	popup.open()
 
 
 /obj/machinery/reagentgrinder/Topic(href, href_list)
@@ -1205,11 +1185,11 @@
 		if ("detach")
 			detach()
 
-	src.updateUsrDialog()
+	updateUsrDialog()
 
 /obj/machinery/reagentgrinder/proc/detach()
 
-	if (usr.stat != CONSCIOUS)
+	if(usr.incapacitated())
 		return
 	if (!beaker)
 		return
@@ -1219,7 +1199,7 @@
 
 /obj/machinery/reagentgrinder/proc/eject()
 
-	if (usr.stat != CONSCIOUS)
+	if(usr.incapacitated())
 		return
 	if (holdingitems && holdingitems.len == 0)
 		return

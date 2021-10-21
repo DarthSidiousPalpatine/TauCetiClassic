@@ -2,7 +2,7 @@
 
 	var/list/motionTargets = list()
 	var/detectTime = 0
-	var/area/ai_monitored/area_motion = null
+	var/area/station/ai_monitored/area_motion = null
 	var/alarm_delay = 100 // Don't forget, there's another 10 seconds in queueAlarm()
 
 
@@ -17,7 +17,8 @@
 			triggerAlarm()
 	else if (detectTime == -1)
 		for (var/mob/target in motionTargets)
-			if (target.stat == DEAD) lostTarget(target)
+			if (target.stat == DEAD)
+				lostTarget(target)
 			// If not detecting with motion camera...
 			if (!area_motion)
 				// See if the camera is still in range
@@ -26,6 +27,8 @@
 					lostTarget(target)
 
 /obj/machinery/camera/proc/newTarget(mob/target)
+	if (!target.mouse_opacity || target.alpha < 50)
+		return
 	if (istype(target, /mob/living/silicon/ai)) return 0
 	if (detectTime == 0)
 		detectTime = world.time // start the clock

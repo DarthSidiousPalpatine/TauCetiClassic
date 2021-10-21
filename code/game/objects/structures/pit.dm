@@ -4,8 +4,8 @@
 	icon = 'icons/obj/pit.dmi'
 	icon_state = "pit1"
 	blend_mode = BLEND_MULTIPLY
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	var/open = 1
 
 /obj/structure/pit/attackby(obj/item/weapon/W, mob/user)
@@ -71,7 +71,7 @@
 	if(open)
 		return
 
-	if(escapee.stat || escapee.restrained())
+	if(escapee.incapacitated())
 		return
 
 	to_chat(escapee, "<span class='warning'>You start digging your way out of \the [src] (this will take about [breakout_time] minute\s)</span>")
@@ -83,7 +83,7 @@
 		if(!do_after(escapee, 50, target = src))
 			to_chat(escapee, "<span class='warning'>You have stopped digging.</span>")
 			return
-		if(!escapee || escapee.stat || escapee.loc != src)
+		if(!escapee || escapee.incapacitated() || escapee.loc != src)
 			return
 		if(open)
 			return
@@ -126,7 +126,7 @@
 
 	var/loot
 	var/list/suits = list(
-		/obj/item/clothing/suit/wintercoat/captain,
+		/obj/item/clothing/suit/hooded/wintercoat/captain,
 		/obj/item/clothing/suit/storage/labcoat,
 		/obj/item/clothing/suit/storage/det_suit,
 		/obj/item/clothing/suit/storage/hazardvest,
@@ -177,7 +177,7 @@
 	icon_state = "wood"
 	pixel_x = 15
 	pixel_y = 8
-	anchored = 1
+	anchored = TRUE
 	var/message = "Unknown."
 
 /obj/structure/gravemarker/cross
@@ -195,9 +195,8 @@
 	icon_state = pick("wood","cross")
 
 	var/nam = random_name(pick(MALE,FEMALE))
-	var/cur_year = text2num(time2text(world.timeofday, "YYYY"))+544
-	var/born = cur_year - rand(5,150)
-	var/died = max(cur_year - rand(0,70),born)
+	var/born = game_year - rand(70, 150)
+	var/died = born + rand(20, 60)
 
 	message = "Here lies [nam], [born] - [died]."
 
@@ -258,4 +257,3 @@
 	desc = "Jetson is coming appart"
 	icon_state = "jetsons_f"
 	item_color = "jetsons_f"
-

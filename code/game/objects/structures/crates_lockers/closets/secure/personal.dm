@@ -43,12 +43,8 @@
 	new /obj/item/device/radio/headset(src)
 
 /obj/structure/closet/secure_closet/personal/attackby(obj/item/W, mob/user)
-	if (src.opened)
-		if (istype(W, /obj/item/weapon/grab))
-			var/obj/item/weapon/grab/G = W
-			MouseDrop_T(G.affecting, user)      //act like they were dragged onto the closet
-		user.drop_item()
-		if (W) W.forceMove(src.loc)
+	if(opened  || istype(W, /obj/item/weapon/grab))
+		return ..()
 	else if(istype(W, /obj/item/weapon/card/id) || istype(W, /obj/item/device/pda))
 		var/user_registered_name = null
 		if(src.broken)
@@ -63,7 +59,7 @@
 		else if(istype(W, /obj/item/weapon/card/id))
 			var/obj/item/weapon/card/id/id = W
 			user_registered_name = id.registered_name
-		if(src.allowed(user) || !src.registered_name || (src.registered_name == user_registered_name))
+		if(allowed(user) || !src.registered_name || (src.registered_name == user_registered_name))
 			//they can open all lockers, or nobody owns this, or they own this locker
 			src.locked = !( src.locked )
 			if(src.locked)	src.icon_state = src.icon_locked
@@ -81,8 +77,7 @@
 		spark_system.start()
 		playsound(src, 'sound/weapons/blade1.ogg', VOL_EFFECTS_MASTER)
 		playsound(src, pick(SOUNDIN_SPARKS), VOL_EFFECTS_MASTER)
-		for(var/mob/O in viewers(user, 3))
-			O.show_message("<span class='notice'>The locker has been sliced open by [user] with an [W.name]!</span>", 1, "<span class='warning'>You hear metal being sliced and sparks flying.</span>", 2)
+		visible_message("<span class='notice'>The locker has been sliced open by [user] with an [W.name]!</span>", blind_message = "<span class='warning'>You hear metal being sliced and sparks flying.</span>", viewing_distance = 3)
 	else
 		to_chat(user, "<span class='warning'>Access Denied</span>")
 	return
@@ -101,17 +96,17 @@
 	set src in oview(1) // One square distance
 	set category = "Object"
 	set name = "Reset Lock"
-	if(!usr.canmove || usr.stat || usr.restrained()) // Don't use it if you're not able to! Checks for stuns, ghost and restrain
+	if(usr.incapacitated()) // Don't use it if you're not able to! Checks for stuns, ghost and restrain
 		return
 	if(ishuman(usr))
-		src.add_fingerprint(usr)
+		add_fingerprint(usr)
 		if (src.locked || !src.registered_name)
 			to_chat(usr, "<span class='warning'>You need to unlock it first.</span>")
 		else if (src.broken)
 			to_chat(usr, "<span class='warning'>It appears to be broken.</span>")
 		else
 			if (src.opened)
-				if(!src.close())
+				if(!close())
 					return
 			src.locked = 1
 			src.icon_state = src.icon_locked

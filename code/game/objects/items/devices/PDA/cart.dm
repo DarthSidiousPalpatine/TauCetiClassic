@@ -4,7 +4,7 @@
 	icon = 'icons/obj/pda.dmi'
 	icon_state = "cart"
 	item_state = "electronic"
-	w_class = ITEM_SIZE_TINY
+	w_class = SIZE_MINUSCULE
 
 	var/obj/item/radio/integrated/radio = null
 	var/access_security = 0
@@ -35,8 +35,7 @@
 	var/list/stored_data = list()
 
 /obj/item/weapon/cartridge/Destroy()
-	if(radio)
-		qdel(radio)
+	QDEL_NULL(radio)
 	return ..()
 
 /obj/item/weapon/cartridge/engineering
@@ -228,8 +227,8 @@
 						user = user_client.mob
 
 				if(user)
-					log_admin("STATUS: [user] set status screen with [PDA]. Message: [data1] [data2]")
-					message_admins("STATUS: [user] set status screen with [PDA]. Message: [data1] [data2] [ADMIN_FLW(user)]")
+					log_admin("STATUS: [key_name(user)] set status screen with [PDA]. Message: [data1] [data2]")
+					message_admins("STATUS: [key_name_admin(user)] set status screen with [PDA]. Message: [data1] [data2] [ADMIN_FLW(user)]")
 				else
 					var/turf/PDA_turf = get_turf(PDA)
 					log_admin("STATUS: UNKNOWN set status screen with [PDA]. Message: [data1] [data2]")
@@ -284,8 +283,8 @@
 	if(mode==433)
 		if(powmonitor)
 			values["powermonitor_detected"] = TRUE
-			values["poweravail"] = powmonitor.powernet.avail
-			values["powerload"] = num2text(powmonitor.powernet.viewload,10)
+			values["poweravail"] = DisplayPower(powmonitor.powernet.viewavail)
+			values["powerload"] = DisplayPower(powmonitor.powernet.viewload)
 
 			var/list/L = list()
 			for(var/obj/machinery/power/terminal/term in powmonitor.powernet.nodes)
@@ -297,7 +296,7 @@
 			var/list/chg = list("N","C","F")	// Charging: nope, charging, full
 			var/apcData[0]
 			for(var/obj/machinery/power/apc/A in L)
-				apcData[++apcData.len] = list("Name" = html_encode(A.area.name), "Equipment" = Status[A.equipment+1], "Lights" = Status[A.lighting+1], "Environment" = Status[A.environ+1], "CellStatus" = A.cell ? "[add_lspace(round(A.cell.percent()), 3)]% [chg[A.charging+1]]" : "N/C", "Load" = add_lspace(A.lastused_total, 6))
+				apcData[++apcData.len] = list("Name" = html_encode(A.area.name), "Equipment" = Status[A.equipment+1], "Lights" = Status[A.lighting+1], "Environment" = Status[A.environ+1], "CellStatus" = A.cell ? "[add_lspace(round(A.cell.percent()), 3)]% [chg[A.charging+1]]" : "N/C", "Load" = add_lspace(round(A.lastused_total), 6))
 
 			values["apcs"] = apcData
 		else
@@ -533,7 +532,7 @@
 /obj/item/weapon/cartridge/Topic(href, href_list)
 	..()
 
-	if (!usr.canmove || usr.stat || usr.restrained() || !in_range(loc, usr))
+	if (usr.incapacitated() || !Adjacent(usr))
 		usr.unset_machine()
 		usr << browse(null, "window=pda")
 		return

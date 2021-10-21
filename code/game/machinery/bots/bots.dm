@@ -1,5 +1,13 @@
 // AI (i.e. game AI, not the AI player) controlled bots
 
+#define SECBOT_IDLE         0  // idle
+#define SECBOT_HUNT         1  // found target, hunting
+#define SECBOT_PREP_ARREST  2  // at target, preparing to arrest
+#define SECBOT_ARREST       3  // arresting target
+#define SECBOT_START_PATROL 4  // start patrol
+#define SECBOT_PATROL       5  // patrolling
+#define SECBOT_SUMMON       6  // summoned by PDA
+
 /obj/machinery/bot
 	icon = 'icons/obj/aibots.dmi'
 	layer = MOB_LAYER
@@ -42,7 +50,7 @@
 
 /obj/machinery/bot/proc/healthcheck()
 	if (src.health <= 0)
-		src.explode()
+		explode()
 
 /obj/machinery/bot/emag_act(mob/user)
 	if(emagged >= 2)
@@ -65,24 +73,24 @@
 		else
 			to_chat(user, "<span class='danger'>[src]'s parts look very loose!</span>")
 
-/obj/machinery/bot/attack_alien(mob/living/carbon/alien/user)
+/obj/machinery/bot/attack_alien(mob/living/carbon/xenomorph/user)
 	user.do_attack_animation(src)
 	user.SetNextMove(CLICK_CD_MELEE)
 	src.health -= rand(15,30)*brute_dam_coeff
-	src.visible_message("<span class='warning'><B>[user] has slashed [src]!</B></span>")
+	visible_message("<span class='warning'><B>[user] has slashed [src]!</B></span>")
 	playsound(src, 'sound/weapons/slice.ogg', VOL_EFFECTS_MASTER, 25)
 	if(prob(10))
 		new /obj/effect/decal/cleanable/blood/oil(src.loc)
 	healthcheck()
 
 
-/obj/machinery/bot/attack_animal(mob/living/simple_animal/M)
+/obj/machinery/bot/attack_animal(mob/living/simple_animal/attacker)
 	..()
-	if(M.melee_damage_upper == 0)
+	if(attacker.melee_damage == 0)
 		return
-	src.health -= M.melee_damage_upper
-	src.visible_message("<span class='warning'><B>[M] has [M.attacktext] [src]!</B></span>")
-	M.attack_log += text("\[[time_stamp()]\] <font color='red'>attacked [src.name]</font>")
+	src.health -= attacker.melee_damage
+	visible_message("<span class='warning'><B>[attacker] has [attacker.attacktext] [src]!</B></span>")
+	attacker.attack_log += text("\[[time_stamp()]\] <font color='red'>attacked [src.name]</font>")
 	if(prob(10))
 		new /obj/effect/decal/cleanable/blood/oil(src.loc)
 	healthcheck()
@@ -124,10 +132,6 @@
 	..()
 	healthcheck()
 
-/obj/machinery/bot/meteorhit()
-	src.explode()
-	return
-
 /obj/machinery/bot/blob_act()
 	src.health -= rand(20,40)*fire_dam_coeff
 	healthcheck()
@@ -136,7 +140,7 @@
 /obj/machinery/bot/ex_act(severity)
 	switch(severity)
 		if(1.0)
-			src.explode()
+			explode()
 			return
 		if(2.0)
 			src.health -= rand(5,10)*fire_dam_coeff
@@ -158,8 +162,8 @@
 	pulse2.icon = 'icons/effects/effects.dmi'
 	pulse2.icon_state = "empdisable"
 	pulse2.name = "emp sparks"
-	pulse2.anchored = 1
-	pulse2.dir = pick(cardinal)
+	pulse2.anchored = TRUE
+	pulse2.set_dir(pick(cardinal))
 
 	spawn(10)
 		qdel(pulse2)
@@ -172,9 +176,9 @@
 
 
 /obj/machinery/bot/attack_ai(mob/user)
-	src.attack_hand(user)
+	attack_hand(user)
 
-/obj/machinery/bot/is_operational_topic()
+/obj/machinery/bot/is_operational()
 	return TRUE
 
 /obj/machinery/bot/proc/inaction_check()

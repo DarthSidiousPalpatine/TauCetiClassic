@@ -6,7 +6,7 @@
 	flags = MASKCOVERSMOUTH | MASKCOVERSEYES | BLOCK_GAS_SMOKE_EFFECT | MASKINTERNALS
 	flags_inv = HIDEEARS|HIDEEYES|HIDEFACE
 	body_parts_covered = FACE|EYES
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	item_state = "gas_mask_tc"
 	gas_transfer_coefficient = 0.01
 	permeability_coefficient = 0.01
@@ -27,7 +27,7 @@
 	action_button_name = "Toggle Welding Mask"
 	siemens_coefficient = 0.9
 	body_parts_covered = FACE|EYES
-	w_class = ITEM_SIZE_NORMAL
+	w_class = SIZE_SMALL
 	var/up = 0
 
 /obj/item/clothing/mask/gas/welding/attack_self()
@@ -38,7 +38,7 @@
 	set name = "Adjust welding mask"
 	set src in usr
 
-	if(usr.canmove && !usr.stat && !usr.restrained())
+	if(!usr.incapacitated())
 		if(src.up)
 			src.up = !src.up
 			src.flags |= (HEADCOVERSEYES | HEADCOVERSMOUTH)
@@ -66,10 +66,10 @@
 	icon_state = "secmask"
 	var/cooldown = 0
 	var/aggressiveness = 2
-	flags = MASKCOVERSMOUTH | MASKCOVERSEYES | BLOCK_GAS_SMOKE_EFFECT | MASKINTERNALS | BLOCKHAIR
+	flags = MASKCOVERSMOUTH | MASKCOVERSEYES | BLOCK_GAS_SMOKE_EFFECT | MASKINTERNALS
 
-/obj/item/clothing/mask/gas/sechailer/attackby(obj/item/weapon/W, mob/user)
-	if(isscrewdriver(W))
+/obj/item/clothing/mask/gas/sechailer/attackby(obj/item/I, mob/user, params)
+	if(isscrewdriver(I))
 		switch(aggressiveness)
 			if(1)
 				to_chat(user, "<span class='notice'>You set the restrictor to the middle position.</span>")
@@ -82,12 +82,12 @@
 				aggressiveness = 1
 			if(4)
 				to_chat(user, "<span class='warning'>You adjust the restrictor but nothing happens, probably because its broken.</span>")
-	else if(iswirecutter(W))
+	else if(iswirecutter(I))
 		if(aggressiveness != 4)
 			to_chat(user, "<span class='warning'>You broke it!</span>")
 			aggressiveness = 4
 	else
-		..()
+		return ..()
 
 /obj/item/clothing/mask/gas/sechailer/attack_self()
 	halt()
@@ -97,7 +97,8 @@
 	set name = "HALT"
 	set src in usr
 	if(!istype(usr, /mob/living)) return
-	if(usr.stat) return
+	if(usr.incapacitated())
+		return
 
 	var/phrase = 0	//selects which phrase to use
 	var/phrase_text = null
@@ -185,7 +186,7 @@
 	body_parts_covered = HEAD|FACE
 
 /obj/item/clothing/mask/gas/swat
-	name = "\improper SWAT mask"
+	name = "SWAT mask"
 	desc = "A close-fitting tactical mask that can be connected to an air supply."
 	icon_state = "swat"
 	siemens_coefficient = 0.7
@@ -214,6 +215,7 @@
 	item_state = "s-ninja_mask"
 	vchange = 1
 	siemens_coefficient = 0.2
+	var/hud = FALSE
 
 /obj/item/clothing/mask/gas/clown_hat
 	name = "clown wig and mask"
@@ -290,11 +292,10 @@
 	flags = MASKCOVERSMOUTH | MASKINTERNALS | BLOCK_GAS_SMOKE_EFFECT
 	flags_inv = 0
 	body_parts_covered = 0
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	gas_transfer_coefficient = 0.10
 	filter = list("phoron", "sleeping_agent", "oxygen")
 	species_restricted = list(VOX , VOX_ARMALIS)
-	sprite_sheets = list(VOX_ARMALIS = 'icons/mob/species/armalis/mask.dmi')
 
 /obj/item/clothing/mask/gas/German
 	name = "German Gas Mask"

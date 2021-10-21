@@ -1,12 +1,13 @@
 //todo: toothbrushes, and some sort of "toilet-filthinator" for the hos
 
+ADD_TO_GLOBAL_LIST(/obj/structure/toilet, toilet_list)
 /obj/structure/toilet
 	name = "toilet"
 	desc = "The HT-451, a torque rotation-based, waste disposal unit for small matter. This one seems remarkably clean."
 	icon = 'icons/obj/watercloset.dmi'
 	icon_state = "toilet00"
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	var/open = 0			//if the lid is up
 	var/cistern = 0			//if the cistern bit is open
 	var/w_items = 0			//the combined w_class of all the items in the cistern
@@ -82,14 +83,13 @@
 				to_chat(user, "<span class='notice'>You need a tighter grip.</span>")
 
 	if(cistern)
-		if(I.w_class > ITEM_SIZE_NORMAL)
+		if(I.w_class > SIZE_SMALL)
 			to_chat(user, "<span class='notice'>\The [I] does not fit.</span>")
 			return
-		if(w_items + I.w_class > ITEM_SIZE_HUGE)
+		if(w_items + I.w_class > SIZE_BIG)
 			to_chat(user, "<span class='notice'>The cistern is full.</span>")
 			return
-		user.drop_item()
-		I.loc = src
+		user.drop_from_inventory(I, src)
 		w_items += I.w_class
 		user.SetNextMove(CLICK_CD_INTERACT)
 		add_fingerprint(user)
@@ -103,8 +103,8 @@
 	desc = "The HU-452, an experimental urinal."
 	icon = 'icons/obj/watercloset.dmi'
 	icon_state = "urinal"
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 
 /obj/structure/urinal/attackby(obj/item/I, mob/user)
 	if(istype(I, /obj/item/weapon/grab))
@@ -260,7 +260,7 @@
 		if(user.get_active_hand() != I)
 			return //Person has switched hands or the item in their hands
 
-		O.wet = FALSE
+		O.wet = 0
 		user.visible_message( \
 			"<span class='notice'>[user] drying \a [I] using \the [src].</span>", \
 			"<span class='notice'>You dry \a [I] using \the [src].</span>")
@@ -284,16 +284,17 @@
 	desc = "The HS-451. Installed in the 2550s by the Nanotrasen Hygiene Division."
 	icon = 'icons/obj/watercloset.dmi'
 	icon_state = "shower"
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	use_power = NO_POWER_USE
+	layer = MOB_LAYER + 1.1
 	var/on = 0
 	var/obj/effect/mist/mymist = null
 	var/ismist = 0				//needs a var so we can make it linger~
 	var/watertemp = "normal"	//freezing, normal, or boiling
 	var/mobpresent = 0		//true if there is a mob on the shower's loc, this is to ease process()
 	var/is_payed = 0
-	var/cost_per_activation = 150
+	var/cost_per_activation = 10
 
 //add heat controls? when emagged, you can freeze to death in it?
 
@@ -302,8 +303,8 @@
 	icon = 'icons/obj/watercloset.dmi'
 	icon_state = "mist"
 	layer = MOB_LAYER + 1
-	anchored = 1
-	mouse_opacity = 0
+	anchored = TRUE
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
 /obj/machinery/shower/attack_hand(mob/user)
 	. = ..()
@@ -320,7 +321,7 @@
 			for (var/atom/movable/G in src.loc)
 				G.clean_blood()
 		else
-			is_payed = 0 // ≈сли игрок выключил раньше времени - принудительное аннулирование платы.
+			is_payed = 0 // If the player closes ahead of time - force cancel the fee
 	else
 		to_chat(user, "You didn't pay for that. Swipe a card against [src].")
 
@@ -357,8 +358,8 @@
 						var/transaction_amount = cost_per_activation
 						if(transaction_amount <= D.money)
 							//transfer the money
-							D.money -= transaction_amount
-							station_account.money += transaction_amount
+							D.adjust_money(-transaction_amount)
+							station_account.adjust_money(transaction_amount)
 
 							//create entries in the two account transaction logs
 							var/datum/transaction/T = new()
@@ -390,12 +391,12 @@
 			to_chat(usr, "[bicon(src)]<span class='notice'>Is payed, you may turn it on now.</span>")
 
 /obj/machinery/shower/update_icon()	//this is terribly unreadable, but basically it makes the shower mist up
-	overlays.Cut()					//once it's been on for a while, in addition to handling the water overlay.
+	cut_overlays()					//once it's been on for a while, in addition to handling the water overlay.
 	if(mymist)
 		qdel(mymist)
 
 	if(on)
-		overlays += image('icons/obj/watercloset.dmi', src, "water", MOB_LAYER + 1, dir)
+		add_overlay(image('icons/obj/watercloset.dmi', src, "water", MOB_LAYER + 1, dir))
 		if(watertemp == "freezing")
 			return
 		if(!ismist)
@@ -414,12 +415,12 @@
 				qdel(mymist)
 				ismist = 0
 
-/obj/machinery/shower/Crossed(atom/movable/O)
-	..()
-	wash(O)
-	if(ismob(O))
+/obj/machinery/shower/Crossed(atom/movable/AM)
+	. = ..()
+	wash(AM)
+	if(ismob(AM))
 		mobpresent += 1
-		check_heat(O)
+		check_heat(AM)
 
 /obj/machinery/shower/Uncrossed(atom/movable/O)
 	if(ismob(O))
@@ -681,6 +682,7 @@
 
 /obj/structure/sink/puddle	//splishy splashy ^_^
 	name = "puddle"
+	desc = "The puddle looks infinitely deep and infinitely lonely on the space station."
 	icon_state = "puddle"
 
 /obj/structure/sink/puddle/attack_hand(mob/M)

@@ -6,8 +6,8 @@ var/global/list/image/splatter_cache=list()
 	name = "blood"
 	desc = "It's thick and gooey. Perhaps it's the chef's cooking?"
 	gender = PLURAL
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	layer = 2
 	icon = 'icons/effects/blood.dmi'
 	icon_state = "mfloor1"
@@ -19,6 +19,8 @@ var/global/list/image/splatter_cache=list()
 	var/list/datum/disease2/disease/virus2 = list()
 	var/amount = 5
 	var/drytime
+
+	beauty = -100
 
 /obj/effect/decal/cleanable/blood/Destroy()
 	for(var/datum/disease/D in viruses)
@@ -52,9 +54,11 @@ var/global/list/image/splatter_cache=list()
 /obj/effect/decal/cleanable/blood/update_icon()
 	color = basedatum.color
 
-/obj/effect/decal/cleanable/blood/Crossed(mob/living/carbon/perp)
-	if(!istype(perp))
+/obj/effect/decal/cleanable/blood/Crossed(atom/movable/AM)
+	. = ..()
+	if(!iscarbon(AM) || HAS_TRAIT(AM, TRAIT_LIGHT_STEP))
 		return
+	var/mob/living/carbon/perp = AM
 	if(amount < 1)
 		return
 	if(!islist(blood_DNA))	//prevent from runtime errors connected with shitspawn
@@ -72,7 +76,7 @@ var/global/list/image/splatter_cache=list()
 			var/obj/item/clothing/shoes/S = perp.shoes
 			if(istype(S))
 				if((dirt_overlay && dirt_overlay.color != basedatum.color) || (!dirt_overlay))
-					S.overlays.Cut()
+					S.cut_overlays()
 					S.add_dirt_cover(basedatum)
 				S.track_blood = max(amount,S.track_blood)
 				if(!S.blood_DNA)
@@ -167,23 +171,25 @@ var/global/list/image/splatter_cache=list()
 	icon_state = "blank"
 	desc = "Your instincts say you shouldn't be following these."
 	gender = PLURAL
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	layer = 2
 	random_icon_states = null
 	amount = 3
 	var/list/existing_dirs = list()
 	blood_DNA = list()
 
+	beauty = -50
+
 /obj/effect/decal/cleanable/blood/gibs
 	name = "gibs"
 	desc = "They look bloody and gruesome."
 	gender = PLURAL
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	layer = 2
 	icon = 'icons/effects/blood.dmi'
-	icon_state = "gibbl5"
+	icon_state = "gibbearcore"
 	random_icon_states = list("gib1", "gib2", "gib3", "gib4", "gib5", "gib6")
 	var/fleshcolor = "#ffffff"
 
@@ -197,23 +203,28 @@ var/global/list/image/splatter_cache=list()
 	blood.Blend(basedatum.color, ICON_MULTIPLY)
 
 	icon = blood
-	overlays.Cut()
-	overlays += giblets
+	cut_overlays()
+	add_overlay(giblets)
 
 /obj/effect/decal/cleanable/blood/gibs/up
+	icon_state = "gibup1" // for mapeditor
 	random_icon_states = list("gib1", "gib2", "gib3", "gib4", "gib5", "gib6","gibup1","gibup1","gibup1")
 
 /obj/effect/decal/cleanable/blood/gibs/down
+	icon_state = "gibdown1"
 	random_icon_states = list("gib1", "gib2", "gib3", "gib4", "gib5", "gib6","gibdown1","gibdown1","gibdown1")
 
 /obj/effect/decal/cleanable/blood/gibs/body
+	icon_state = "gibhead"
 	random_icon_states = list("gibhead", "gibtorso")
 
 /obj/effect/decal/cleanable/blood/gibs/limb
+	icon_state = "gibleg"
 	random_icon_states = list("gibleg", "gibarm")
 
 /obj/effect/decal/cleanable/blood/gibs/core
-	random_icon_states = list("gibmid1", "gibmid2", "gibmid3")
+	icon_state = "gibmid1"
+	random_icon_states = list("gibmid1", "gibmid2", "gibmid3", "gibbearcore")
 
 
 /obj/effect/decal/cleanable/blood/gibs/proc/streak(list/directions)
@@ -233,8 +244,8 @@ var/global/list/image/splatter_cache=list()
 				if (step_to(src, get_step(src, direction), 0))
 					break
 
-/obj/effect/decal/cleanable/blood/gibs/Crossed(mob/living/L)
-	if(istype(L) && has_gravity(loc))
+/obj/effect/decal/cleanable/blood/gibs/Crossed(atom/movable/AM)
+	if(isliving(AM) && has_gravity(loc))
 		playsound(src, 'sound/effects/gib_step.ogg', VOL_EFFECTS_MASTER)
 	. = ..()
 
@@ -243,8 +254,8 @@ var/global/list/image/splatter_cache=list()
 	name = "mucus"
 	desc = "Disgusting mucus."
 	gender = PLURAL
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	layer = 2
 	icon = 'icons/effects/blood.dmi'
 	icon_state = "mucus"
@@ -252,6 +263,8 @@ var/global/list/image/splatter_cache=list()
 
 	var/list/datum/disease2/disease/virus2 = list()
 	var/dry = 0 // Keeps the lag down
+
+	beauty = -50
 
 /obj/effect/decal/cleanable/mucus/atom_init()
 	. = ..()

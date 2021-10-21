@@ -5,8 +5,8 @@
 	desc = "A gas turbine. Converting pressure into energy since 1884."
 	icon = 'icons/obj/pipeturbine.dmi'
 	icon_state = "turbine"
-	anchored = 0
-	density = 1
+	anchored = FALSE
+	density = TRUE
 
 	var/efficiency = 0.4
 	var/kin_energy = 0
@@ -58,15 +58,15 @@
 	update_parents()
 
 /obj/machinery/atmospherics/components/pipeturbine/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	if (dP > 10)
-		overlays += image('icons/obj/pipeturbine.dmi', "moto-turb")
+		add_overlay(image('icons/obj/pipeturbine.dmi', "moto-turb"))
 	if (kin_energy > 100000)
-		overlays += image('icons/obj/pipeturbine.dmi', "low-turb")
+		add_overlay(image('icons/obj/pipeturbine.dmi', "low-turb"))
 	if (kin_energy > 500000)
-		overlays += image('icons/obj/pipeturbine.dmi', "med-turb")
+		add_overlay(image('icons/obj/pipeturbine.dmi', "med-turb"))
 	if (kin_energy > 1000000)
-		overlays += image('icons/obj/pipeturbine.dmi', "hi-turb")
+		add_overlay(image('icons/obj/pipeturbine.dmi', "hi-turb"))
 
 /obj/machinery/atmospherics/components/pipeturbine/attackby(obj/item/weapon/W, mob/user)
 	if(iswrench(W))
@@ -112,10 +112,10 @@
 	set name = "Rotate Circulator (Clockwise)"
 	set src in view(1)
 
-	if (usr.stat || usr.restrained() || anchored)
+	if (usr.incapacitated() || anchored)
 		return
 
-	src.set_dir(turn(src.dir, -90))
+	set_dir(turn(src.dir, -90))
 
 
 /obj/machinery/atmospherics/components/pipeturbine/verb/rotate_anticlockwise()
@@ -123,18 +123,18 @@
 	set name = "Rotate Circulator (Counterclockwise)"
 	set src in view(1)
 
-	if (usr.stat || usr.restrained() || anchored)
+	if (usr.incapacitated() || anchored)
 		return
 
-	src.set_dir(turn(src.dir, 90))
+	set_dir(turn(src.dir, 90))
 
 /obj/machinery/power/turbinemotor
 	name = "motor"
 	desc = "Electrogenerator. Converts rotation into power."
 	icon = 'icons/obj/pipeturbine.dmi'
 	icon_state = "motor"
-	anchored = 0
-	density = 1
+	anchored = FALSE
+	density = TRUE
 
 	var/kin_to_el_ratio = 0.1	//How much kinetic energy will be taken from turbine and converted into electricity
 	var/obj/machinery/atmospherics/components/pipeturbine/turbine
@@ -174,7 +174,7 @@
 	set name = "Rotate Motor Clockwise"
 	set src in view(1)
 
-	if (usr.stat || usr.restrained() || anchored)
+	if (usr.incapacitated() || anchored)
 		return
 
 	set_dir(turn(dir, -90))
@@ -184,7 +184,7 @@
 	set name = "Rotate Motor Counterclockwise"
 	set src in view(1)
 
-	if (usr.stat || usr.restrained() || anchored)
+	if (usr.incapacitated() || anchored)
 		return
 
 	set_dir(turn(dir, 90))

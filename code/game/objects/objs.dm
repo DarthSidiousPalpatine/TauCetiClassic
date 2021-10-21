@@ -2,7 +2,6 @@
 	//var/datum/module/mod		//not used
 	var/m_amt = 0	// metal
 	var/g_amt = 0	// glass
-	var/w_amt = 0	// waster amounts
 	var/origin_tech = null	//Used by R&D to determine what research bonuses it grants.
 	var/reliability = 100	//Used by SOME devices to determine how reliable they are.
 	var/crit_fail = 0
@@ -32,6 +31,15 @@
 	nanomanager.close_uis(src)
 	return ..()
 
+/obj/proc/get_current_temperature()
+	/*
+	It actually returns a rise in temperature from the enviroment since I don't know why.
+	Before it was called "is_hot". And it returned 0 if something is not any hotter than it should be.
+
+	Slap me on the wrist if you ever will need this to return a meaningful value. ~Luduk
+	*/
+	return 0
+
 /obj/assume_air(datum/gas_mixture/giver)
 	if(loc)
 		return loc.assume_air(giver)
@@ -59,7 +67,7 @@
 /obj/singularity_pull(S, current_size)
 	if(anchored)
 		if(current_size >= STAGE_FIVE)
-			anchored = 0
+			anchored = FALSE
 			step_towards(src,S)
 	else
 		step_towards(src,S)
@@ -126,13 +134,16 @@
 		for(var/mob/M in nearby)
 			if ((M.client && M.machine == src))
 				is_in_use = TRUE
-				src.interact(M)
+				interact(M)
 		var/ai_in_use = AutoUpdateAI(src)
 
 		in_use = is_in_use|ai_in_use
 
 /obj/attack_ghost(mob/dead/observer/user)
-	if(user.client.machine_interactive_ghost && ui_interact(user) != -1)
+	if(user.client.machine_interactive_ghost)
+		if(ui_interact(user) != -1)
+			return
+		tgui_interact(user)
 		return
 	..()
 
@@ -145,14 +156,10 @@
 /obj/proc/container_resist()
 	return
 
-/obj/proc/update_icon()
-	return
-
-/mob/proc/unset_machine(obj/O)
-	if(O && O == src.machine)
-		src.machine = null
-	else
-		src.machine = null
+/mob/proc/unset_machine()
+	if(machine)
+		machine.on_unset_machine(src)
+		machine = null
 
 /mob/proc/set_machine(obj/O)
 	if(src.machine)
@@ -161,10 +168,13 @@
 	if(istype(O))
 		O.in_use = 1
 
+/atom/movable/proc/on_unset_machine(mob/user)
+	return
+
 /obj/item/proc/updateSelfDialog()
 	var/mob/M = src.loc
 	if(istype(M) && M.client && M.machine == src)
-		src.attack_self(M)
+		attack_self(M)
 
 
 /obj/proc/alter_health()
@@ -176,6 +186,24 @@
 /obj/proc/hides_under_flooring()
 	return level == 1
 
+/atom/movable/proc/get_listeners()
+	. = list()
+	for(var/mob/M in contents)
+		. |= M.get_listeners()
+
+/mob/get_listeners()
+	. = list(src)
+	for(var/mob/M in contents)
+		. |= M.get_listeners()
+
+/atom/movable/proc/get_listening_objs()
+	return list(src)
+
+/mob/get_listening_objs()
+	. = list()
+	for(var/atom/movable/AM in contents)
+		. |= AM.get_listening_objs()
+
 /obj/proc/hear_talk(mob/M, text, verb, datum/language/speaking)
 	if(talking_atom)
 		talking_atom.catchMessage(text, M)
@@ -183,7 +211,7 @@
 	var/mob/mo = locate(/mob) in src
 	if(mo)
 		var/rendered = "<span class='game say'><span class='name'>[M.name]: </span> <span class='message'>[text]</span></span>"
-		mo.show_message(rendered, 2)
+		mo.oldshow_message(rendered, 2)
 		*/
 	return
 
@@ -191,11 +219,7 @@
 	being_shocked = 1
 	var/power_bounced = power / 2
 	tesla_zap(src, 3, power_bounced)
-	spawn(10)
-		reset_shocked()
-
-/obj/proc/reset_shocked()
-	being_shocked = 0
+	VARSET_IN(src, being_shocked, FALSE, 10)
 
 //mob - who is being feed
 //user - who is feeding
@@ -220,6 +244,12 @@
 				else
 					to_chat(user, "You can't feed [Feeded] with [food] through [Mask]")
 				return FALSE
+		if(Feeded.species.flags[IS_SYNTHETIC])
+			if(Feeded == user)
+				to_chat(user, "<span class='warning'>You can't [eatverb] [food], you have a monitor for a head!</span>")
+			else
+				to_chat(user, "<span class='warning'>You can't feed [Feeded] with [food], they have a monitor for a head!</span>")
+			return FALSE
 		return TRUE
 	if(isIAN(mob))
 		var/mob/living/carbon/ian/dumdum = mob

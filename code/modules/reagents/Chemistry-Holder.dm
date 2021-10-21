@@ -1,15 +1,14 @@
-//This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:32
-
 var/const/TOUCH = 1
 var/const/INGEST = 2
 
 ///////////////////////////////////////////////////////////////////////////////////
 
 /datum/reagents
-	var/list/datum/reagent/reagent_list = new/list()
+	var/list/datum/reagent/reagent_list = list()
 	var/total_volume = 0
 	var/maximum_volume = 100
 	var/atom/my_atom = null
+	var/proccessing_reaction_count = 0
 
 /datum/reagents/New(maximum=100)
 	maximum_volume = maximum
@@ -27,11 +26,11 @@ var/const/INGEST = 2
 		if(current_list_element > reagent_list.len) current_list_element = 1
 		var/datum/reagent/current_reagent = reagent_list[current_list_element]
 
-		src.remove_reagent(current_reagent.id, 1)
+		remove_reagent(current_reagent.id, 1)
 
 		current_list_element++
 		total_transfered++
-		src.update_total()
+		update_total()
 
 	handle_reactions()
 	return total_transfered
@@ -82,13 +81,13 @@ var/const/INGEST = 2
 		if(preserve_data)
 			trans_data = copy_data(current_reagent)
 
-		R.add_reagent(current_reagent.id, (current_reagent_transfer * multiplier), trans_data, safety = 1)	//safety checks on these so all chemicals are transferred
-		src.remove_reagent(current_reagent.id, current_reagent_transfer, safety = 1)							// to the target container before handling reactions
+		R.add_reagent(current_reagent.id, (current_reagent_transfer * multiplier), trans_data, TRUE, current_reagent.religion)	//safety checks on these so all chemicals are transferred
+		remove_reagent(current_reagent.id, current_reagent_transfer, safety = 1)							// to the target container before handling reactions
 
-	src.update_total()
+	update_total()
 	R.update_total()
 	R.handle_reactions()
-	src.handle_reactions()
+	handle_reactions()
 	return amount
 
 /datum/reagents/proc/trans_to_ingest(obj/target, amount=1, multiplier=1, preserve_data=1)//For items ingested. A delay is added between ingestion and addition of the reagents
@@ -101,14 +100,15 @@ var/const/INGEST = 2
 	if(amount > 2000) return
 
 	var/obj/item/weapon/reagent_containers/glass/beaker/noreact/B = new /obj/item/weapon/reagent_containers/glass/beaker/noreact //temporary holder
-	B.volume = 1000
+	B.volume = maximum_volume
+	B.reagents.maximum_volume = maximum_volume
 
 	var/datum/reagents/BR = B.reagents
 	var/datum/reagents/R = target.reagents
 
 	amount = min(min(amount, src.total_volume), R.maximum_volume-R.total_volume)
 
-	src.trans_to(B, amount)
+	trans_to(B, amount)
 
 	digest_with_delay(BR, target, B)
 
@@ -138,19 +138,19 @@ var/const/INGEST = 2
 		var/current_reagent_transfer = current_reagent.volume * part
 		if(preserve_data)
 			trans_data = copy_data(current_reagent)
-		R.add_reagent(current_reagent.id, (current_reagent_transfer * multiplier), trans_data, safety = 1)	//safety check so all chemicals are transferred before reacting
+		R.add_reagent(current_reagent.id, (current_reagent_transfer * multiplier), trans_data, TRUE, current_reagent.religion)	//safety check so all chemicals are transferred before reacting
 
-	src.update_total()
+	update_total()
 	R.update_total()
 	if(!safety)
 		R.handle_reactions()
-		src.handle_reactions()
+		handle_reactions()
 	return amount
 
-/datum/reagents/proc/trans_id_to(obj/target, reagent, amount=1, preserve_data=1)//Not sure why this proc didn't exist before. It does now! /N
+/datum/reagents/proc/trans_id_to(obj/target, reagent, amount=1, multiplier=1, preserve_data=1)//Not sure why this proc didn't exist before. It does now! /N
 	if (!target)
 		return
-	if(src.total_volume<=0 || !src.get_reagent_amount(reagent))
+	if(src.total_volume<=0 || !get_reagent_amount(reagent))
 		return
 	if(amount < 0) return
 	if(amount > 2000) return
@@ -163,33 +163,30 @@ var/const/INGEST = 2
 			return
 		R = target.reagents
 
-	if(src.get_reagent_amount(reagent)<amount)
-		amount = src.get_reagent_amount(reagent)
+	if(get_reagent_amount(reagent)<amount)
+		amount = get_reagent_amount(reagent)
 	amount = min(amount, R.maximum_volume-R.total_volume)
 	var/trans_data = null
 	for (var/datum/reagent/current_reagent in src.reagent_list)
 		if(current_reagent.id == reagent)
 			if(preserve_data)
 				trans_data = copy_data(current_reagent)
-			R.add_reagent(current_reagent.id, amount, trans_data)
-			src.remove_reagent(current_reagent.id, amount, 1)
+			R.add_reagent(current_reagent.id, amount * multiplier, trans_data, safety = TRUE)
+			remove_reagent(current_reagent.id, amount, 1, safety = TRUE)
 			break
 
-	src.update_total()
+	update_total()
 	R.update_total()
 	R.handle_reactions()
-	//src.handle_reactions() Don't need to handle reactions on the source since you're (presumably isolating and) transferring a specific reagent.
+	//handle_reactions() Don't need to handle reactions on the source since you're (presumably isolating and) transferring a specific reagent.
 	return amount
 
-/datum/reagents/proc/metabolize(mob/M, alien)
-	if(has_reagent("aclometasone")) // Has a "unique" metabolization disabling factor, which just prevents any metabolization at all without affecting hunger. ~Luduk
-		return
-	for(var/A in reagent_list)
-		var/datum/reagent/R = A
+/datum/reagents/proc/metabolize(mob/M)
+	for(var/datum/reagent/R in reagent_list)
 		if(M && R)
 			var/mob/living/carbon/C = M //currently metabolism work only for carbon, there is no need to check mob type
 			var/remove_amount = R.custom_metabolism * C.get_metabolism_factor()
-			R.on_mob_life(M, alien)
+			R.on_mob_life(M)
 			remove_reagent(R.id, remove_amount)
 	update_total()
 
@@ -214,6 +211,8 @@ var/const/INGEST = 2
 	if(my_atom.flags & NOREACT) return //Yup, no reactions here. No siree.
 
 
+	// Carefull, next while cycle are async
+	proccessing_reaction_count += 1
 	var/reaction_occured = 0
 	do
 		reaction_occured = 0
@@ -239,7 +238,7 @@ var/const/INGEST = 2
 				var/total_matching_catalysts= 0
 				var/matching_container = 0
 				var/matching_other = 0
-				var/list/multipliers = new/list()
+				var/list/multipliers = list()
 
 				for(var/B in C.required_reagents)
 					if(!has_reagent(B, C.required_reagents[B]))	break
@@ -308,8 +307,9 @@ var/const/INGEST = 2
 						if(ME2.Uses <= 0) // give the notification that the slime core is dead
 							for(var/mob/M in seen)
 								to_chat(M, "<span class='notice'>[bicon(my_atom)] The [my_atom]'s power is consumed in the reaction.</span>")
-								ME2.name = "used slime extract"
-								ME2.desc = "This extract has been used up."
+							ME2.name = "used slime extract"
+							ME2.desc = "This extract has been used up."
+							ME2.origin_tech = null
 
 					playsound(my_atom, 'sound/effects/bubbles.ogg', VOL_EFFECTS_MASTER)
 
@@ -319,18 +319,23 @@ var/const/INGEST = 2
 
 	while(reaction_occured)
 	update_total()
+	if (proccessing_reaction_count > 0)
+		proccessing_reaction_count -= 1
 	return 0
 
+/datum/reagents/proc/is_reaction_in_proccessing()
+	if (proccessing_reaction_count > 0)
+		return TRUE
+	return FALSE
+
 /datum/reagents/proc/isolate_reagent(reagent)
-	for(var/A in reagent_list)
-		var/datum/reagent/R = A
+	for(var/datum/reagent/R in reagent_list)
 		if (R.id != reagent)
 			del_reagent(R.id)
 			update_total()
 
 /datum/reagents/proc/del_reagent(reagent)
-	for(var/A in reagent_list)
-		var/datum/reagent/R = A
+	for(var/datum/reagent/R in reagent_list)
 		if (R.id == reagent)
 			reagent_list -= R
 			qdel(R)
@@ -393,38 +398,29 @@ var/const/INGEST = 2
 						INVOKE_ASYNC(R, /datum/reagent.proc/reaction_obj, A, R.volume+volume_modifier)
 	return
 
-/datum/reagents/proc/add_reagent(reagent, amount, list/data=null, safety = 0)
-	if(!isnum(amount)) return 1
-	if(amount < 0) return 0
-	if(amount > 2000) return
+/datum/reagents/proc/add_reagent(reagent, amount, list/data = null, safety = FALSE, datum/religion/_religion)
+	if(!isnum(amount) || amount < 0 || amount > 2000)
+		return FALSE
+
 	update_total()
-	if(total_volume + amount > maximum_volume) amount = (maximum_volume - total_volume) //Doesnt fit in. Make it disappear. Shouldnt happen. Will happen.
+	if(total_volume + amount > maximum_volume)
+		amount = (maximum_volume - total_volume) //Doesnt fit in. Make it disappear. Shouldnt happen. Will happen.
 
-	for(var/A in reagent_list)
-
-		var/datum/reagent/R = A
+	for(var/datum/reagent/R in reagent_list)
 		if (R.id == reagent)
 			R.volume += amount
-			update_total()
-			if(my_atom)
-				my_atom.on_reagent_change()
 
-			// mix dem viruses
+			// Data:
 			if(R.id == "blood" && reagent == "blood")
 				if(R.data && data)
-
-					if(R.data["viruses"] || data["viruses"])
-
+					if(R.data["viruses"] || data["viruses"]) // mix dem viruses
 						var/list/mix1 = R.data["viruses"]
 						var/list/mix2 = data["viruses"]
 
 						// Stop issues with the list changing during mixing.
 						var/list/to_mix = list()
-
-						for(var/datum/disease/advance/AD in mix1)
-							to_mix += AD
-						for(var/datum/disease/advance/AD in mix2)
-							to_mix += AD
+						to_mix += mix1
+						to_mix += mix2
 
 						var/datum/disease/advance/AD = Advance_Mix(to_mix)
 						if(AD)
@@ -433,53 +429,57 @@ var/const/INGEST = 2
 								if(!istype(D, /datum/disease/advance))
 									preserve += D
 							R.data["viruses"] = preserve
+
 			else if(R.id == "customhairdye" || R.id == "paint_custom")
 				for(var/color in R.data)
 					R.data[color] = (R.data[color] + data[color]) * 0.5
 				// I am well aware of RGB_CONTRAST define, but in reagent colors everywhere else we use hex codes, so I did the thing below. ~Luduk.
 				R.color = numlist2hex(list(R.data["r_color"], R.data["g_color"], R.data["b_color"]))
 
+			// Update:
+			update_total()
+			if(my_atom)
+				my_atom.on_reagent_change()
 			if(!safety)
 				handle_reactions()
-			return 0
+			return TRUE
 
 	var/datum/reagent/D = chemical_reagents_list[reagent]
 	if(D)
-
 		var/datum/reagent/R = new D.type()
 		reagent_list += R
 		R.holder = src
 		R.volume = amount
+		R.religion = _religion
+
+		// Data:
 		SetViruses(R, data) // Includes setting data
 
-		//debug
-		//world << "Adding data"
-		//for(var/D in R.data)
-		//	world << "Container data: [D] = [R.data[D]]"
-		//debug
 		if(reagent == "customhairdye" || reagent == "paint_custom")
 			R.color = numlist2hex(list(R.data["r_color"], R.data["g_color"], R.data["b_color"]))
+
+		// Update:
+		R.on_new()
 
 		update_total()
 		if(my_atom)
 			my_atom.on_reagent_change()
 		if(!safety)
 			handle_reactions()
-		return 0
+		return TRUE
 	else
 		warning("[my_atom] attempted to add a reagent called '[reagent]' which doesn't exist. ([usr])")
 
 	if(!safety)
 		handle_reactions()
 
-	return 1
+	return FALSE
 
 /datum/reagents/proc/remove_reagent(reagent, amount, safety = 0)//Added a safety check for the trans_id_to
 	if(!isnum(amount) || amount < 0 || amount > 2000)
 		return FALSE
 
-	for(var/A in reagent_list)
-		var/datum/reagent/R = A
+	for(var/datum/reagent/R in reagent_list)
 		if (R.id == reagent)
 			R.volume -= amount
 			update_total()
@@ -492,37 +492,17 @@ var/const/INGEST = 2
 	return FALSE
 
 /datum/reagents/proc/has_reagent(reagent, amount = 0)
-	/*
-	Aclometasone prevents: reactions, metabolism, reagent effects, so we make this special snowflake code
-	to prevent all of the above.
-	*/
-	var/datum/reagent/aclometasone/ACLO = locate(/datum/reagent/aclometasone) in reagent_list
-	if(ismob(my_atom) && ACLO)
-		if(reagent == "aclometasone")
-			return ACLO.volume
-		return 0
-
 	for(var/datum/reagent/R in reagent_list)
 		if(R.id == reagent)
 			if(!amount)
 				return R
 			else if(R.volume >= amount)
 				return R
-	return 0
+
+	return FALSE
 
 /datum/reagents/proc/get_reagent_amount(reagent)
-	/*
-	Aclometasone prevents: reactions, metabolism, reagent effects, so we make this special snowflake code
-	to prevent all of the above.
-	*/
-	var/datum/reagent/aclometasone/ACLO = locate(/datum/reagent/aclometasone) in reagent_list
-	if(ismob(my_atom) && ACLO)
-		if(reagent == "aclometasone")
-			return ACLO.volume
-		return 0
-
-	for(var/A in reagent_list)
-		var/datum/reagent/R = A
+	for(var/datum/reagent/R in reagent_list)
 		if (R.id == reagent)
 			return R.volume
 
@@ -614,8 +594,43 @@ var/const/INGEST = 2
 	if(my_atom && my_atom.reagents == src)
 		my_atom.reagents = null
 
-///////////////////////////////////////////////////////////////////////////////////
+/datum/reagents/proc/create_chempuff(amount, multiplier=1, preserve_data=1, name_from_reagents = TRUE, icon_from_reagents = TRUE)
+	var/obj/effect/decal/chempuff/D = new/obj/effect/decal/chempuff(get_turf(my_atom))
+	if(name_from_reagents)
+		D.name = get_master_reagent_name()
+	D.create_reagents(amount)
+	D.icon = 'icons/obj/chempuff.dmi'
+	trans_to(D, amount, multiplier, preserve_data)
+	if(icon_from_reagents)
+		D.icon += mix_color_from_reagents(D.reagents.reagent_list)
+	return D
 
+/datum/reagents/proc/standard_splash(atom/target, amount=null, mob/living/user=null)
+	if(total_volume <= 0)
+		return
+
+	if(isnull(amount))
+		amount = total_volume
+
+	var/datum/reagents/splash = new()
+	splash.maximum_volume = maximum_volume
+	trans_to(splash, amount=amount)
+
+	if(!isnull(user))
+		var/turf/T = get_turf(target)
+		message_admins("[key_name_admin(user)] splashed [get_reagents()] on [target], location ([COORD(T)]) [ADMIN_JMP(user)]")
+		log_game("[key_name(user)] splashed [get_reagents()] on [target], location ([COORD(T)])")
+
+		if(ismob(target))
+			var/mob/living/L = target
+			var/contained = splash.get_reagents()
+
+			L.log_combat(user, "splashed with [my_atom.name], reagents: [contained] (INTENT: [uppertext(user.a_intent)])")
+
+	splash.reaction(target, TOUCH)
+	splash.clear_reagents()
+
+///////////////////////////////////////////////////////////////////////////////////
 
 // Convenience proc to create a reagents holder for an atom
 // Max vol is maximum volume of holder

@@ -3,8 +3,8 @@
 	name = "lattice"
 	icon = 'icons/obj/structures.dmi'
 	icon_state = "latticefull"
-	density = 0
-	anchored = 1.0
+	density = FALSE
+	anchored = TRUE
 	layer = 2.3 //under pipes
 	plane = FLOOR_PLANE
 	//	flags = CONDUCT
@@ -68,7 +68,7 @@
 	//if(!(istype(src.loc, /turf/space)))
 	//	qdel(src)
 	spawn(1)
-		overlays = list()
+		cut_overlays()
 
 		var/dir_sum = 0
 

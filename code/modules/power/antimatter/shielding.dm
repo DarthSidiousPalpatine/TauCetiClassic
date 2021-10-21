@@ -13,8 +13,8 @@
 
 	icon = 'icons/obj/machines/antimatter.dmi'
 	icon_state = "shield"
-	anchored = 1
-	density = 1
+	anchored = TRUE
+	density = TRUE
 	dir = 1
 	use_power = NO_POWER_USE//Living things generally dont use power
 	idle_power_usage = 0
@@ -122,14 +122,14 @@
 
 
 /obj/machinery/am_shielding/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	for(var/direction in alldirs)
 		var/machine = locate(/obj/machinery, get_step(loc, direction))
 		if((istype(machine, /obj/machinery/am_shielding) && machine:control_unit == control_unit)||(istype(machine, /obj/machinery/power/am_control_unit) && machine == control_unit))
-			overlays += "shield_[direction]"
+			add_overlay("shield_[direction]")
 
 	if(core_check())
-		overlays += "core"
+		add_overlay("core")
 		if(!processing) setup_core()
 	else if(processing) shutdown_core()
 
@@ -205,18 +205,16 @@
 	icon = 'icons/obj/machines/antimatter.dmi'
 	icon_state = "box"
 	item_state = "electronic"
-	w_class = ITEM_SIZE_LARGE
+	w_class = SIZE_NORMAL
 	flags = CONDUCT
 	throwforce = 5
 	throw_speed = 1
 	throw_range = 2
 	m_amt = 100
-	w_amt = 2000
 
-/obj/item/device/am_shielding_container/attackby(obj/item/I, mob/user)
-	if(ismultitool(I) && istype(src.loc,/turf))
-		new/obj/machinery/am_shielding(src.loc)
+/obj/item/device/am_shielding_container/attackby(obj/item/I, mob/user, params)
+	if(ismultitool(I) && istype(loc, /turf))
+		new/obj/machinery/am_shielding(loc)
 		qdel(src)
 		return
-	..()
-	return
+	return ..()

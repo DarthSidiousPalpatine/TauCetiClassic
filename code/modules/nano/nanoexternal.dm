@@ -18,12 +18,12 @@
 
 		if(ui.ref)
 			var/href = "close=1"
-			src.Topic(href, params2list(href), ui.ref)	// this will direct to the atom's Topic() proc via client.Topic()
+			Topic(href, params2list(href), ui.ref)	// this will direct to the atom's Topic() proc via client.Topic()
 		else if (ui.on_close_logic)
 			// no atomref specified (or not found)
 			// so just reset the user mob's machine var
 			if(src && src.mob)
-				src.mob.unset_machine()
+				mob.unset_machine()
 
 /*
  * The ui_interact proc is used to open and update Nano UIs
@@ -37,7 +37,7 @@
  *
  * @return nothing
  */
-/atom/movable/proc/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/nano_ui/master_ui = null, datum/topic_state/custom_state = null)
+/atom/movable/proc/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, datum/nanoui/master_ui = null, datum/topic_state/custom_state = null)
 	return -1 // Not implemented.
 
 // Used by the Nano UI Manager (/datum/nanomanager) to track UIs opened by this mob

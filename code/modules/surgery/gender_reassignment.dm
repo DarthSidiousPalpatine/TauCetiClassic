@@ -6,7 +6,7 @@
 	priority = 2
 	can_infect = 0
 	blood_level = 1
-	allowed_species = list("exclude", IPC, DIONA)
+	allowed_species = list("exclude", IPC, DIONA, VOX)
 
 /datum/surgery_step/gender_reassignment/can_use(mob/living/user, mob/living/carbon/human/target, target_zone, obj/item/tool)
 	if (!ishuman(target))
@@ -56,4 +56,4 @@
 	var/obj/item/organ/external/BP = target.bodyparts_by_name[BP_GROIN]
 	user.visible_message("<span class='warning'>[user]'s hand slips, slicing [target]'s genitals with \the [tool]!</span>", \
 	"<span class='warning'>Your hand slips, slicing [target]'s genitals with \the [tool]!</span>")
-	BP.createwound(CUT, 20, 1)
+	BP.take_damage(20, 0, DAM_SHARP|DAM_EDGE, tool)

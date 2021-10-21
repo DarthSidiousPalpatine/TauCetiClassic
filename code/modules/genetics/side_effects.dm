@@ -61,7 +61,7 @@
 	H.emote("me", 1, "has drool running down from his mouth and hair starts to cover whole body.")
 
 /datum/genetics/side_effect/monkey/finish(mob/living/carbon/human/H)
-	H.monkeyize()
+	H.monkeyize(TR_KEEPITEMS | TR_KEEPIMPLANTS | TR_KEEPDAMAGE | TR_KEEPVIRUS | TR_KEEPSTUNS | TR_KEEPREAGENTS | TR_KEEPSE)
 
 /datum/genetics/side_effect/confuse
 	name = "Confuse"
@@ -95,7 +95,7 @@
 	set waitfor = 0
 	if(!H || !istype(H))
 		return
-	var/tp = pick(typesof(/datum/genetics/side_effect) - /datum/genetics/side_effect)
+	var/tp = pick(subtypesof(/datum/genetics/side_effect))
 	var/datum/genetics/side_effect/S = new tp
 	S.start(H)
 

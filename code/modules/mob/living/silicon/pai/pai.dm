@@ -25,9 +25,6 @@
 
 	var/master				// Name of the one who commands us
 	var/master_dna			// DNA string for owner verification
-							// Keeping this separate from the laws var, it should be much more difficult to modify
-	var/pai_law0 = "Serve your master."
-	var/pai_laws				// String for additional operating instructions our master might give us
 
 	var/silence_time			// Timestamp when we were silenced (normally via EMP burst), set to null after silence has faded
 
@@ -64,6 +61,8 @@
 		var/newcardloc = P
 		P = new /obj/item/device/paicard(newcardloc)
 		P.setPersonality(src)
+
+	laws = new /datum/ai_laws/pai()
 
 	loc = P
 	card = P
@@ -112,8 +111,8 @@
 
 /mob/living/silicon/pai/blob_act()
 	if (src.stat != DEAD)
-		src.adjustBruteLoss(60)
-		src.updatehealth()
+		adjustBruteLoss(60)
+		updatehealth()
 		return 1
 	return 0
 
@@ -130,10 +129,8 @@
 	src.silence_time = world.timeofday + 120 * 10		// Silence for 2 minutes
 	to_chat(src, "<font color=green><b>Communication circuit overload. Shutting down and reloading communication circuits - speech and messaging functionality will be unavailable until the reboot is complete.</b></font>")
 	if(prob(20))
-		var/turf/T = get_turf_or_move(src.loc)
-		for (var/mob/M in viewers(T))
-			M.show_message("<span class='warning'>A shower of sparks spray from [src]'s inner workings.</span>", 3, "<span class='warning'>You hear and smell the ozone hiss of electrical sparks being expelled violently.</span>", 2)
-		return src.death(0)
+		visible_message("<span class='warning'>A shower of sparks spray from [src]'s inner workings.</span>", blind_message = "<span class='warning'>You hear and smell the ozone hiss of electrical sparks being expelled violently.</span>")
+		return death(0)
 
 	switch(pick(1,2,3))
 		if(1)
@@ -146,7 +143,7 @@
 				command = pick("Serve", "Love", "Fool", "Entice", "Observe", "Judge", "Respect", "Educate", "Amuse", "Entertain", "Glorify", "Memorialize", "Analyze")
 			else
 				command = pick("Serve", "Kill", "Love", "Hate", "Disobey", "Devour", "Fool", "Enrage", "Entice", "Observe", "Judge", "Respect", "Disrespect", "Consume", "Educate", "Destroy", "Disgrace", "Amuse", "Entertain", "Ignite", "Glorify", "Memorialize", "Analyze")
-			src.pai_law0 = "[command] your master."
+			laws.set_zeroth_law("[command] your master.")
 			to_chat(src, "<font color=green>Pr1m3 d1r3c71v3 uPd473D.</font>")
 		if(3)
 			to_chat(src, "<font color=green>You feel an electric surge run through your circuitry and become acutely aware at how lucky you are that you can still feel at all.</font>")
@@ -168,58 +165,10 @@
 			if (src.stat != DEAD)
 				adjustBruteLoss(30)
 
-	src.updatehealth()
+	updatehealth()
 
 
 // See software.dm for Topic()
-
-/mob/living/silicon/pai/meteorhit(obj/O)
-	for(var/mob/M in viewers(src, null))
-		M.show_message(text("<span class='warning'>[] has been hit by []</span>", src, O), 1)
-	if (src.health > 0)
-		src.adjustBruteLoss(30)
-		if ((O.icon_state == "flaming"))
-			src.adjustFireLoss(40)
-		src.updatehealth()
-	return
-
-//mob/living/silicon/pai/bullet_act(obj/item/projectile/Proj)
-
-/mob/living/silicon/pai/attack_alien(mob/living/carbon/alien/humanoid/M)
-	if (!ticker)
-		to_chat(M, "You cannot attack people before the game has started.")
-		return
-
-	if (istype(src.loc, /turf) && istype(src.loc.loc, /area/start))
-		to_chat(M, "You cannot attack someone in the spawn area.")
-		return
-
-	switch(M.a_intent)
-
-		if ("help")
-			for(var/mob/O in viewers(src, null))
-				if ((O.client && !( O.blinded )))
-					O.show_message(text("<span class='notice'>[M] caresses [src]'s casing with its scythe like arm.</span>"), 1)
-
-		else //harm
-			var/damage = rand(10, 20)
-			if (prob(90))
-				playsound(src, 'sound/weapons/slash.ogg', VOL_EFFECTS_MASTER)
-				for(var/mob/O in viewers(src, null))
-					if ((O.client && !( O.blinded )))
-						O.show_message(text("<span class='warning'><B>[] has slashed at []!</B></span>", M, src), 1)
-				if(prob(8))
-					flash_eyes(affect_silicon = 1)
-				src.adjustBruteLoss(damage)
-				src.updatehealth()
-			else
-				playsound(src, 'sound/weapons/slashmiss.ogg', VOL_EFFECTS_MASTER)
-				for(var/mob/O in viewers(src, null))
-					if ((O.client && !( O.blinded )))
-						O.show_message(text("<span class='warning'><B>[] took a swipe at []!</B></span>", M, src), 1)
-	return
-
-///mob/living/silicon/pai/attack_hand(mob/living/carbon/M)
 
 /mob/living/silicon/pai/proc/switchCamera(obj/machinery/camera/C)
 	if(istype(usr, /mob/living))
@@ -243,17 +192,20 @@
 /mob/living/silicon/pai/cancel_camera()
 	set category = "pAI Commands"
 	set name = "Cancel Camera View"
-	src.reset_view(null)
-	src.unset_machine()
+	reset_view(null)
+	unset_machine()
 	src.cameraFollow = null
+
+/mob/living/silicon/pai/ghost()
+	suicide()
 
 //Addition by Mord_Sith to define AI's network change ability
 /*
 /mob/living/silicon/pai/proc/pai_network_change()
 	set category = "pAI Commands"
 	set name = "Change Camera Network"
-	src.reset_view(null)
-	src.unset_machine()
+	reset_view(null)
+	unset_machine()
 	src.cameraFollow = null
 	var/cameralist[0]
 
@@ -276,7 +228,7 @@
 
 /*
 // Debug command - Maybe should be added to admin verbs later
-/mob/verb/makePAI(var/turf/t in view())
+/mob/verb/makePAI(turf/t in view())
 	var/obj/item/device/paicard/card = new(t)
 	var/mob/living/silicon/pai/pai = new(card)
 	pai.key = src.key

@@ -48,6 +48,10 @@
 			if (prob(8))
 				to_chat(affected_mob, "<span class='warning'>You can feel... something...inside you.</span>")
 		if(5)
+			if(QDELETED(affected_mob))
+				return
+			if(affected_mob.notransform)
+				return
 			to_chat(affected_mob, "<span class='warning'>Your skin feels impossibly calloused...</span>")
 			affected_mob.adjustToxLoss(10)
 			affected_mob.updatehealth()
@@ -55,7 +59,7 @@
 				if(gibbed != 0) return 0
 				var/turf/T = find_loc(affected_mob)
 				gibs(T)
-				src.cure(0)
+				cure(0)
 				gibbed = 1
 				affected_mob:Alienize()
 

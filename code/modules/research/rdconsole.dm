@@ -1,5 +1,3 @@
-//This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:33
-
 /*
 Research and Development (R&D) Console
 
@@ -176,10 +174,18 @@ cause a ton of data to be lost, an admin can go send it back.
 	if(href_list["select_technology"])
 		var/new_selected_technology = href_list["select_technology"]
 		if(files.all_technologies[selected_tech_tree][new_selected_technology])
+			var/datum/technology/T = files.all_technologies[selected_tech_tree][new_selected_technology]
+
+			T.reliability_upgrade_cost = files.GetReliabilityUpgradeCost(T)
+			T.avg_reliability = files.GetAverageDesignReliability(T)
+
 			selected_technology = new_selected_technology
 	if(href_list["unlock_technology"])
 		var/unlock = href_list["unlock_technology"]
 		files.UnlockTechology(files.all_technologies[selected_tech_tree][unlock])
+	if(href_list["upgrade_technology"])
+		var/upgrade = href_list["upgrade_technology"]
+		files.UpgradeTechology(files.all_technologies[selected_tech_tree][upgrade])
 	if(href_list["go_screen"])
 		var/where = href_list["go_screen"]
 		if(href_list["need_access"])
@@ -286,7 +292,7 @@ cause a ton of data to be lost, an admin can go send it back.
 				linked_imprinter = null
 	if(href_list["reset"]) //Reset the R&D console's database.
 		griefProtection()
-		var/choice = alert("R&D Console Database Reset", "Are you sure you want to reset the R&D console's database? Data lost cannot be recovered.", "Continue", "Cancel")
+		var/choice = tgui_alert(usr, "Are you sure you want to reset the R&D console's database? Data lost cannot be recovered.", "R&D Console Database Reset", list("Continue", "Cancel"))
 		if(choice == "Continue")
 			screen = "working"
 			qdel(files)
@@ -325,6 +331,13 @@ cause a ton of data to be lost, an admin can go send it back.
 			server_processed = 1
 		if(!istype(S, /obj/machinery/r_n_d/server/centcom) && server_processed)
 			S.produce_heat(100)
+
+	if(selected_tech_tree && selected_technology)//update selected_technology upgrade cost and realibility
+		var/datum/technology/T = files.all_technologies[selected_tech_tree][selected_technology]
+
+		T.reliability_upgrade_cost = files.GetReliabilityUpgradeCost(T)
+		T.avg_reliability = files.GetAverageDesignReliability(T)
+
 	screen = "main"
 	nanomanager.update_uis(src)
 
@@ -338,7 +351,7 @@ cause a ton of data to be lost, an admin can go send it back.
 		material_list += list(list(
 			"id" =             M,
 			"name" =           linked_lathe.loaded_materials[M].name,
-			"ammount" =        linked_lathe.loaded_materials[M].amount,
+			"amount" =        linked_lathe.loaded_materials[M].amount,
 			"can_eject_one" =  linked_lathe.loaded_materials[M].amount >= linked_lathe.loaded_materials[M].sheet_size,
 			"can_eject_five" = linked_lathe.loaded_materials[M].amount >= (linked_lathe.loaded_materials[M].sheet_size * 5),
 		))
@@ -365,7 +378,7 @@ cause a ton of data to be lost, an admin can go send it back.
 		material_list += list(list(
 			"id" =             M,
 			"name" =           linked_imprinter.loaded_materials[M].name,
-			"ammount" =        linked_imprinter.loaded_materials[M].amount,
+			"amount" =        linked_imprinter.loaded_materials[M].amount,
 			"can_eject_one" =  linked_imprinter.loaded_materials[M].amount >= linked_imprinter.loaded_materials[M].sheet_size,
 			"can_eject_five" = linked_imprinter.loaded_materials[M].amount >= (linked_imprinter.loaded_materials[M].sheet_size * 5),
 		))
@@ -450,7 +463,7 @@ cause a ton of data to be lost, an admin can go send it back.
 
 		if(linked_destroy)
 			if(linked_destroy.loaded_item)
-				var/list/tech_names = list("materials" = "Materials", "engineering" = "Engineering", "phorontech" = "Phoron", "powerstorage" = "Power", "bluespace" = "Blue-space", "biotech" = "Biotech", "combat" = "Combat", "magnets" = "Electromagnetic", "programming" = "Programming", "syndicate" = "Illegal")
+				var/list/tech_names = list("materials" = "Materials", "engineering" = "Engineering", "phorontech" = "Phoron", "powerstorage" = "Power", "bluespace" = "Bluespace", "biotech" = "Biotech", "combat" = "Combat", "magnets" = "Electromagnetic", "programming" = "Programming", "syndicate" = "Illegal")
 
 				var/list/temp_tech = linked_destroy.ConvertReqString2List(linked_destroy.loaded_item.origin_tech)
 				var/list/item_data = list()
@@ -467,7 +480,10 @@ cause a ton of data to be lost, an admin can go send it back.
 					))
 
 				// This calculates how much research points we missed because we already researched items with such orig_tech levels
-				var/tech_points_mod = files.experiments.get_object_research_value(linked_destroy.loaded_item) / files.experiments.get_object_research_value(linked_destroy.loaded_item, ignoreRepeat = TRUE)
+				var/research_value = files.experiments.get_object_research_value(linked_destroy.loaded_item, ignoreRepeat = TRUE)
+				var/tech_points_mod = research_value
+				if(research_value)
+					tech_points_mod = files.experiments.get_object_research_value(linked_destroy.loaded_item) / research_value
 
 				var/list/destroy_list = list(
 					"has_item" =              TRUE,
@@ -609,6 +625,8 @@ cause a ton of data to be lost, an admin can go send it back.
 				"id" =             Tech.id,
 				"tech_type" =      Tech.tech_type,
 				"cost" =           Tech.cost,
+				"reliability_upgrade_cost" = Tech.reliability_upgrade_cost,
+				"avg_reliability" = Tech.avg_reliability,
 				"isresearched" =   files.IsResearched(Tech),
 			)
 			data["selected_technology_id"] = Tech.id
@@ -637,7 +655,7 @@ cause a ton of data to be lost, an admin can go send it back.
 			for(var/T in Tech.unlocks_designs)
 				var/datum/design/D = files.design_by_id[T]
 				var/list/unlock_data = list(
-					"text" =           "[D.name]",
+					"text" = "[D.name]"
 				)
 				unlock_list += list(unlock_data)
 			technology_data["unlocks"] = unlock_list

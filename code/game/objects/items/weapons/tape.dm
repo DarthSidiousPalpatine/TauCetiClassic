@@ -3,7 +3,7 @@
 	name = "tape roll"
 	icon = 'icons/obj/tape.dmi'
 	icon_state = "rollstart"
-	w_class = ITEM_SIZE_SMALL
+	w_class = SIZE_TINY
 	var/turf/start
 	var/turf/end
 	var/tape_type = /obj/item/tape
@@ -12,8 +12,8 @@
 /obj/item/tape
 	name = "tape"
 	icon = 'icons/obj/tape.dmi'
-	anchored = 1
-	density = 1
+	anchored = TRUE
+	density = TRUE
 	var/icon_base
 
 /obj/item/taperoll/police
@@ -108,12 +108,11 @@
 			cur = get_step_towards(cur,end)
 		to_chat(usr, "<span class='notice'>You finish placing the [src].</span>")
 
-/obj/item/taperoll/afterattack(atom/A, mob/user)
-	if (istype(A, /obj/machinery/door/airlock))
-		if(!user.Adjacent(A))
-			to_chat(user, "<span class='notice'>You're too far away from \the [A]!</span>")
-			return
-		var/turf/T = get_turf(A)
+/obj/item/taperoll/afterattack(atom/target, mob/user, proximity, params)
+	if(!proximity)
+		return
+	if(istype(target, /obj/machinery/door/airlock))
+		var/turf/T = get_turf(target)
 		var/obj/item/tape/P = new tape_type(T.x,T.y,T.z)
 		P.loc = locate(T.x,T.y,T.z)
 		P.icon_state = "[icon_base]_door"
@@ -127,29 +126,33 @@
 		return TRUE
 	if(allowed(mover))
 		return TRUE
-	if (mover.pass_flags & PASSTABLE || istype(mover, /obj/effect/meteor) || mover.throwing)
+	if (mover.pass_flags & (PASSTABLE | PASSCRAWL) || istype(mover, /obj/effect/meteor) || mover.throwing)
 		return TRUE
 	else
 		return FALSE
 
-/obj/item/tape/attackby(obj/item/weapon/W, mob/user)
-	breaktape(W, user, FALSE)
+/obj/item/tape/attackby(obj/item/I, mob/user, params)
+	. = ..()
+	breaktape(I, user, FALSE)
 	user.SetNextMove(CLICK_CD_INTERACT)
 
 /obj/item/tape/attack_hand(mob/user)
 	user.SetNextMove(CLICK_CD_MELEE)
-	if (user.a_intent == "help" && allowed(user))
+	if (user.a_intent == INTENT_HELP && allowed(user))
 		user.visible_message("<span class='notice'>[user] lifts [src], allowing passage.</span>")
-		density = 0
-		addtimer(CALLBACK(src, .proc/stop_passage), 20 SECONDS)
+		density = FALSE
+		VARSET_IN(src, density, TRUE, 20 SECONDS)
 	else
 		breaktape(null, user, FALSE)
 
-/obj/item/tape/proc/stop_passage()
-	density = 1
-
 /obj/item/tape/attack_paw(mob/user)
 	breaktape(null, user, FALSE)
+
+/obj/item/tape/attack_alien(mob/user)
+	breaktape(W = null, user = user, forced = FALSE)
+
+/obj/item/tape/attack_animal(mob/living/simple_animal/M)
+	breaktape(W = null, user = M, forced = FALSE)
 
 /obj/item/tape/blob_act()
 	breaktape(W = null, user = null, forced = TRUE)
@@ -157,8 +160,16 @@
 /obj/item/tape/ex_act()
 	breaktape(W = null, user = null, forced = TRUE)
 
+/obj/item/tape/Bumped(atom/movable/AM)
+	if(istype(AM, /obj/mecha))
+		breaktape(W = null, user = null, forced = TRUE)
+	else if(isliving(AM))
+		var/mob/living/L = AM
+		if(L.a_intent == INTENT_HARM)
+			breaktape(W = null, user = L, forced = FALSE)
+
 /obj/item/tape/proc/breaktape(obj/item/weapon/W, mob/user, forced = FALSE)
-	if((user && user.a_intent == "help") && (W && !W.can_puncture() && allowed(user)) && !forced)
+	if((user && user.a_intent == INTENT_HELP) && (W && !W.can_puncture() && allowed(user)) && !forced)
 		to_chat(user, "<span class='warning'>You can't break the [src] with that!</span>")
 		return
 	if(user)

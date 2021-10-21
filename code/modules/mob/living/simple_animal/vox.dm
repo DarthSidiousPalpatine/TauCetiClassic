@@ -30,7 +30,7 @@
 	stat = DEAD
 	visible_message("<span class='warning'><B>[src] shudders violently and explodes!</B></span>","<span class='warning'><B>You feel your body rupture!</B></span>")
 	explosion(get_turf(loc), -1, -1, 3, 5)
-	src.gib()
+	gib()
 	return
 
 /mob/living/simple_animal/vox/armalis/attackby(obj/item/O, mob/user)
@@ -40,18 +40,12 @@
 			if (O.damtype == HALLOSS)
 				damage = 0
 			health -= damage
-			for(var/mob/M in viewers(src, null))
-				if ((M.client && !( M.blinded )))
-					M.show_message("<span class='warning'><b>[src] has been attacked with the [O] by [user].</b></span>")
+			visible_message("<span class='warning'><b>[src] has been attacked with the [O] by [user].</b></span>")
 		else
-			for(var/mob/M in viewers(src, null))
-				if ((M.client && !( M.blinded )))
-					M.show_message("<span class='warning'><b>The [O] bounces harmlessly off of [src].</b></span>")
+			visible_message("<span class='warning'><b>The [O] bounces harmlessly off of [src].</b></span>")
 	else
 		to_chat(usr, "<span class='warning'>This weapon is ineffective, it does no damage.</span>")
-		for(var/mob/M in viewers(src, null))
-			if ((M.client && !( M.blinded )))
-				M.show_message("<span class='warning'>[user] gently taps [src] with the [O]. </span>")
+		visible_message("<span class='warning'>[user] gently taps [src] with the [O]. </span>")
 
 /mob/living/simple_animal/vox/armalis/verb/fire_quill(mob/target as mob in oview())
 
@@ -113,19 +107,17 @@
 
 /mob/living/simple_animal/vox/armalis/attackby(obj/item/O, mob/user)
 	if(istype(O,/obj/item/vox/armalis_armour))
-		user.drop_item()
+		user.drop_from_inventory(O, src)
 		armour = O
 		speed = 1
 		maxHealth += 200
 		health += 200
-		O.loc = src
 		visible_message("<span class='notice'>[src] is quickly outfitted in [O] by [user].</span>","<span class='notice'>You quickly outfit [src] in [O].</span>")
 		regenerate_icons()
 		return
 	if(istype(O,/obj/item/vox/armalis_amp))
-		user.drop_item()
+		user.drop_from_inventory(O, src)
 		amp = O
-		O.loc = src
 		visible_message("<span class='notice'>[src] is quickly outfitted in [O] by [user].</span>","<span class='notice'>You quickly outfit [src] in [O].</span>")
 		regenerate_icons()
 		return
@@ -133,14 +125,14 @@
 
 /mob/living/simple_animal/vox/armalis/regenerate_icons()
 
-	overlays = list()
+	cut_overlays()
 	if(armour)
 		var/icon/armour = image('icons/mob/vox.dmi',"armour")
 		speed = 1
-		overlays += armour
+		add_overlay(armour)
 	if(amp)
 		var/icon/amp = image('icons/mob/vox.dmi',"amplifier")
-		overlays += amp
+		add_overlay(amp)
 	return
 
 /obj/item/vox/armalis_armour

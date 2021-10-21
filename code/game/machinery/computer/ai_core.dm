@@ -1,6 +1,6 @@
 /obj/structure/AIcore
-	density = 1
-	anchored = 0
+	density = TRUE
+	anchored = FALSE
 	name = "AI core"
 	icon = 'icons/mob/AI.dmi'
 	icon_state = "0"
@@ -18,7 +18,7 @@
 					return
 				if(P.use_tool(src, user, 20, volume = 50))
 					to_chat(user, "<span class='notice'>You wrench the frame into place.</span>")
-					anchored = 1
+					anchored = TRUE
 					state = 1
 			if(iswelder(P))
 				var/obj/item/weapon/weldingtool/WT = P
@@ -36,15 +36,14 @@
 					return
 				if(P.use_tool(src, user, 20, volume = 50))
 					to_chat(user, "<span class='notice'>You unfasten the frame.</span>")
-					anchored = 0
+					anchored = FALSE
 					state = 0
 			if(istype(P, /obj/item/weapon/circuitboard/aicore) && !circuit)
 				playsound(src, 'sound/items/Deconstruct.ogg', VOL_EFFECTS_MASTER)
 				to_chat(user, "<span class='notice'>You place the circuit board inside the frame.</span>")
 				icon_state = "1"
 				circuit = P
-				user.drop_item()
-				P.loc = src
+				user.drop_from_inventory(P, src)
 			if(isscrewdriver(P) && circuit)
 				playsound(src, 'sound/items/Screwdriver.ogg', VOL_EFFECTS_MASTER)
 				to_chat(user, "<span class='notice'>You screw the circuit board into place.</span>")
@@ -119,26 +118,28 @@
 				to_chat(usr, "Added a freeform law.")
 
 			if(istype(P, /obj/item/device/mmi) || istype(P, /obj/item/device/mmi/posibrain))
-				if(!P:brainmob)
-					to_chat(user, "<span class='warning'>Sticking an empty [P] into the frame would sort of defeat the purpose.</span>")
-					return
-				if(P:brainmob.stat == DEAD)
-					to_chat(user, "<span class='warning'>Sticking a dead [P] into the frame would sort of defeat the purpose.</span>")
-					return
+				var/obj/item/device/mmi/M = P
 
-				if(jobban_isbanned(P:brainmob, "AI"))
-					to_chat(user, "<span class='warning'>This [P] does not seem to fit.</span>")
+				if(!M.brainmob)
+					to_chat(user, "<span class='warning'>Sticking an empty [M] into the frame would sort of defeat the purpose.</span>")
+					return
+				if(M.brainmob.stat == DEAD)
+					to_chat(user, "<span class='warning'>Sticking a dead [M] into the frame would sort of defeat the purpose.</span>")
 					return
 
-				if(P:brainmob.mind)
-					ticker.mode.remove_cultist(P:brainmob.mind, 1)
-					ticker.mode.remove_revolutionary(P:brainmob.mind, 1)
-					ticker.mode.remove_gangster(P:brainmob.mind, 1)
+				if(jobban_isbanned(M.brainmob, "AI"))
+					to_chat(user, "<span class='warning'>This [M] does not seem to fit.</span>")
+					return
 
-				user.drop_item()
-				P.loc = src
-				brain = P
-				to_chat(usr, "Added [P].")
+				if(M.brainmob.mind)
+					for(var/role in list(CULTIST, REV, HEADREV))
+						var/datum/role/R = M.brainmob.mind.GetRole(role)
+						if(R)
+							R.RemoveFromRole(M.brainmob.mind)
+
+				user.drop_from_inventory(M, src)
+				brain = M
+				to_chat(usr, "Added [M].")
 				icon_state = "3b"
 
 			if(iscrowbar(P) && brain)
@@ -164,7 +165,7 @@
 				playsound(src, 'sound/items/Screwdriver.ogg', VOL_EFFECTS_MASTER)
 				to_chat(user, "<span class='notice'>You connect the monitor.</span>")
 				if(!brain)
-					var/open_for_latejoin = alert(user, "Would you like this core to be open for latejoining AIs?", "Latejoin", "Yes", "Yes", "No") == "Yes"
+					var/open_for_latejoin = tgui_alert(user, "Would you like this core to be open for latejoining AIs?", "Latejoin", list("Yes", "No")) == "Yes"
 					var/obj/structure/AIcore/deactivated/D = new(loc)
 					if(open_for_latejoin)
 						empty_playable_ai_cores += D
@@ -179,7 +180,7 @@
 	name = "Inactive AI"
 	icon = 'icons/mob/AI.dmi'
 	icon_state = "ai-empty"
-	anchored = 1
+	anchored = TRUE
 	state = 20//So it doesn't interact based on the above. Not really necessary.
 
 /obj/structure/AIcore/deactivated/atom_init()
@@ -216,10 +217,10 @@ That prevents a few funky behaviors.
 						if(C.contents.len)//If there is an AI on card.
 							to_chat(U, "<span class='warning'><b>Transfer failed</b>:</span> Existing AI found on this terminal. Remove existing AI to install a new one.")
 						else
-							if (ticker.mode.name == "AI malfunction")
-								var/datum/game_mode/malfunction/malf = ticker.mode
-								for (var/datum/mind/malfai in malf.malf_ai)
-									if (T.mind == malfai)
+							var/datum/faction/malf_silicons/malf = find_faction_by_type(/datum/faction/malf_silicons)
+							if(malf)
+								for (var/datum/role/malfAI/malfai in malf.members)
+									if (T.mind == malfai.antag)
 										to_chat(U, "<span class='warning'><b>ERROR</b>:</span> Remote transfer interface disabled.")//Do ho ho ho~
 										return
 							new /obj/structure/AIcore/deactivated(T.loc)//Spawns a deactivated terminal at AI location.
@@ -239,10 +240,10 @@ That prevents a few funky behaviors.
 						if(C.AI)//If there is an AI on card.
 							to_chat(U, "<span class='warning'><b>Transfer failed</b>:</span> Existing AI found on this terminal. Remove existing AI to install a new one.")
 						else
-							if (ticker.mode.name == "AI malfunction")
-								var/datum/game_mode/malfunction/malf = ticker.mode
-								for (var/datum/mind/malfai in malf.malf_ai)
-									if (T.mind == malfai)
+							var/datum/faction/malf_silicons/malf = find_faction_by_type(/datum/faction/malf_silicons)
+							if(malf)
+								for (var/datum/role/malfAI/malfai in malf.members)
+									if (T.mind == malfai.antag)
 										to_chat(U, "<span class='warning'><b>ERROR</b>:</span> Remote transfer interface disabled.")
 										return
 							if(T.stat)//If the ai is dead/dying.
@@ -270,7 +271,7 @@ That prevents a few funky behaviors.
 							A.loc = T.loc//To replace the terminal.
 							C.icon_state = "aicard"
 							C.name = "inteliCard"
-							C.overlays.Cut()
+							C.cut_overlays()
 							A.cancel_camera()
 							to_chat(A, "You have been uploaded to a stationary terminal. Remote device connection restored.")
 							to_chat(U, "<span class='notice'><b>Transfer successful</b>:</span> [A.name] ([rand(1000,9999)].exe) installed and executed succesfully. Local copy has been removed.")
@@ -297,28 +298,28 @@ That prevents a few funky behaviors.
 							else for(var/mob/living/silicon/ai/A in C)
 								C.icon_state = "aicard"
 								C.name = "inteliCard"
-								C.overlays.Cut()
+								C.cut_overlays()
 								A.loc = T
 								T.occupier = A
 								A.control_disabled = 1
 								if (A.stat == DEAD)
-									T.overlays += image('icons/obj/computer.dmi', "ai-fixer-404")
+									T.add_overlay(image('icons/obj/computer.dmi', "ai-fixer-404"))
 								else
-									T.overlays += image('icons/obj/computer.dmi', "ai-fixer-full")
-								T.overlays -= image('icons/obj/computer.dmi', "ai-fixer-empty")
+									T.add_overlay(image('icons/obj/computer.dmi', "ai-fixer-full"))
+								T.cut_overlay(image('icons/obj/computer.dmi', "ai-fixer-empty"))
 								A.cancel_camera()
 								to_chat(A, "You have been uploaded to a stationary terminal. Sadly, there is no remote access from here.")
 								to_chat(U, "<span class='notice'><b>Transfer successful</b>:</span> [A.name] ([rand(1000,9999)].exe) installed and executed successfully. Local copy has been removed.")
 						else
 							if(!C.contents.len && T.occupier && !T.active)
 								C.name = "inteliCard - [T.occupier.name]"
-								T.overlays += image('icons/obj/computer.dmi', "ai-fixer-empty")
+								T.add_overlay(image('icons/obj/computer.dmi', "ai-fixer-empty"))
 								if (T.occupier.stat == DEAD)
 									C.icon_state = "aicard-404"
-									T.overlays -= image('icons/obj/computer.dmi', "ai-fixer-404")
+									T.cut_overlay(image('icons/obj/computer.dmi', "ai-fixer-404"))
 								else
 									C.icon_state = "aicard-full"
-									T.overlays -= image('icons/obj/computer.dmi', "ai-fixer-full")
+									T.cut_overlay(image('icons/obj/computer.dmi', "ai-fixer-full"))
 								to_chat(T.occupier, "You have been downloaded to a mobile storage device. Still no remote access.")
 								to_chat(U, "<span class='notice'><b>Transfer successful</b>:</span> [T.occupier.name] ([rand(1000,9999)].exe) removed from host terminal and stored within local memory.")
 								T.occupier.loc = C
@@ -341,8 +342,8 @@ That prevents a few funky behaviors.
 								T.occupant = A
 								C.AI = null
 								A.control_disabled = 1
-								T.overlays += image('icons/obj/computer.dmi', "ai-fixer-full")
-								T.overlays -= image('icons/obj/computer.dmi', "ai-fixer-empty")
+								T.add_overlay(image('icons/obj/computer.dmi', "ai-fixer-full"))
+								T.cut_overlay(image('icons/obj/computer.dmi', "ai-fixer-empty"))
 								A.cancel_camera()
 								to_chat(A, "You have been uploaded to a stationary terminal. Sadly, there is no remote access from here.")
 								to_chat(U, "<span class='notice'><b>Transfer successful</b>:</span> [A.name] ([rand(1000,9999)].exe) installed and executed successfully. Local copy has been removed.")
@@ -351,8 +352,8 @@ That prevents a few funky behaviors.
 								if (T.occupant.stat)
 									to_chat(U, "<span class='warning'><b>ERROR</b>:</span> [T.occupant.name] data core is corrupted. Unable to install.")
 								else
-									T.overlays += image('icons/obj/computer.dmi', "ai-fixer-empty")
-									T.overlays -= image('icons/obj/computer.dmi', "ai-fixer-full")
+									T.add_overlay(image('icons/obj/computer.dmi', "ai-fixer-empty"))
+									T.cut_overlay(image('icons/obj/computer.dmi', "ai-fixer-full"))
 									to_chat(T.occupant, "You have been downloaded to a mobile storage device. Still no remote access.")
 									to_chat(U, "<span class='notice'><b>Transfer successful</b>:</span> [T.occupant.name] ([rand(1000,9999)].exe) removed from host terminal and stored within local memory.")
 									T.occupant.loc = C
@@ -393,7 +394,7 @@ That prevents a few funky behaviors.
 										A_T.loc = T//Throw them into suit.
 										C.icon_state = "aicard"
 										C.name = "inteliCard"
-										C.overlays.Cut()
+										C.cut_overlays()
 										T.AI = A_T
 										A_T.cancel_camera()
 										to_chat(A_T, "You have been uploaded to a mobile storage device.")

@@ -13,28 +13,31 @@ var/global/list/frozen_items = list()
 //Main cryopod console.
 
 /obj/machinery/computer/cryopod
-	name = "cryogenic oversight console"
+	name = "Cryogenic Oversight Console"
 	desc = "An interface between crew and the cryogenic storage oversight systems."
 	icon = 'icons/obj/Cryogenic3.dmi'
 	icon_state = "cellconsole"
-	circuit = "/obj/item/weapon/circuitboard/cryopodcontrol"
+	circuit = /obj/item/weapon/circuitboard/cryopodcontrol
 	var/mode = null
 
 /obj/machinery/computer/cryopod/ui_interact(mob/user)
-	if(!ticker)
+	if(!SSticker)
 		return
 
 	var/dat
 
-	dat += "<hr/><br/><b>Cryogenic Oversight Control</b><br/>"
-	dat += "<i>Welcome, [user.real_name].</i><br/><br/><hr/>"
-	dat += "<a href='?src=\ref[src];log=1'>View storage log</a>.<br>"
-	dat += "<a href='?src=\ref[src];item=1'>Recover object</a>.<br>"
-	dat += "<a href='?src=\ref[src];allitems=1'>Recover all objects</a>.<br>"
-	dat += "<a href='?src=\ref[src];crew=1'>Revive crew</a>.<br/><hr/>"
+	dat += "<div class='Section__title'>Cryogenic Oversight Control</div>"
+	dat += "<div class='Section'>"
+	dat += "<i>Welcome, [user.real_name].</i><br/><br/>"
+	dat += "<a href='?src=\ref[src];log=1'>View storage log</a><br>"
+	dat += "<a href='?src=\ref[src];item=1'>Recover object</a><br>"
+	dat += "<a href='?src=\ref[src];allitems=1'>Recover all objects</a><br>"
+	dat += "<a href='?src=\ref[src];crew=1'>Revive crew</a><br/>"
+	dat += "</div>"
 
-	user << browse(entity_ja(dat), "window=cryopod_console")
-	onclose(user, "cryopod_console")
+	var/datum/browser/popup = new(user, "window=cryopod_console", src.name)
+	popup.set_content(dat)
+	popup.open()
 
 /obj/machinery/computer/cryopod/Topic(href, href_list)
 	. = ..()
@@ -50,7 +53,9 @@ var/global/list/frozen_items = list()
 			dat += "[person]<br/>"
 		dat += "<hr/>"
 
-		user << browse(entity_ja(dat), "window=cryolog")
+		var/datum/browser/popup = new(user, "window=cryolog", src.name + ": Log")
+		popup.set_content(dat)
+		popup.open()
 
 	else if(href_list["item"])
 
@@ -94,12 +99,12 @@ var/global/list/frozen_items = list()
 //Decorative structures to go alongside cryopods.
 /obj/structure/cryofeed
 
-	name = "\improper cryogenic feed"
+	name = "cryogenic feed"
 	desc = "A bewildering tangle of machinery and pipes."
 	icon = 'icons/obj/Cryogenic3.dmi'
 	icon_state = "cryo_rear"
-	anchored = 1
-	density = 1
+	anchored = TRUE
+	density = TRUE
 
 	var/orient_right = null //Flips the sprite.
 
@@ -117,12 +122,12 @@ var/global/list/frozen_items = list()
 
 //Cryopods themselves.
 /obj/machinery/cryopod
-	name = "\improper cryogenic freezer"
+	name = "cryogenic freezer"
 	desc = "A man-sized pod for entering suspended animation."
 	icon = 'icons/obj/Cryogenic3.dmi'
 	icon_state = "cryosleeper_left"
-	density = 1
-	anchored = 1
+	density = TRUE
+	anchored = TRUE
 	req_one_access = list(access_heads, access_security)
 	var/storage = 1	//tc, criopods on centcomm
 
@@ -160,6 +165,40 @@ var/global/list/frozen_items = list()
 		icon_state = "cryosleeper_left"
 	. = ..()
 
+/obj/machinery/cryopod/proc/delete_objective(datum/objective/target/O)
+	if(!O)
+		return
+
+	//We don't want revs to get objectives that aren't for heads of staff. Letting them win or lose based on cryo is silly so we remove the objective.
+	if(!istype(O, /datum/objective/target/rp_rev))
+		O.find_target()
+
+	if(!O.target)
+		target_objectives -= O
+		var/datum/faction/F = O.faction
+		if(F)
+			F.handleRemovedObjective(O)
+			return
+
+		if(O.owner)
+			for(var/role in O.owner.antag_roles)
+				var/datum/role/R = O.owner.antag_roles[role]
+				R.handleRemovedObjective(O)
+			return
+
+		qdel(O)
+
+/obj/machinery/cryopod/proc/remove_objective(datum/objective/target/O)
+	if(O.target != occupant.mind)
+		return
+
+	if(O?.owner?.current)
+		to_chat(O.owner.current, "<span class='red'>You get the feeling your target is no longer within your reach. Time for Plan [pick(list("A","B","C","D","X","Y","Z"))]...</span>")
+
+	O.target = null
+
+	addtimer(CALLBACK(src, .proc/delete_objective, O), 1) //This should ideally fire after the occupant is deleted.
+
 //Lifted from Unity stasis.dm and refactored. ~Zuhayr
 /obj/machinery/cryopod/process()
 	if(occupant)
@@ -173,63 +212,17 @@ var/global/list/frozen_items = list()
 			//Drop all items into the pod.
 			for(var/obj/item/W in occupant)
 				occupant.drop_from_inventory(W)
-				W.loc = src
-
-				if(W.contents.len) //Make sure we catch anything not handled by del() on the items.
-					for(var/obj/item/O in W.contents)
-						O.loc = src
-
-			//Delete all items not on the preservation list.
-			var/list/items = contents
-			items -= occupant // Don't delete the occupant
-			items -= announce // or the autosay radio.
-
-			for(var/obj/item/W in items)
-				var/preserve = FALSE
-				for(var/T in preserve_items)
-					if(istype(W, T))
-						preserve = TRUE
-						break
-
-				if(!preserve)
-					qdel(W)
-				else
-					if(storage)
-						frozen_items += W
-					else
-						qdel(W)
+				preserve_item(W)
 
 			//Update any existing objectives involving this mob.
-			for(var/datum/objective/O in all_objectives)
-				if(istype(O,/datum/objective/mutiny) && O.target == occupant.mind) //We don't want revs to get objectives that aren't for heads of staff. Letting them win or lose based on cryo is silly so we remove the objective.
-					qdel(O) //TODO: Update rev objectives on login by head (may happen already?) ~ Z
-				else if(O.target && istype(O.target, /datum/mind))
-					if(O.target == occupant.mind)
-						if(O.owner && O.owner.current)
-							to_chat(O.owner.current, "<span class='red'>You get the feeling your target is no longer within your reach. Time for Plan [pick(list("A","B","C","D","X","Y","Z"))]...</span>")
-						O.target = null
-						spawn(1) //This should ideally fire after the occupant is deleted.
-							if(!O)
-								return
-							O.find_target()
-							if(!O.target)
-								all_objectives -= O
-								O.owner.objectives -= O
-								qdel(O)
+			for(var/datum/objective/target/O in target_objectives)
+				remove_objective(O)
 
 			//Handle job slot/tater cleanup.
 			if(occupant && occupant.mind)
 				var/job = occupant.mind.assigned_role
 
 				SSjob.FreeRole(job)
-
-				/*if(occupant.mind.objectives.len)
-					qdel(occupant.mind.objectives)
-					occupant.mind.special_role = null
-				else
-					if(ticker.mode.name == "AutoTraitor")
-						var/datum/game_mode/traitor/autotraitor/current_mode = ticker.mode
-						current_mode.possible_traitors.Remove(occupant)*/
 
 			// Delete them from datacore.
 
@@ -250,8 +243,6 @@ var/global/list/frozen_items = list()
 			else
 				icon_state = "cryosleeper_left"
 
-			//TODO: Check objectives/mode, update new targets if this mob is the target, spawn new antags?
-
 			//This should guarantee that ghosts don't spawn.
 			occupant.ckey = null
 
@@ -271,12 +262,15 @@ var/global/list/frozen_items = list()
 
 	if(istype(G, /obj/item/weapon/grab))
 		var/obj/item/weapon/grab/grab = G
+		if(!user.IsAdvancedToolUser())
+			to_chat(user, "<span class='notice'>You have no idea how to do that.</span>")
+			return
 
 		if(occupant)
 			to_chat(user, "<span class='notice'>The cryo pod is in use.</span>")
 			return
 
-		if(!ismob(grab.affecting))
+		if(!ishuman(grab.affecting))
 			return
 
 		var/willing = null //We don't want to allow people to be forced into despawning.
@@ -284,7 +278,7 @@ var/global/list/frozen_items = list()
 		user.SetNextMove(CLICK_CD_MELEE)
 
 		if(M.client)
-			if(alert(M,"Would you like to enter cryosleep?",,"Yes","No") == "Yes")
+			if(tgui_alert(M,"Would you like to enter cryosleep?",, list("Yes","No")) == "Yes")
 				if(!M || !grab || !grab.affecting)
 					return
 				willing = TRUE
@@ -300,11 +294,29 @@ var/global/list/frozen_items = list()
 					return
 				insert(M)
 				// Book keeping!
-				log_admin("[key_name_admin(M)] has entered a stasis pod.")
+				log_admin("[key_name(M)] has entered a stasis pod.")
 				message_admins("<span class='notice'>[key_name_admin(M)] has entered a stasis pod.</span>")
 
 				//Despawning occurs when process() is called with an occupant without a client.
 				add_fingerprint(M)
+
+/obj/machinery/cryopod/proc/preserve_item(obj/item/O)
+	O.loc = src
+
+	var/preserve = FALSE
+	for(var/T in preserve_items)
+		if(istype(O, T))
+			preserve = TRUE
+			break
+
+	if (preserve && storage)
+		frozen_items += O
+	else
+		if (O.contents.len)
+			for (var/obj/item/object in O.contents)
+				preserve_item(object)
+		qdel(O)
+
 
 /obj/machinery/cryopod/proc/insert(mob/M)
 	M.forceMove(src)
@@ -326,7 +338,7 @@ var/global/list/frozen_items = list()
 	set name = "Eject Pod"
 	set category = "Object"
 	set src in oview(1)
-	if(usr.stat != CONSCIOUS || !occupant)
+	if(usr.incapacitated() || !occupant)
 		return
 
 	if(usr != occupant && \
@@ -345,7 +357,11 @@ var/global/list/frozen_items = list()
 	set category = "Object"
 	set src in oview(1)
 
-	if(usr.stat != CONSCIOUS || !(ishuman(usr) || ismonkey(usr)))
+	if(usr.incapacitated() || !(ishuman(usr)))
+		return
+
+	if(!usr.IsAdvancedToolUser())
+		to_chat(usr, "<span class='notice'>You have no idea how to do that.</span>")
 		return
 
 	if(occupant)

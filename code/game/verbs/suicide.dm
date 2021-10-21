@@ -7,15 +7,15 @@
 		to_chat(src, "You're already dead!")
 		return
 
-	if (!ticker)
+	if (!SSticker)
 		to_chat(src, "You can't commit suicide before the game starts!")
 		return
 
 
 	var/permitted = 0
-	var/list/allowed = list("Syndicate","traitor","Wizard","Head Revolutionary","Cultist","Changeling")
+	var/list/allowed = list(NUKE_OP,TRAITOR,WIZARD,HEADREV,CULTIST,CHANGELING)
 	for(var/T in allowed)
-		if(mind.special_role == T)
+		if(isrole(T, src))
 			permitted = 1
 			break
 
@@ -28,10 +28,10 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
-		if(!canmove || restrained())	//just while I finish up the new 'fun' suiciding verb. This is to prevent metagaming via suicide
+		if(restrained())	//just while I finish up the new 'fun' suiciding verb. This is to prevent metagaming via suicide
 			to_chat(src, "You can't commit suicide whilst restrained! ((You can type Ghost instead however.))")
 			return
 		suiciding = 1
@@ -92,7 +92,7 @@
 		to_chat(src, "You're already dead!")
 		return
 
-	if (!ticker)
+	if (!SSticker)
 		to_chat(src, "You can't commit suicide before the game starts!")
 		return
 
@@ -100,7 +100,7 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
 		suiciding = 1
@@ -116,7 +116,7 @@
 		to_chat(src, "You're already dead!")
 		return
 
-	if (!ticker)
+	if (!SSticker)
 		to_chat(src, "You can't commit suicide before the game starts!")
 		return
 
@@ -124,10 +124,10 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
-		if(!canmove || restrained())
+		if(restrained())
 			to_chat(src, "You can't commit suicide whilst restrained! ((You can type Ghost instead however.))")
 			return
 		suiciding = 1
@@ -147,7 +147,7 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
 		suiciding = 1
@@ -167,7 +167,7 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
 		suiciding = 1
@@ -176,22 +176,18 @@
 		adjustOxyLoss(max(maxHealth * 2 - getToxLoss() - getFireLoss() - getBruteLoss() - getOxyLoss(), 0))
 		updatehealth()
 
-/mob/living/silicon/pai/verb/suicide()
-	set category = "pAI Commands"
-	set desc = "Kill yourself and become a ghost (You will receive a confirmation prompt)."
-	set name = "pAI Suicide"
-	var/answer = input("REALLY kill yourself? This action can't be undone.", "Suicide", "No") in list ("Yes", "No")
+// Kill yourself and become a ghost (You will receive a confirmation prompt).
+/mob/living/silicon/pai/proc/suicide()
+	var/answer = tgui_alert(usr, "REALLY kill yourself? This action can't be undone.", "Confirm Suicide", list("Yes", "No"))
 	if(answer == "Yes")
 		var/obj/item/device/paicard/card = loc
 		card.removePersonality()
-		var/turf/T = get_turf_or_move(card.loc)
-		for (var/mob/M in viewers(T))
-			M.show_message("<span class='notice'>[src] flashes a message across its screen, \"Wiping core files. Please acquire a new personality to continue using pAI device functions.\"</span>", 3, "<span class='notice'>[src] bleeps electronically.</span>", 2)
+		card.visible_message("<span class='notice'>[src] flashes a message across its screen, \"Wiping core files. Please acquire a new personality to continue using pAI device functions.\"</span>", blind_message = "<span class='notice'>[src] bleeps electronically.</span>")
 		death(0)
 	else
 		to_chat(src, "Aborting suicide attempt.")
 
-/mob/living/carbon/alien/humanoid/verb/suicide()
+/mob/living/carbon/xenomorph/humanoid/verb/suicide()
 	set hidden = 1
 
 	if (stat == DEAD)
@@ -202,7 +198,7 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
 		suiciding = 1
@@ -222,7 +218,7 @@
 		to_chat(src, "You're already committing suicide! Be patient!")
 		return
 
-	var/confirm = alert("Are you sure you want to commit suicide?", "Confirm Suicide", "Yes", "No")
+	var/confirm = tgui_alert(usr, "Are you sure you want to commit suicide?", "Confirm Suicide", list("Yes", "No"))
 
 	if(confirm == "Yes")
 		suiciding = 1

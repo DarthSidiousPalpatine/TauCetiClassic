@@ -1,11 +1,21 @@
 /obj/structure/girder
-	icon_state = "girder"
-	anchored = 1
-	density = 1
+	icon = 'icons/obj/smooth_structures/girder.dmi'
+	icon_state = "box"
+	anchored = TRUE
+	density = TRUE
 	layer = 2.9
 	var/state = 0
 	var/health = 200
-
+	canSmoothWith = list(
+		/turf/simulated/wall,
+		/turf/simulated/wall/r_wall,
+		/obj/structure/falsewall,
+		/obj/structure/falsewall/reinforced,
+		/obj/structure/girder,
+		/obj/structure/girder/reinforced,
+		/obj/structure/girder/cult,
+	)
+	smooth = SMOOTH_TRUE
 
 /obj/structure/girder/bullet_act(obj/item/projectile/Proj)
 	if(istype(Proj, /obj/item/projectile/beam))
@@ -111,7 +121,7 @@
 					new /obj/structure/falsewall/reinforced(loc)
 					qdel(src)
 				else
-					if (src.icon_state == "reinforced") //I cant believe someone would actually write this line of code...
+					if (istype (src, /obj/structure/girder/reinforced))
 						if(S.get_amount() < 1)
 							return ..()
 						to_chat(user, "<span class='notice'>Now finalising reinforced wall.</span>")
@@ -160,8 +170,7 @@
 	else if(istype(W, /obj/item/pipe))
 		var/obj/item/pipe/P = W
 		if (P.pipe_type in list(0, 1, 5))	//simple pipes, simple bends, and simple manifolds.
-			user.drop_item()
-			P.loc = src.loc
+			user.drop_from_inventory(P, loc)
 			to_chat(user, "<span class='notice'>You fit the pipe into the [src]!</span>")
 	else
 		..()
@@ -192,85 +201,40 @@
 		else
 	return
 
-/obj/structure/girder/attack_animal(mob/living/simple_animal/M)
-	if(M.environment_smash)
+/obj/structure/girder/attack_animal(mob/living/simple_animal/attacker)
+	if(attacker.environment_smash)
 		..()
-		M.visible_message("<span class='warning'>[M] smashes against [src].</span>", \
+		attacker.visible_message("<span class='warning'>[attacker] smashes against [src].</span>", \
 			 "<span class='warning'>You smash against [src].</span>", \
 			 "You hear twisting metal.")
 		playsound(src, 'sound/effects/grillehit.ogg', VOL_EFFECTS_MASTER)
-		health -= M.melee_damage_upper
+		health -= attacker.melee_damage * 10
 		if(health <= 0)
 			new /obj/item/stack/sheet/metal(get_turf(src))
 			qdel(src)
 
 /obj/structure/girder/displaced
+	icon = 'icons/obj/structures.dmi'
 	icon_state = "displaced"
-	anchored = 0
+	anchored = FALSE
 	health = 50
+	smooth = SMOOTH_FALSE
 
 /obj/structure/girder/reinforced
-	icon_state = "reinforced"
+	icon = 'icons/obj/smooth_structures/girder_reinforced.dmi'
+	icon_state = "box"
 	state = 2
 	health = 500
 
-/obj/structure/cultgirder
-	icon= 'icons/obj/cult.dmi'
-	icon_state= "cultgirder"
-	anchored = 1
-	density = 1
+/obj/structure/girder/cult
+	icon= 'icons/obj/smooth_structures/cult_girder.dmi'
+	icon_state= "box"
+	anchored = TRUE
+	density = TRUE
 	layer = 2.9
-	var/health = 250
+	health = 250
+	smooth = SMOOTH_TRUE
 
-/obj/structure/cultgirder/attackby(obj/item/W, mob/user)
-	if(user.is_busy(src))
-		return
-	if(iswrench(W))
-		to_chat(user, "<span class='notice'>Now disassembling the girder</span>")
-		if(W.use_tool(src, user, 40, volume = 100))
-			to_chat(user, "<span class='notice'>You dissasembled the girder!</span>")
-			new /obj/effect/decal/remains/human(get_turf(src))
-			qdel(src)
-
-	else if(istype(W, /obj/item/weapon/pickaxe/plasmacutter))
-		to_chat(user, "<span class='notice'>Now slicing apart the girder</span>")
-		if(W.use_tool(src, user, 30, volume = 100))
-			to_chat(user, "<span class='notice'>You slice apart the girder!</span>")
-		new /obj/effect/decal/remains/human(get_turf(src))
-		qdel(src)
-
-	else if(istype(W, /obj/item/weapon/pickaxe/drill/diamond_drill))
-		to_chat(user, "<span class='notice'>You drill through the girder!</span>")
-		new /obj/effect/decal/remains/human(get_turf(src))
-		qdel(src)
-
-/obj/structure/cultgirder/blob_act()
-	if(prob(40))
-		qdel(src)
-
-/obj/structure/cultgirder/bullet_act(obj/item/projectile/Proj) //No beam check- How else will you destroy the cult girder with silver bullets?????
-	health -= Proj.damage
-	..()
-	if(health <= 0)
-		new /obj/item/stack/sheet/metal(get_turf(src))
-		qdel(src)
-
-	return
-
-/obj/structure/cultgirder/ex_act(severity)
-	switch(severity)
-		if(1.0)
-			qdel(src)
-			return
-		if(2.0)
-			if (prob(30))
-				new /obj/effect/decal/remains/human(loc)
-				qdel(src)
-			return
-		if(3.0)
-			if (prob(5))
-				new /obj/effect/decal/remains/human(loc)
-				qdel(src)
-			return
-		else
-	return
+/obj/structure/girder/cult/Destroy()
+	new /obj/effect/decal/remains/human(get_turf(src))
+	return ..()

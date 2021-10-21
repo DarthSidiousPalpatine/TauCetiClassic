@@ -5,7 +5,7 @@
 	icon = 'icons/obj/clothing/masks.dmi'
 	icon_state = "weldingmask"
 /obj/random/cloth/masks/item_to_spawn()
-	return pick(subtypesof(/obj/item/clothing/mask) - subtypesof(/obj/item/clothing/mask/cigarette) - list(/obj/item/clothing/mask/gas/death_commando, /obj/item/clothing/mask/facehugger/toy, /obj/item/clothing/mask/facehugger, /obj/item/clothing/mask/gas/shadowling, /obj/item/clothing/mask/ecig, /obj/item/clothing/mask/scarf/ninja, /obj/item/clothing/mask/gas/voice, /obj/item/clothing/mask/gas/voice/space_ninja, /obj/item/clothing/mask/facehugger/lamarr, /obj/item/clothing/mask/facehugger/toy, /obj/item/clothing/mask/gas/golem))
+	return pick(subtypesof(/obj/item/clothing/mask) - subtypesof(/obj/item/clothing/mask/cigarette) - list(/obj/item/clothing/mask/gas/death_commando, /obj/item/clothing/mask/facehugger_toy, /obj/item/clothing/mask/facehugger, /obj/item/clothing/mask/gas/shadowling, /obj/item/clothing/mask/ecig, /obj/item/clothing/mask/scarf/ninja, /obj/item/clothing/mask/gas/voice, /obj/item/clothing/mask/gas/voice/space_ninja, /obj/item/clothing/mask/facehugger/lamarr, /obj/item/clothing/mask/gas/golem))
 
 /obj/random/cloth/armor
 	name = "random armor"
@@ -21,7 +21,7 @@
 	icon = 'icons/obj/clothing/suits.dmi'
 	icon_state = "syndicate"
 /obj/random/cloth/spacesuit/item_to_spawn()
-	return pick(subtypesof(/obj/item/clothing/suit/space) - list(/obj/item/clothing/suit/space/space_ninja, /obj/item/clothing/suit/space/golem, /obj/item/clothing/suit/space/shadowling, /obj/item/clothing/suit/space/changeling, /obj/item/clothing/suit/space/rig/ert/stealth))
+	return pick(subtypesof(/obj/item/clothing/suit/space) - list(/obj/item/clothing/suit/space/space_ninja, /obj/item/clothing/suit/space/golem, /obj/item/clothing/suit/space/shadowling, /obj/item/clothing/suit/space/changeling, /obj/item/clothing/suit/space/rig/ert/stealth, /obj/item/clothing/suit/space/rig/syndi/elite, /obj/item/clothing/suit/space/rig/syndi/elite/comander))
 
 /obj/random/cloth/storagesuit
 	name = "random storagesuit"
@@ -48,7 +48,8 @@
 	return pick(\
 				/obj/item/clothing/suit/tajaran/furs,\
 				/obj/item/clothing/suit/unathi/robe ,\
-				/obj/item/clothing/suit/nun,\
+				/obj/item/clothing/suit/hooded/skhima,\
+				/obj/item/clothing/suit/hooded/nun,\
 				/obj/item/clothing/suit/chef/classic,\
 				/obj/item/clothing/suit/suspenders,\
 				/obj/item/clothing/suit/pirate,\
@@ -78,7 +79,7 @@
 	icon = 'icons/obj/clothing/hats.dmi'
 	icon_state = "skrell_helmet_white"
 /obj/random/cloth/spacehelmet/item_to_spawn()
-	return pick(subtypesof(/obj/item/clothing/head/helmet/space) - list(/obj/item/clothing/head/helmet/space/golem, /obj/item/clothing/head/helmet/space/space_ninja, /obj/item/clothing/head/helmet/space/changeling, /obj/item/clothing/head/helmet/space/rig/ert/stealth))
+	return pick(subtypesof(/obj/item/clothing/head/helmet/space) - list(/obj/item/clothing/head/helmet/space/golem, /obj/item/clothing/head/helmet/space/space_ninja, /obj/item/clothing/head/helmet/space/changeling, /obj/item/clothing/head/helmet/space/rig/ert/stealth, /obj/item/clothing/head/helmet/space/rig/syndi/elite, /obj/item/clothing/head/helmet/space/rig/syndi/elite/comander))
 
 /obj/random/cloth/helmet
 	name = "random helmet"
@@ -94,7 +95,7 @@
 	icon = 'icons/obj/clothing/hats.dmi'
 	icon_state = "santa"
 /obj/random/cloth/head/item_to_spawn()
-	return pick(subtypesof(/obj/item/clothing/head) - list(/obj/item/clothing/head/shadowling) - (subtypesof(/obj/item/clothing/head/helmet) + subtypesof(/obj/item/clothing/head/helmet/space)))
+	return pick(subtypesof(/obj/item/clothing/head) - list(/obj/item/clothing/head/shadowling, /obj/item/clothing/head/collectable/tophat/badmin_magic_hat, /obj/item/clothing/head/wizard/tophat) - (subtypesof(/obj/item/clothing/head/helmet) + subtypesof(/obj/item/clothing/head/helmet/space)))
 
 /obj/random/cloth/gloves
 	name = "random gloves"
@@ -102,7 +103,7 @@
 	icon = 'icons/obj/clothing/gloves.dmi'
 	icon_state = "orange"
 /obj/random/cloth/gloves/item_to_spawn()
-	return pick(subtypesof(/obj/item/clothing/gloves) - list(/obj/item/clothing/gloves/golem, /obj/item/clothing/gloves/shadowling, /obj/item/clothing/gloves/fluff))
+	return pick(subtypesof(/obj/item/clothing/gloves) - list(/obj/item/clothing/gloves/golem, /obj/item/clothing/gloves/shadowling, /obj/item/clothing/gloves/fluff, /obj/item/clothing/gloves/black/silence/furioso))
 
 /obj/random/cloth/glasses
 	name = "random glasses"
@@ -228,16 +229,15 @@
 				prob(12);/obj/item/clothing/head/helmet/space/santahat,\
 				prob(12);/obj/item/clothing/suit/space/santa,\
 				prob(12);/obj/item/clothing/shoes/winterboots,\
-				prob(3);/obj/item/clothing/suit/wintercoat,\
-				prob(3);/obj/item/clothing/suit/storage/labcoat/winterlabcoat,\
-				prob(1);/obj/item/clothing/suit/wintercoat/security,\
-				prob(1);/obj/item/clothing/suit/wintercoat/engineering/atmos,\
-				prob(1);/obj/item/clothing/suit/wintercoat/engineering,\
-				prob(1);/obj/item/clothing/suit/wintercoat/science,\
-				prob(1);/obj/item/clothing/suit/wintercoat/medical,\
-				prob(1);/obj/item/clothing/suit/wintercoat/cargo,\
-				prob(1);/obj/item/clothing/suit/wintercoat/hydro,\
-				prob(1);/obj/item/clothing/suit/wintercoat/captain,\
+				prob(3);/obj/item/clothing/suit/hooded/wintercoat,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/security,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/engineering/atmos,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/engineering,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/science,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/medical,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/cargo,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/hydro,\
+				prob(1);/obj/item/clothing/suit/hooded/wintercoat/captain,\
 				prob(12);/obj/item/weapon/storage/backpack/santabag,\
 			)
 

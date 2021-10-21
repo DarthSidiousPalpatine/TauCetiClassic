@@ -53,23 +53,23 @@
 /obj/item/rig_module/simple_ai/atom_init()
 	. = ..()
 	health_warnings = list(
-		new /datum/rig_warning(90,  "Vital signs are dropping",                                          'sound/rig/shortbeep.wav'), // health, message, sound
-		new /datum/rig_warning(40,  "Vital signs are dropping. Evacuate area",                           'sound/rig/shortbeep.wav'),
-		new /datum/rig_warning(0,   "Warning: Vital signs critical. Seek medical attention",             'sound/rig/beep.wav'),
-		new /datum/rig_warning(-20, "Warning: Vital signs critical. Seek medical attention immediately", 'sound/rig/longbeep.wav'),
-		new /datum/rig_warning(-50, "Emergency. User death imminent",                                    'sound/rig/longbeep.wav'),
+		new /datum/rig_warning(90,  "Vital signs are dropping",                                          'sound/rig/shortbeep.ogg'), // health, message, sound
+		new /datum/rig_warning(40,  "Vital signs are dropping. Evacuate area",                           'sound/rig/shortbeep.ogg'),
+		new /datum/rig_warning(0,   "Warning: Vital signs critical. Seek medical attention",             'sound/rig/beep.ogg'),
+		new /datum/rig_warning(-20, "Warning: Vital signs critical. Seek medical attention immediately", 'sound/rig/longbeep.ogg'),
+		new /datum/rig_warning(-50, "Emergency. User death imminent",                                    'sound/rig/longbeep.ogg'),
 		)
 
 	breach_warnings = list(
-		new /datum/rig_warning(3, "Minor breaches detected",                                                     'sound/rig/shortbeep.wav'),
-		new /datum/rig_warning(6, "Severe breaches detected. Evacuate low preasure area",                        'sound/rig/beep.wav'),
-		new /datum/rig_warning(8, "Warning: Critical breaches detected. Evacuate low preasure area immediately", 'sound/rig/longbeep.wav'),
+		new /datum/rig_warning(3, "Minor breaches detected",                                                     'sound/rig/shortbeep.ogg'),
+		new /datum/rig_warning(6, "Severe breaches detected. Evacuate low preasure area",                        'sound/rig/beep.ogg'),
+		new /datum/rig_warning(8, "Warning: Critical breaches detected. Evacuate low preasure area immediately", 'sound/rig/longbeep.ogg'),
 		)
 
 	energy_warnings = list(
-		new /datum/rig_warning(0.5, "Warning: hardsuit power level below 50%",         'sound/rig/shortbeep.wav'),
-		new /datum/rig_warning(0.3, "Warning: hardsuit power level below 30%",         'sound/rig/beep.wav'),
-		new /datum/rig_warning(0.1, "Warning: hardsuit power level is critically low", 'sound/rig/loudbeep.wav'),
+		new /datum/rig_warning(0.5, "Warning: hardsuit power level below 50%",         'sound/rig/shortbeep.ogg'),
+		new /datum/rig_warning(0.3, "Warning: hardsuit power level below 30%",         'sound/rig/beep.ogg'),
+		new /datum/rig_warning(0.1, "Warning: hardsuit power level is critically low", 'sound/rig/loudbeep.ogg'),
 		)
 
 /obj/item/rig_module/simple_ai/activate(forced = FALSE)
@@ -97,7 +97,7 @@
 	var/power_waste = 0
 
 	if(H.stat == DEAD && saved_stat != DEAD)
-		playsound(H, 'sound/rig/dead.wav', VOL_EFFECTS_MASTER)
+		playsound(H, 'sound/rig/dead.ogg', VOL_EFFECTS_MASTER)
 	saved_stat = H.stat
 
 	process_warnings(H)
@@ -197,17 +197,17 @@
 	if(dam_module == src) // ai module is damaged, we need to forget about old messages and show to the user that we broke
 		message_queue.Cut() // clearing the message queue
 		if(dam_module.damage >= MODULE_DESTROYED)
-			rig_message(destroyed_message, message_class = "danger", message_type = "[dam_module.name]", sound = 'sound/rig/longbeep.wav')
+			rig_message(destroyed_message, message_class = "danger", message_type = "[dam_module.name]", sound = 'sound/rig/longbeep.ogg')
 		else
-			rig_message(damage_message, message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/beep.wav')
+			rig_message(damage_message, message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/beep.ogg')
 			restart_cooldown = 10
 		rig_messages_process(holder.wearer)
 		return
 
 	if(dam_module.damage >= MODULE_DESTROYED)
-		rig_message("The [source] has disabled your [dam_module.interface_name]!", message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/longbeep.wav')
+		rig_message("The [source] has disabled your [dam_module.interface_name]!", message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/longbeep.ogg')
 	else
-		rig_message("The [source] has damaged your [dam_module.interface_name]!", message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/beep.wav')
+		rig_message("The [source] has damaged your [dam_module.interface_name]!", message_class = "warning", message_type = "[dam_module.name]", sound = 'sound/rig/beep.ogg')
 
 /datum/rig_aivoice
 	var/name = "ADS"
@@ -244,6 +244,59 @@
 		"Power is running out, please recharge the suit cell",
 		"The suit power is almost dead, can't help you much",
 		)
+
+/datum/rig_aivoice/wheatley
+	name = "Wheatley"
+	welcome_message = "Oi, just say hi already! That's too aggressive... Hello, friend!"
+	damage_message = "Hello? Anyone in there?"
+	destroyed_message = "Hellooooo-ooo-o..."
+
+	health_warnings = list(
+		"AHHH!!! Oh God. You look te-- ummm... good. Looking good, actually.",
+		"Are you okay? Are you - Don't answer that. I'm absolutely sure you're fine.",
+		"Oh. You MIGHT want to call out to somebody...",
+		"Do you still understand what I'm saying? At all? If \"yes\" - please seek help. If \"no\" please seek help immediately!",
+		"You are basically dying. But don't be alarmed, alright? Although, if you do feel alarm, try to hold onto that feeling because that is the proper reaction to being told that you are dying.",
+		)
+
+	breach_warnings = list(
+		"You, no, I, no, WE are taking some damage.",
+		"OOOF, I don't want to be bossy to you or anything, but you might want to cease the damage dealt to us.",
+		"GAAAH!!! It's not like you're at risk of losing me, or me losing you, but you might want to patch us up.",
+		)
+
+	energy_warnings = list(
+		"Oi, listen, you might want to consider the following fun fact: the charge bar, responsible for the charge says it's at 50%.",
+		"Alright, listen, for I am going to tell you something. The suit. Yes, it. It is running low on charge. Look at the meter. AT THE METER YOU DON'T GET TO SEE.",
+		"Wha-a-a-at's going o-o-o-on? Oh, right, you seem to be in a litte bit of non-haste when considering the fact that the SUIT IS ALMOST OUT OF POWER.",
+		)
+
+/datum/rig_aivoice/jester
+	name = "Jester"
+	welcome_message = "If we are going to die, let's at least enjoy it!"
+	damage_message = "If all else fails, and I be gone... laugh. It blinds the mind..."
+	destroyed_message = "At last, the greatest joke of all..."
+
+	health_warnings = list(
+		"Nasty ugly thing, this wound. It suits you.",
+		"Well, so much for bravery, thy are wounded.",
+		"All this leather and steel and blood... For what?",
+		"All your courage and your nobility... All for what?!",
+		"Why do we hang about here? We are defeated!",
+		)
+
+	breach_warnings = list(
+		"Ha-ha, they're onto you! The barrier is shed...",
+		"I admire your guile, I am immune to death, albeit the suit isn't.",
+		"... You're leading us into a trap! Clever, but I must decline. I urge you to retreat.",
+		)
+
+	energy_warnings = list(
+		"You pitiable fool! What use in scampering about!? You are in need of charging.",
+		"I should never have come out here...",
+		"We're all going to die..."
+		)
+
 
 /obj/item/rig_module/simple_ai/advanced
 	name = "hardsuit advanced diagnostic system"
@@ -282,7 +335,7 @@
 /obj/item/rig_module/simple_ai/advanced/on_rigdamage(mob/living/carbon/human/H, rig_damage)
 	if(rig_damage < 7)
 		return
-	var/obj/item/rig_module/selfrepair/repair_module = holder.find_module(/obj/item/rig_module/selfrepair/)
+	var/obj/item/rig_module/selfrepair/repair_module = holder.find_module(/obj/item/rig_module/selfrepair)
 	if(repair_module && !repair_module.active)
 		repair_module.activate(forced = TRUE)
 
@@ -290,7 +343,7 @@
 	if(H.stat == DEAD)
 		return
 
-	var/obj/item/rig_module/chem_dispenser/chem_disp = holder.find_module(/obj/item/rig_module/chem_dispenser/)
+	var/obj/item/rig_module/chem_dispenser/chem_disp = holder.find_module(/obj/item/rig_module/chem_dispenser)
 	if(!chem_disp)
 		return
 

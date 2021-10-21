@@ -10,13 +10,13 @@
 	throwforce = 15.0
 	throw_speed = 1
 	throw_range = 7
-	w_class = ITEM_SIZE_LARGE
+	w_class = SIZE_NORMAL
 
 	var/charges = 0		//how many restocking "charges" the refill has
 
 /obj/item/weapon/vending_refill/atom_init()
 	. = ..()
-	name = "\improper [machine_name] restocking unit"
+	name = "[machine_name] restocking unit"
 
 /obj/item/weapon/vending_refill/examine(mob/user)
 	..()
@@ -81,7 +81,7 @@
 	charges =  17// of 51
 
 /obj/item/weapon/vending_refill/chinese
-	machine_name = "\improper Mr. Chang"
+	machine_name = "Mr. Chang"
 	icon_state = "refill_snack"
 	charges =  16// of 48
 
@@ -101,6 +101,11 @@
 	machine_name = "McNuffin's Fast Food"
 	icon_state = "refill_snack"
 	charges =  14// of 40
+
+/obj/item/weapon/vending_refill/donut
+	machine_name = "Monkin' Donuts"
+	icon_state = "refill_donut"
+	charges =  10// of 30
 
 /obj/item/weapon/vending_refill/assist
 	machine_name = "Vendomat"

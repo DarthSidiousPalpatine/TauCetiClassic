@@ -81,7 +81,7 @@
 			if(!H.eyecheck() <= 0)
 				continue
 
-		if (istype(O, /mob/living/carbon/alien))//So aliens don't get flashed (they have no external eyes)/N
+		if (istype(O, /mob/living/carbon/xenomorph))//So aliens don't get flashed (they have no external eyes)/N
 			continue
 
 		O.Weaken(strength)
@@ -112,7 +112,7 @@
 	if(istype(AM, /mob/living/carbon))
 		var/mob/living/carbon/M = AM
 		if ((M.m_intent != "walk") && (src.anchored))
-			src.flash()
+			flash()
 
 /obj/machinery/flasher/portable/attackby(obj/item/weapon/W, mob/user)
 	if (iswrench(W))
@@ -121,12 +121,12 @@
 		user.SetNextMove(CLICK_CD_INTERACT)
 
 		if (!src.anchored)
-			user.show_message(text("<span class='warning'>[src] can now be moved.</span>"))
-			src.overlays.Cut()
+			to_chat(user, "<span class='warning'>[src] can now be moved.</span>")
+			cut_overlays()
 
 		else if (src.anchored)
-			user.show_message(text("<span class='warning'>[src] is now secured.</span>"))
-			src.overlays += "[base_state]-s"
+			to_chat(user, "<span class='warning'>[src] is now secured.</span>")
+			add_overlay("[base_state]-s")
 
 /obj/machinery/flasher_button/attackby(obj/item/weapon/W, mob/user)
 	return attack_hand(user)

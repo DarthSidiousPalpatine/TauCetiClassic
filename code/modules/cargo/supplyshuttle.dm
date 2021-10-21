@@ -13,28 +13,15 @@ var/list/mechtoys = list(
 	/obj/item/toy/prize/phazon
 )
 
-/area/supply/station
-	name = "supply shuttle"
-	icon_state = "shuttle3"
-	requires_power = 0
-	dynamic_lighting = DYNAMIC_LIGHTING_FORCED
-	looped_ambience = 'sound/ambience/loop_space.ogg'
-
-/area/supply/dock
-	name = "supply shuttle"
-	icon_state = "shuttle3"
-	requires_power = 0
-	dynamic_lighting = DYNAMIC_LIGHTING_FORCED
-
 //SUPPLY PACKS MOVED TO /code/defines/obj/supplypacks.dm
 
 /obj/structure/plasticflaps //HOW DO YOU CALL THOSE THINGS ANYWAY
-	name = "\improper plastic flaps"
+	name = "plastic flaps"
 	desc = "Completely impassable - or are they?"
 	icon = 'icons/obj/stationobjs.dmi' //Change this.
 	icon_state = "plasticflaps"
-	density = 0
-	anchored = 1
+	density = FALSE
+	anchored = TRUE
 	layer = 4
 	explosion_resistance = 5
 
@@ -50,11 +37,15 @@ var/list/mechtoys = list(
 	return TRUE
 
 /obj/structure/plasticflaps/CanPass(atom/A, turf/T)
-	if(istype(A) && A.checkpass(PASSGLASS))
+	if(!istype(A))
+		return
+	if(A.checkpass(PASSGLASS)) // for laser projectile
 		return prob(60)
+	if(A.checkpass(PASSTABLE))
+		return TRUE
 
 	var/obj/structure/stool/bed/B = A
-	if (istype(A, /obj/structure/stool/bed) && B.buckled_mob)//if it's a bed/chair and someone is buckled, it will not pass
+	if (istype(A, /obj/structure/stool/bed) && B.buckled_mob) //if it's a bed/chair and someone is buckled, it will not pass
 		return FALSE
 
 	else if(istype(A, /mob/living)) // You Shall Not Pass!
@@ -63,7 +54,7 @@ var/list/mechtoys = list(
 			return TRUE
 		if(istype(M, /mob/living/simple_animal/hostile))
 			return FALSE
-		if(!M.lying && !istype(M, /mob/living/carbon/monkey) && !istype(M, /mob/living/carbon/slime) && !istype(M, /mob/living/simple_animal/mouse) && !istype(M, /mob/living/silicon/robot/drone))  //If your not laying down, or a small creature, no pass.
+		if(!M.lying) //If your not laying down, or a small creature, no pass.
 			return FALSE
 	return ..()
 
@@ -82,7 +73,7 @@ var/list/mechtoys = list(
 	return
 
 /obj/structure/plasticflaps/mining //A specific type for mining that doesn't allow airflow because of them damn crates
-	name = "\improper Airtight plastic flaps"
+	name = "Airtight plastic flaps"
 	desc = "Heavy duty, airtight, plastic flaps."
 
 /obj/structure/plasticflaps/mining/atom_init() //set the turf below the flaps to block air

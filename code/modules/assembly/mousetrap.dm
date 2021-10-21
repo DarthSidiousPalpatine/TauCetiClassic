@@ -3,7 +3,6 @@
 	desc = "A handy little spring-loaded trap for catching pesty rodents."
 	icon_state = "mousetrap"
 	m_amt = 100
-	w_amt = 10
 	origin_tech = "combat=1"
 	var/armed = 0
 
@@ -52,7 +51,7 @@
 	if(!armed)
 		to_chat(user, "<span class='notice'>You arm [src].</span>")
 	else
-		if(((user.getBrainLoss() >= 60 || (CLUMSY in user.mutations)) && prob(50)))
+		if((user.getBrainLoss() >= 60 || (CLUMSY in user.mutations)) && prob(50))
 			triggered(user, user.hand ? BP_L_ARM : BP_R_ARM)
 			user.visible_message("<span class='warning'>[user] accidentally sets off [src], breaking their fingers.</span>", \
 								 "<span class='warning'>You accidentally trigger [src]!</span>")
@@ -60,11 +59,11 @@
 		to_chat(user, "<span class='notice'>You disarm [src].</span>")
 	armed = !armed
 	update_icon()
-	playsound(user, 'sound/weapons/handcuffs.ogg', VOL_EFFECTS_MASTER, 30, null, -3)
+	playsound(user, 'sound/weapons/handcuffs.ogg', VOL_EFFECTS_MASTER, 30, FALSE, null, -3)
 
 /obj/item/device/assembly/mousetrap/attack_hand(mob/living/user)
 	if(armed)
-		if(((user.getBrainLoss() >= 60 || CLUMSY in user.mutations)) && prob(50))
+		if((user.getBrainLoss() >= 60 || (CLUMSY in user.mutations)) && prob(50))
 			user.SetNextMove(CLICK_CD_INTERACT)
 			triggered(user, user.hand ? BP_L_ARM : BP_R_ARM)
 			user.visible_message("<span class='warning'>[user] accidentally sets off [src], breaking their fingers.</span>", \
@@ -72,7 +71,7 @@
 			return
 	..()
 
-/obj/item/device/assembly/mousetrap/Crossed(AM as mob|obj)
+/obj/item/device/assembly/mousetrap/Crossed(atom/movable/AM)
 	if(armed)
 		if(ishuman(AM))
 			var/mob/living/carbon/H = AM
@@ -82,7 +81,7 @@
 								  "<span class='warning'>You accidentally step on [src]</span>")
 		if(ismouse(AM))
 			triggered(AM)
-	..()
+	. = ..()
 
 /obj/item/device/assembly/mousetrap/on_found(mob/finder)
 	if(armed)
@@ -92,10 +91,10 @@
 		return 1	//end the search!
 	return 0
 
-/obj/item/device/assembly/mousetrap/hitby(A)
+/obj/item/device/assembly/mousetrap/hitby(atom/movable/AM, datum/thrownthing/throwingdatum)
 	if(!armed)
 		return ..()
-	visible_message("<span class='warning'>[src] is triggered by [A].</span>")
+	visible_message("<span class='warning'>[src] is triggered by [AM].</span>")
 	triggered(null)
 
 /obj/item/device/assembly/mousetrap/armed
@@ -107,7 +106,7 @@
 	set name = "Hide"
 	set category = "Object"
 
-	if(usr.stat)
+	if(usr.incapacitated())
 		return
 
 	layer = TURF_LAYER+0.2

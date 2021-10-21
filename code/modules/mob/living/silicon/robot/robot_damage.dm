@@ -4,6 +4,8 @@
 		stat = CONSCIOUS
 		return
 	health = 200 - (getBruteLoss() + getFireLoss())
+	diag_hud_set_status()
+	diag_hud_set_health()
 	return
 
 /mob/living/silicon/robot/getBruteLoss()
@@ -92,6 +94,8 @@
 	var/datum/robot_component/C = pick(components)
 	C.take_damage(brute,burn,sharp,edge)
 
+	updatehealth()
+
 /mob/living/silicon/robot/heal_overall_damage(brute, burn)
 	var/list/datum/robot_component/parts = get_damaged_components(brute,burn)
 
@@ -146,3 +150,5 @@
 		burn	-= (picked.electronics_damage - burn_was)
 
 		parts -= picked
+
+	updatehealth()

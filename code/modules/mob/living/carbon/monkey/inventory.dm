@@ -10,6 +10,10 @@
 	W.loc = src
 
 	switch(slot)
+		if(SLOT_HEAD)
+			head = W
+			W.equipped(src, slot)
+			update_inv_head(redraw_mob)
 		if(SLOT_BACK)
 			src.back = W
 			W.equipped(src, slot)
@@ -34,8 +38,8 @@
 			W.equipped(src, slot)
 			update_inv_r_hand(redraw_mob)
 		if(SLOT_IN_BACKPACK)
-			if(src.get_active_hand() == W)
-				src.remove_from_mob(W)
+			if(get_active_hand() == W)
+				remove_from_mob(W)
 			W.loc = src.back
 		else
 			to_chat(usr, "<span class='red'>You are trying to eqip this item to an unsupported inventory slot. How the heck did you manage that? Stop it...</span>")

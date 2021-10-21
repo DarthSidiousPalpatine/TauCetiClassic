@@ -1,29 +1,49 @@
 
 // Called when the item is in the active hand, and clicked; alternately, there is an 'Click On Held Object' verb or you can hit pagedown.
 /obj/item/proc/attack_self(mob/user)
-	return
+	if(SEND_SIGNAL(src, COMSIG_ITEM_ATTACK_SELF, user) & COMPONENT_NO_INTERACT)
+		return
+
+	SSdemo.mark_dirty(src)
+	SSdemo.mark_dirty(user)
 
 // No comment
 /atom/proc/attackby(obj/item/W, mob/user, params)
-	return
+	if(SEND_SIGNAL(src, COMSIG_PARENT_ATTACKBY, W, user, params) & COMPONENT_NO_AFTERATTACK)
+		return TRUE
+	return FALSE
 
 /atom/movable/attackby(obj/item/W, mob/user, params)
+	. = ..()
+	if(.) // Clickplace, no need for attack animation.
+		return FALSE
+
+	if(user.a_intent != INTENT_HARM)
+		return FALSE
+
+	var/had_effect = FALSE
 	if(!(W.flags & NOATTACKANIMATION))
 		user.do_attack_animation(src)
+		had_effect = TRUE
+
+	if(!(W.flags & NOBLUDGEON))
+		visible_message("<span class='danger'>[src] has been hit by [user] with [W].</span>")
+		had_effect = TRUE
+
+	if(!had_effect)
+		return FALSE
+
 	user.SetNextMove(CLICK_CD_MELEE)
 	add_fingerprint(user)
-	if(W && !(W.flags & NOBLUDGEON))
-		visible_message("<span class='danger'>[src] has been hit by [user] with [W].</span>")
+
+	SSdemo.mark_dirty(src)
+	SSdemo.mark_dirty(W)
+	SSdemo.mark_dirty(user)
+
+	return TRUE
 
 /mob/living/attackby(obj/item/I, mob/user, params)
-	if(!istype(I) || !ismob(user))
-		return
 	user.SetNextMove(CLICK_CD_MELEE)
-
-	if(user.zone_sel && user.zone_sel.selecting)
-		I.attack(src, user, user.zone_sel.selecting)
-	else
-		I.attack(src, user)
 
 	if(ishuman(user))	//When abductor will hit someone from stelth he will reveal himself
 		var/mob/living/carbon/human/H = user
@@ -37,17 +57,30 @@
 			var/obj/item/clothing/suit/V = H.wear_suit
 			V.attack_reaction(src, REACTION_ATACKED, user)
 
+	SSdemo.mark_dirty(src)
+	SSdemo.mark_dirty(I)
+	SSdemo.mark_dirty(user)
+	return I.attack(src, user, user.get_targetzone())
+
 // Proximity_flag is 1 if this afterattack was called on something adjacent, in your square, or on your person.
 // Click parameters is the params string from byond Click() code, see that documentation.
-/obj/item/proc/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
+/obj/item/proc/afterattack(atom/target, mob/user, proximity, params)
 	return
 
 
 /obj/item/proc/attack(mob/living/M, mob/living/user, def_zone)
-	var/messagesource = M
+	if(SEND_SIGNAL(src, COMSIG_ITEM_ATTACK, M, user, def_zone) & COMPONENT_ITEM_NO_ATTACK)
+		return
+
+	var/mob/messagesource = M
 	if (can_operate(M))        //Checks if mob is lying down on table for surgery
-		if (do_surgery(M,user,src))
+		if (do_surgery(M, user, src))
 			return 0
+
+	if(stab_eyes && user.a_intent != INTENT_HELP && (def_zone == O_EYES || def_zone == BP_HEAD))
+		if((CLUMSY in user.mutations) && prob(50))
+			M = user
+		return eyestab(M,user)
 
 	// Knifing
 	if(edge)
@@ -65,27 +98,38 @@
 					M.apply_damage(20, BRUTE, BP_HEAD, null, damage_flags)
 					M.apply_damage(20, BRUTE, BP_HEAD, null, damage_flags)
 					M.adjustOxyLoss(60) // Brain lacks oxygen immediately, pass out
-					playsound(src, 'sound/effects/throat_cutting.ogg', VOL_EFFECTS_MASTER)
+					playsound(M, 'sound/effects/throat_cutting.ogg', VOL_EFFECTS_MASTER)
 					flick(G.hud.icon_state, G.hud)
 					user.SetNextMove(CLICK_CD_ACTION)
 					user.visible_message("<span class='danger'>[user] slit [M]'s throat open with \the [name]!</span>")
-					user.attack_log += "\[[time_stamp()]\]<font color='red'> Knifed [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
-					M.attack_log += "\[[time_stamp()]\]<font color='orange'> Got knifed by [user.name] ([user.ckey]) with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
-					msg_admin_attack("[key_name(user)] knifed [key_name(M)] with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])", user)
+					M.log_combat(user, "knifed with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYPE: [uppertext(damtype)])")
 					return
 
 	if (istype(M,/mob/living/carbon/brain))
 		messagesource = M:container
 	if (length(hitsound))
-		playsound(src, pick(hitsound), VOL_EFFECTS_MASTER)
+		playsound(M, pick(hitsound), VOL_EFFECTS_MASTER)
 	/////////////////////////
 	user.lastattacked = M
 	M.lastattacker = user
 	user.do_attack_animation(M)
 
-	user.attack_log += "\[[time_stamp()]\]<font color='red'> Attacked [M.name] ([M.ckey]) with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
-	M.attack_log += "\[[time_stamp()]\]<font color='orange'> Attacked by [user.name] ([user.ckey]) with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])</font>"
-	msg_admin_attack("[key_name(user)] attacked [key_name(M)] with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYE: [uppertext(damtype)])", user)
+	if(slot_flags & SLOT_FLAGS_HEAD && def_zone == BP_HEAD && mob_can_equip(M, SLOT_HEAD, TRUE) && user.a_intent != INTENT_HARM)
+		user.visible_message("<span class='danger'>[user] tries to put [name] on the [M]'s head!</span>")
+		if(user.is_busy(src) || !do_after(user, 0.8 SECONDS, target = M))
+			return
+		user.remove_from_mob(src)
+		M.equip_to_slot_if_possible(src, SLOT_HEAD, disable_warning = TRUE)
+		user.visible_message("<span class='danger'>[user] slams [name] on the [M]'s head!</span>")
+		M.log_combat(user, "slammed with [name] on the head (INTENT: [uppertext(user.a_intent)]) (DAMTYPE: [uppertext(BRUTE)])")
+		var/list/data = user.get_unarmed_attack()
+		// if item has no force just assume attacker smashed his fist (no scratches or any modifiers) against victim's head.
+		if(user.a_intent in list(INTENT_PUSH, INTENT_GRAB))
+			M.apply_damage(force + data["damage"], BRUTE, BP_HEAD)
+			playsound(M, data["sound"], VOL_EFFECTS_MASTER)
+		return TRUE
+
+	M.log_combat(user, "attacked with [name] (INTENT: [uppertext(user.a_intent)]) (DAMTYPE: [uppertext(damtype)])")
 
 	var/power = force
 	if(HULK in user.mutations)
@@ -112,7 +156,7 @@
 							if(prob(80) && !slime.client)
 								slime.Discipline++
 						slime.Victim = null
-						slime.anchored = 0
+						slime.anchored = FALSE
 
 						spawn()
 							if(slime)
@@ -149,7 +193,7 @@
 											slime.SStun = 0
 
 							slime.Victim = null
-							slime.anchored = 0
+							slime.anchored = FALSE
 
 
 						spawn(0)
@@ -169,17 +213,43 @@
 		if(!(user in viewers(M, null)))
 			showname = "."
 
-		for(var/mob/O in viewers(messagesource, null))
-			if(attack_verb.len)
-				O.show_message("<span class='warning'><B>[M] has been [pick(attack_verb)] with [src][showname] </B></span>", 1)
-			else
-				O.show_message("<span class='warning'><B>[M] has been attacked with [src][showname] </B></span>", 1)
+		var/list/alt_alpperances_vieawers
+		if(alternate_appearances)
+			for(var/key in alternate_appearances)
+				var/datum/atom_hud/alternate_appearance/AA = alternate_appearances[key]
+				if(!AA.alternate_obj || !istype(AA.alternate_obj, /obj))
+					continue
+				var/obj/alternate_obj = AA.alternate_obj
+				alt_alpperances_vieawers = list()
+				for(var/mob/alt_viewer in viewers(M))
+					if(!alt_viewer.client || !(alt_viewer in AA.hudusers))
+						continue
+					alt_alpperances_vieawers += alt_viewer
+					alt_viewer.show_message("<span class='warning'><B>[M] has been attacked with [alternate_obj.name][showname] </B></span>", SHOWMSG_VISUAL)
+
+		if(attack_verb.len)
+			messagesource.visible_message("<span class='warning'><B>[M] has been [pick(attack_verb)] with [src][showname] </B></span>", ignored_mobs = alt_alpperances_vieawers)
+		else
+			messagesource.visible_message("<span class='warning'><B>[M] has been attacked with [src][showname] </B></span>", ignored_mobs = alt_alpperances_vieawers)
 
 		if(!showname && user)
 			if(user.client)
 				to_chat(user, "<span class='warning'><B>You attack [M] with [src]. </B></span>")
 
+	// Attacking yourself can't miss
+	if(user == M)
+		def_zone = user.get_targetzone()
+	else
+		def_zone = def_zone? check_zone(def_zone) : get_zone_with_miss_chance(user.get_targetzone(), M)
 
+	if(!def_zone)
+		visible_message("<span class='userdanger'>[user] misses [M] with \the [src]!</span>")
+		return FALSE
+
+	if(user != M)
+		user.do_attack_animation(M)
+		if(M.check_shields(src, force, "the [name]", get_dir(user, M) ))
+			return FALSE
 
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
@@ -191,35 +261,18 @@
 					M.adjustBrainLoss(power)
 
 				else
-
+					if(prob(33)) // Added blood for whacking non-humans too
+						var/turf/simulated/T = M.loc
+						if(istype(T))
+							T.add_blood_floor(M)
 					M.take_bodypart_damage(power)
-					if (prob(33)) // Added blood for whacking non-humans too
-						var/turf/location = M.loc
-						if (istype(location, /turf/simulated))
-							location:add_blood_floor(M)
 			if("fire")
 				if (!(COLD_RESISTANCE in M.mutations))
-					M.take_bodypart_damage(0, power)
 					to_chat(M, "Aargh it burns!")
-		M.updatehealth()
+					M.take_bodypart_damage(0, power)
+
 	add_fingerprint(user)
+	SSdemo.mark_dirty(src)
+	SSdemo.mark_dirty(M)
+	SSdemo.mark_dirty(user)
 	return 1
-
-/*
-[ModifierName]ClickAction procs are called from [ModifierName]Click
-and passed to an item held in user's hand, when he clicks on target.
-
-Return TRUE to prevent any other click logic.
-*/
-
-/obj/item/proc/ShiftClickAction(atom/target, mob/user)
-	return FALSE
-
-/obj/item/proc/CtrlClickAction(atom/target, mob/user)
-	return FALSE
-
-/obj/item/proc/CtrlShiftClickAction(atom/target, mob/user)
-	return FALSE
-
-/obj/item/proc/AltClickAction(atom/target, mob/user)
-	return FALSE

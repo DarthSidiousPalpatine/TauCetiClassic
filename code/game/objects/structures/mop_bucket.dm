@@ -3,7 +3,7 @@
 	desc = "Fill it with water, but don't forget a mop!"
 	icon = 'icons/obj/janitor.dmi'
 	icon_state = "mopbucket"
-	density = 1
+	density = TRUE
 	flags = OPENCONTAINER
 	var/amount_per_transfer_from_this = 5	//shit I dunno, adding this so syringes stop runtime erroring. --NeoFite
 
@@ -40,6 +40,6 @@
 	update_icon()
 
 /obj/structure/mopbucket/update_icon()
-	overlays.Cut()
+	cut_overlays()
 	if(reagents.total_volume > 1)
-		overlays += "mopbucket_water"
+		add_overlay("mopbucket_water")
