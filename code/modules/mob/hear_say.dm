@@ -69,8 +69,16 @@
 			message = highlight_traitor_codewords(message, src.mind)
 		if(language)
 			to_chat(src, "[track] <span class='game say'><span class='name'>[speaker_name]</span>[alt_name] [language.format_message(message, verb)]</span>")
+			while(length(message) > 40)
+				hearing(src, copytext_char(language.format_message(message, verb), 1, 41), speaker)
+				message = copytext_char(language.format_message(message, verb), 41)
+			hearing(src, copytext_char(language.format_message(message, verb), 1, 41), speaker)
 		else
 			to_chat(src, "[track] <span class='game say'><span class='name'>[speaker_name]</span>[alt_name] [verb], <span class='message'><span class='body'>\"[message]\"</span></span></span>")
+			while(length(message) > 40)
+				hearing(src, copytext_char(message, 1, 41), speaker)
+				message = copytext_char(message, 41)
+			hearing(src, copytext_char(message, 1, 41), speaker)
 		if (speech_sound && (get_dist(speaker, src) <= world.view && src.z == speaker.z))
 			var/turf/source = speaker? get_turf(speaker) : get_turf(src)
 			playsound_local(source, speech_sound, VOL_EFFECTS_MASTER, sound_vol)
@@ -215,8 +223,10 @@
 
 	if(say_understands(speaker, language))
 		message = "<span class='game say'><span class='name'>[speaker_name]</span> [language.format_message(message, verb)]</span>"
+		hearing(src, "*[language.format_message(message, verb)]*", speaker)
 	else
 		message = "<span class='game say'><span class='name'>[speaker_name]</span> [verb].</span>"
+		hearing(src, "*[verb]*", speaker)
 
 	if(src.status_flags & PASSEMOTES)
 		for(var/obj/item/weapon/holder/H in src.contents)

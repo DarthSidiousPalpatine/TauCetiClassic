@@ -239,3 +239,31 @@
 	if(!mind || !mind.assigned_job)
 		return
 	return mind.assigned_job.head_position
+
+/proc/hearing(mob/user, Text, atom/target)
+	if(!user || target && QDELING(target))
+		return FALSE
+
+	var/target_null = TRUE
+
+	var/datum/hearbar/textbar
+	if(user.client && (user.client.prefs.toggles & SHOW_PROGBAR))
+		textbar = new(user, Text, target)
+	else
+		return
+
+	var/endtime = world.time + 50
+	. = TRUE
+	while (world.time < endtime)
+		stoplag(1)
+		textbar.update()
+
+		if(QDELETED(user) || !target_null && QDELETED(target))
+			. = FALSE
+			break
+
+		if(user.stat || user.weakened || user.stunned)
+			. = FALSE
+			break
+
+	qdel(textbar)
