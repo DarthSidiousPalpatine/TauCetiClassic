@@ -764,14 +764,17 @@ steam.start() -- spawns the effect
 	anchored = TRUE
 	unacidable = TRUE
 
-/obj/effect/reflection/proc/setup_visuals(target)
-	mirror_surface = target
+/obj/effect/reflection/proc/setup_visuals(mirror, distance, reflection_alpha, mask_icon, mask_icon_state, mirror_dir = null)
+	mirror_surface = mirror
 
-	if(istype(mirror_surface, /obj/effect/fluid))
-		dir = NORTH
-		alpha = 100
+	if(mirror_dir)
+		dir = mirror_dir
 	else
-		dir = mirror_surface.dir
+		dir = NORTH
+
+	alpha = reflection_alpha
+	alpha_icon = mask_icon
+	alpha_icon_state = mask_icon_state
 
 	pixel_x = mirror_surface.pixel_x
 	pixel_y = mirror_surface.pixel_y
@@ -803,4 +806,4 @@ steam.start() -- spawns the effect
 
 	filters += filter("type" = "alpha", "icon" = icon(alpha_icon, alpha_icon_state), "x" = 0, "y" = 0)
 
-	vis_contents += get_ranged_target_turf(mirror_surface, dir, 1)
+	vis_contents += get_ranged_target_turf(mirror_surface, dir, distance)
