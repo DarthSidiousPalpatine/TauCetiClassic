@@ -14,6 +14,9 @@
 	var/fluid_type = "water" // Declared in stubs/fluid.dm
 	var/turf/start_loc
 
+	var/obj/effect/reflection/reflection = null
+	vis_flags = VIS_HIDE
+
 /obj/effect/fluid/ex_act()
 	return
 
@@ -42,12 +45,16 @@
 	forceMove(start_loc)
 	update_icon()
 
+	reflection = new(loc)
+	reflection.setup_visuals(src)
+
 /obj/effect/fluid/Destroy()
 	start_loc = null
 	if(islist(equalizing_fluids))
 		equalizing_fluids.Cut()
 	if(SSfluids)
 		SSfluids.remove_active_fluid(src)
+	QDEL_NULL(reflection)
 	return ..()
 
 /obj/effect/fluid/mapped

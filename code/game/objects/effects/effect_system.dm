@@ -749,3 +749,58 @@ steam.start() -- spawns the effect
 			dmglevel = 3
 
 		if(dmglevel<4) holder.ex_act(dmglevel)
+
+
+/obj/effect/reflection
+	name = "reflection"
+	appearance_flags = KEEP_TOGETHER|TILE_BOUND|PIXEL_SCALE
+	mouse_opacity = 0
+	vis_flags = VIS_HIDE
+	layer = ABOVE_NORMAL_TURF_LAYER
+	var/alpha_icon = 'icons/effects/effects.dmi'
+	var/alpha_icon_state = "water"
+	var/obj/mirror_surface
+	desc = "Who’s the Fairest of Them All?"
+	anchored = TRUE
+	unacidable = TRUE
+
+/obj/effect/reflection/proc/setup_visuals(target)
+	mirror_surface = target
+
+	if(istype(mirror_surface, /obj/effect/fluid))
+		dir = NORTH
+		alpha = 100
+	else
+		dir = mirror_surface.dir
+
+	pixel_x = mirror_surface.pixel_x
+	pixel_y = mirror_surface.pixel_y
+
+	update_mirror_filters()
+
+/obj/effect/reflection/proc/reset_visuals()
+	mirror_surface = null
+	update_mirror_filters()
+
+/obj/effect/reflection/proc/reset_alpha()
+	alpha = initial(alpha)
+
+/obj/effect/reflection/proc/update_mirror_filters()
+	filters = null
+
+	vis_contents = null
+
+	if(!mirror_surface)
+		return
+
+	var/matrix/M = matrix()
+	if(dir == WEST || dir == EAST)
+		M.Scale(-1, 1)
+	else if(dir == SOUTH|| dir == NORTH)
+		M.Scale(1, -1)
+
+	transform = M
+
+	filters += filter("type" = "alpha", "icon" = icon(alpha_icon, alpha_icon_state), "x" = 0, "y" = 0)
+
+	vis_contents += get_ranged_target_turf(mirror_surface, dir, 1)
