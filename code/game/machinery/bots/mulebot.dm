@@ -389,7 +389,7 @@
 
 	if(isobj(AM))
 		var/obj/O = AM
-		if(O.mount_mob || (locate(/mob) in AM)) //can't load non crates objects with mobs buckled to it or inside it.
+		if(O.rider || (locate(/mob) in AM)) //can't load non crates objects with mobs buckled to it or inside it.
 			buzz(SIGH)
 			return
 

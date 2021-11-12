@@ -15,6 +15,8 @@
 	// Delay in ticks for the lying anim on rider_lying objs.
 	var/buckle_delay = 2
 
+	var/buckle_movable = 0
+
 
 /atom/movable/attack_hand(mob/living/user)
 	. = ..()
@@ -98,7 +100,6 @@
 	M.throw_alert("buckled", /atom/movable/screen/alert/buckled, new_master = src)
 	correct_pixel_shift(M)
 	M.update_canmove()
-	if(can_be_controlled && M.can_control)
 
 	return TRUE
 
