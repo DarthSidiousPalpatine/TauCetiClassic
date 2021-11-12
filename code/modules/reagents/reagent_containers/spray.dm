@@ -105,8 +105,8 @@
 		return
 
 	var/movementdirection = turn(get_dir(get_turf(src), T), 180)
-	if(istype(get_turf(src), /turf/simulated) && istype(user.mount, /obj/structure/stool/bed/chair) && !user.mount.anchored)
-		var/obj/structure/stool/bed/chair/buckled_to = user.mount
+	if(istype(get_turf(src), /turf/simulated) && istype(user.buckled, /obj/structure/stool/bed/chair) && !user.buckled.anchored)
+		var/obj/structure/stool/bed/chair/buckled_to = user.buckled
 		if(!buckled_to.flipped)
 			if(buckled_to)
 				buckled_to.propelled = 4

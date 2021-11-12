@@ -147,7 +147,7 @@
 /obj/machinery/disposal/proc/MouseDrop_Mob(mob/living/target, mob/living/user)
 	if(user.incapacitated())
 		return
-	if(target.mount)
+	if(target.buckled)
 		return
 	//animals cannot put mobs other than themselves into disposal
 	if(isanimal(user) && target != user)

@@ -104,7 +104,7 @@
 //Used by throw code to hand over the mob, instead of throwing the grab. The grab is then deleted by the throw code.
 /obj/item/weapon/grab/proc/throw_held()
 	if(affecting)
-		if(affecting.mount)
+		if(affecting.buckled)
 			return null
 		if(state >= GRAB_AGGRESSIVE)
 			animate(affecting, pixel_x = 0, pixel_y = 0, 4, 1)
@@ -166,7 +166,7 @@
 		qdel(src)
 		return PROCESS_KILL
 
-	if(affecting.mount)
+	if(affecting.buckled)
 		qdel(src)
 		return PROCESS_KILL
 
@@ -263,7 +263,7 @@
 /obj/item/weapon/grab/proc/adjust_position(adjust_time = 5, force_loc = FALSE, force_dir = 0)
 	if(!affecting)
 		return
-	if(affecting.mount)
+	if(affecting.buckled)
 		animate(affecting, pixel_x = 0, pixel_y = 0, time = adjust_time, 1, LINEAR_EASING)
 		return
 	if(affecting.lying && state != GRAB_KILL)

@@ -226,7 +226,7 @@
 		C.layer = layer + 0.1		//so it sits above the vehicle
 
 	if(ismob(C))
-		buckle(C)
+		buckle_mob(C)
 
 	return 1
 

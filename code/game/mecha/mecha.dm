@@ -903,7 +903,7 @@
 	if (usr.incapacitated() || !ishuman(usr))
 		return
 
-	if (usr.mount)
+	if (usr.buckled)
 		to_chat(usr,"<span class='warning'>You can't climb into the exosuit while buckled!</span>")
 		return
 

@@ -78,7 +78,7 @@ This is emryo growth procs
 			add_infected_hud()
 //increase the growth rate if the host is buckled to the alien nest
 	var/growth_rate = 1
-	if(affected_mob.mount && istype(affected_mob.mount, /obj/structure/stool/bed/nest))
+	if(affected_mob.buckled && istype(affected_mob.buckled, /obj/structure/stool/bed/nest))
 		growth_rate = 3
 
 	if(baby && baby.client)

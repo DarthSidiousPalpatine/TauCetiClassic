@@ -58,21 +58,21 @@
 	toggle(user)
 
 /obj/structure/closet/coffin/attack_hand(mob/user)
-	unbuckle(user)
+	user_unbuckle_mob(user)
 
 /obj/structure/closet/coffin/dump_contents()
 	var/mob/M = locate() in src
 	if(M)
 		M.forceMove(loc)
-		buckle(M)
+		buckle_mob(M)
 		M.instant_vision_update(0)
 
 	..()
 
 /obj/structure/closet/coffin/collect_contents()
 	for(var/mob/M in loc)
-		if(M == rider)
-			unbuckle(M)
+		if(M == buckled_mob)
+			unbuckle_mob(M)
 			M.forceMove(src)
 			M.lying = TRUE
 			M.update_transform()
@@ -109,8 +109,8 @@
 /obj/structure/closet/coffin/correct_pixel_shift(mob/living/M)
 	return
 
-/obj/structure/closet/coffin/post_buckle(mob/living/M)
-	if(M == rider)
+/obj/structure/closet/coffin/post_buckle_mob(mob/living/M)
+	if(M == buckled_mob)
 		M.pixel_x = 1
 		M.pixel_y = -1
 		update_buckle_mob(M)
@@ -137,18 +137,18 @@
 	if(layer >= FLY_LAYER) // We're flying, nothing's gonna buckle to us.
 		return
 
-	if(M.loc == loc && can_buckle && istype(M) && !rider && istype(user))
-		buckle(M, user)
+	if(M.loc == loc && can_buckle && istype(M) && !buckled_mob && istype(user))
+		user_buckle_mob(M, user)
 	else
 		..()
 
 // This bootleg is here so mob in a moving coffin won't spin.
 /obj/structure/closet/coffin/handle_buckled_mob_movement(newloc,direct)
-	var/saved_dir = rider.dir
+	var/saved_dir = buckled_mob.dir
 	. = ..()
 	if(.)
 		// so the body doesn't spin in it's grave
 		// unless required to!
-		rider.set_dir(saved_dir)
+		buckled_mob.set_dir(saved_dir)
 
 #undef LYING_ANIM_COOLDOWN

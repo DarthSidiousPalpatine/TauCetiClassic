@@ -37,7 +37,7 @@
 
 /obj/structure/kitchenspike/attackby(obj/item/I, mob/user)
 	if(iscrowbar(I))
-		if(!src.mount_mob)
+		if(!src.buckled_mob)
 			if(user.is_busy()) return
 			if(I.use_tool(src, user, 20, volume = 100))
 				to_chat(user, "<span class='notice'>You pry the spikes out of the frame.</span>")
@@ -53,11 +53,11 @@
 
 		var/obj/item/weapon/grab/G = I
 		if(istype(G.affecting, /mob/living))
-			if(!rider)
+			if(!buckled_mob)
 				if(do_mob(user, src, 120))
-					if(rider) //to prevent spam/queing up attacks
+					if(buckled_mob) //to prevent spam/queing up attacks
 						return
-					if(G.affecting.mount)
+					if(G.affecting.buckled)
 						return
 					var/mob/living/H = G.affecting
 					playsound(src, 'sound/effects/splat.ogg', VOL_EFFECTS_MASTER, 25)
@@ -70,9 +70,9 @@
 						var/turf/simulated/pos = get_turf(H)
 						pos.add_blood_floor(H)
 					H.adjustBruteLoss(30)
-					H.mount = src
+					H.buckled = src
 					H.set_dir(2)
-					rider = H
+					buckled_mob = H
 					var/matrix/m = matrix(H.transform)
 					m.Turn(180)
 					animate(H, transform = m, time = 3)
@@ -83,15 +83,15 @@
 	else
 		..()
 
-/obj/structure/kitchenspike/buckle(mob/living/M, mob/living/user) //Don't want them getting put on the rack other than by spiking
+/obj/structure/kitchenspike/user_buckle_mob(mob/living/M, mob/living/user) //Don't want them getting put on the rack other than by spiking
 	return
 
-/obj/structure/kitchenspike/unbuckle(mob/living/carbon/human/user)
-	if(rider && ismob(rider))
+/obj/structure/kitchenspike/user_unbuckle_mob(mob/living/carbon/human/user)
+	if(buckled_mob)
 		if(user.is_busy())
 			return
 
-		var/mob/living/L = rider
+		var/mob/living/L = buckled_mob
 		if(L != user)
 			if(user.is_busy()) return
 			L.visible_message(\
@@ -99,7 +99,7 @@
 				"<span class='warning'>[user.name] is trying to pull you off the [src], opening up fresh wounds!</span>",\
 				"<span class='italics'>You hear a squishy wet noise.</span>")
 			if(!do_after(user, 300, target = user))
-				if(L && L.mount)
+				if(L && L.buckled)
 					L.visible_message(\
 					"<span class'notice'>[user.name] fails to free [L.name]!</span>",\
 					"<span class='warning'>[user.name] fails to pull you off of the [src].</span>")
@@ -112,11 +112,11 @@
 			"<span class='italics'>You hear a wet squishing noise..</span>")
 			L.adjustBruteLoss(15)
 			if(!do_after(L, 1200, target = src))
-				if(L && L.mount)
+				if(L && L.buckled)
 					to_chat(L, "<span class='warning'>You fail to free yourself!</span>")
 				return
 
-		if(!L.mount)
+		if(!L.buckled)
 			return
 
 		var/matrix/m = matrix(L.transform)
@@ -125,6 +125,6 @@
 		L.pixel_y = L.default_pixel_y
 		L.adjustBruteLoss(15)
 		visible_message(text("<span class='danger'>[L] falls free of the [src]!</span>"))
-		unbuckle()
+		unbuckle_mob()
 		L.emote("scream")
 		L.AdjustWeakened(10)

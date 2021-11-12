@@ -237,10 +237,10 @@
 
 	victim.Stun(2)
 
-	if(victim.mount)
-		victim.mount.unbuckle()
-	if(attacker.mount)
-		attacker.mount.unbuckle()
+	if(victim.buckled)
+		victim.buckled.unbuckle_mob()
+	if(attacker.buckled)
+		attacker.buckled.unbuckle_mob()
 
 	var/obj/item/weapon/grab/victim_G = prepare_grab(victim, attacker, GRAB_AGGRESSIVE)
 	if(!istype(victim_G))

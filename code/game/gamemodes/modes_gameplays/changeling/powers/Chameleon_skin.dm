@@ -38,7 +38,7 @@
 			owner.alpha = 200
 	if(owner.loc != last_loc) // looks like a shit, but meh
 		owner.alpha = 200
-	if(owner.stat == DEAD || owner.lying || owner.mount)
+	if(owner.stat == DEAD || owner.lying || owner.buckled)
 		active = !active
 		turn_off()
 	last_loc = owner.loc

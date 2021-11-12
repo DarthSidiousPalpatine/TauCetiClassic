@@ -57,11 +57,11 @@
 	else if(istype(loc, /turf/space))
 		parent.radiate_heat_to_space(surface, 1)
 
-	if(rider && ishuman(rider))
+	if(buckled_mob)
 		var/hc = pipe_air.heat_capacity()
-		var/avg_temp = (pipe_air.temperature * hc + rider.bodytemperature * 3500) / (hc + 3500)
+		var/avg_temp = (pipe_air.temperature * hc + buckled_mob.bodytemperature * 3500) / (hc + 3500)
 		pipe_air.temperature = avg_temp
-		rider.bodytemperature = avg_temp
+		buckled_mob.bodytemperature = avg_temp
 
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging/process()
 	if(!parent)
@@ -86,11 +86,12 @@
 
 			animate(src, color = rgb(h_r, h_g, h_b), time = 20, easing = SINE_EASING)
 
-	if(rider && ishuman(rider))
+	if(buckled_mob)
 		var/heat_limit = 1000
-		var/mob/living/carbon/human/H = rider
+
+		var/mob/living/carbon/human/H = buckled_mob
 		if(istype(H) && H.species)
 			heat_limit = H.species.heat_level_3
 
 		if(pipe_air.temperature > heat_limit + 1)
-			rider.apply_damage(4 * log(pipe_air.temperature - heat_limit), BURN, BP_CHEST, used_weapon = "Excessive Heat")
+			buckled_mob.apply_damage(4 * log(pipe_air.temperature - heat_limit), BURN, BP_CHEST, used_weapon = "Excessive Heat")

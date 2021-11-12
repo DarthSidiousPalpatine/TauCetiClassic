@@ -91,7 +91,7 @@
 			break
 		if(istype (M, /mob/dead/observer))
 			continue
-		if(M.mount)
+		if(M.buckled)
 			continue
 
 		M.forceMove(src)

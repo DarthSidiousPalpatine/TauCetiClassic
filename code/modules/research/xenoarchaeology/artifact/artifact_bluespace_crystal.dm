@@ -87,8 +87,8 @@
 
 	for (var/mob/living/M in range(7,T))
 		to_chat(M, "<span class='red'>You are displaced by a strange force!</span>")
-		if(M.mount)
-			M.mount.unbuckle_mob()
+		if(M.buckled)
+			M.buckled.unbuckle_mob()
 
 		var/datum/effect/effect/system/spark_spread/sparks = new /datum/effect/effect/system/spark_spread()
 		sparks.set_up(3, 0, get_turf(M))

@@ -53,7 +53,7 @@
 
 /mob/living/carbon/xenomorph/humanoid/hunter/proc/leap_at(atom/A)
 
-	if(mount)
+	if(buckled)
 		to_chat(src, "<span class='alertalien'>You cannot leap in your current state.</span>")
 		return
 

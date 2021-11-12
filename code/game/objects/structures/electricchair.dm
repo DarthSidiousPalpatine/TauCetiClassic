@@ -63,12 +63,12 @@
 	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
 	s.set_up(12, 1, src)
 	s.start()
-	if(rider && ismob(rider))
-		rider.burn_skin(85)
-		to_chat(rider, "<span class='danger'>You feel a deep shock course through your body!</span>")
+	if(buckled_mob)
+		buckled_mob.burn_skin(85)
+		to_chat(buckled_mob, "<span class='danger'>You feel a deep shock course through your body!</span>")
 		sleep(1)
-		rider.burn_skin(85)
-		rider.Stun(600)
+		buckled_mob.burn_skin(85)
+		buckled_mob.Stun(600)
 	visible_message("<span class='danger'>The electric chair went off!</span>", "<span class='danger'>You hear a deep sharp shock!</span>")
 
 	A.power_light = light

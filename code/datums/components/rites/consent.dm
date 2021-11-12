@@ -23,7 +23,7 @@
 	// revert consent to it's default
 	consent = def_consent
 
-	var/mob/victim = AOG.rider
+	var/mob/victim = AOG.buckled_mob
 	if(!victim)
 		return
 
@@ -36,10 +36,10 @@
 	if(!AOG)
 		to_chat(user, "<span class='warning'>Требуется алтарь для проведения ритуала.</span>")
 		return COMPONENT_CHECK_FAILED
-	if(!AOG.rider)
+	if(!AOG.buckled_mob)
 		to_chat(user, "<span class='warning'>Требуется прикрепить жертву к алтарю.</span>")
 		return COMPONENT_CHECK_FAILED
-	if(AOG.rider.mind && !AOG.rider.client)
+	if(AOG.buckled_mob.mind && !AOG.buckled_mob.client)
 		to_chat(user, "<span class='warning'>Требуется сознательная жертва на алтаре.</span>")
 		return COMPONENT_CHECK_FAILED
 	if(!consent)

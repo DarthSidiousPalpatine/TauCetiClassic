@@ -45,7 +45,7 @@ var/list/mechtoys = list(
 		return TRUE
 
 	var/obj/structure/stool/bed/B = A
-	if (istype(A, /obj/structure/stool/bed) && B.rider) //if it's a bed/chair and someone is buckled, it will not pass
+	if (istype(A, /obj/structure/stool/bed) && B.buckled_mob) //if it's a bed/chair and someone is buckled, it will not pass
 		return FALSE
 
 	else if(istype(A, /mob/living)) // You Shall Not Pass!

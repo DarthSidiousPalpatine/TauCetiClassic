@@ -162,8 +162,8 @@
 			"<span class='notice'>You cut \the [C]'s restraints with \the [src]!</span>",\
 			"You hear cable being cut.")
 			QDEL_NULL(C.handcuffed)
-			if(C.mount && C.mount.buckle_require_restraints)
-				C.mount.unbuckle_mob()
+			if(C.buckled && C.buckled.buckle_require_restraints)
+				C.buckled.unbuckle_mob()
 			C.update_inv_handcuffed()
 		else
 			to_chat(user, "The [C.handcuffed] are too tough to cut with [src].")

@@ -3,9 +3,7 @@
 	desc = "You sit in this. Either by will or force."
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "chair"
-	buckle_lying = -1 // force people to sit up in chairs when buckled
-	can_buckle = TRUE
-	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_BIG_HUMAN)
+	buckle_lying = FALSE // force people to sit up in chairs when buckled
 	var/can_flipped = FALSE
 	var/flipped = FALSE
 	var/flip_angle = FALSE
@@ -29,36 +27,35 @@
 	if(moving_diagonally)
 		return .
 
-	if(rider)
-		if(rider && (src.loc != rider.loc))
+	if(buckled_mob)
+		var/mob/living/occupant = buckled_mob
+		if(occupant && (src.loc != occupant.loc))
 			if(propelled)
 				for(var/mob/O in src.loc)
-					if(O != rider)
+					if(O != occupant)
 						Bump(O)
 			else
-				unbuckle()
+				unbuckle_mob()
 	if(has_gravity(src) && roll_sound)
 		playsound(src, roll_sound, VOL_EFFECTS_MASTER)
 	handle_rotation()
 
 /obj/structure/stool/bed/chair/Bump(atom/A)
 	..()
-	if(!rider)
+	if(!buckled_mob)
 		return
 
 	if(propelled)
 		on_propelled_bump(A)
 
 /obj/structure/stool/bed/chair/proc/on_propelled_bump(atom/A)
-	unbuckle(harm = TRUE)
-
-	rider.throw_at(A, 3, propelled)
-	shake_camera(rider, 1, 1)
-	if(ismob(rider))
-		var/mob/living/occupant = rider
-		occupant.apply_effect(2, STUN, 0)
-		occupant.apply_effect(2, WEAKEN, 0)
-		occupant.apply_effect(6, STUTTER, 0)
+	var/mob/living/occupant = unbuckle_mob()
+	. = occupant
+	occupant.throw_at(A, 3, propelled)
+	shake_camera(occupant, 1, 1)
+	occupant.apply_effect(2, STUN, 0)
+	occupant.apply_effect(2, WEAKEN, 0)
+	occupant.apply_effect(6, STUTTER, 0)
 	playsound(src, 'sound/weapons/punch1.ogg', VOL_EFFECTS_MASTER)
 	if(istype(A, /mob/living))
 		var/mob/living/victim = A
@@ -66,7 +63,7 @@
 		victim.apply_effect(4, WEAKEN, 0)
 		victim.apply_effect(12, STUTTER, 0)
 		victim.take_bodypart_damage(10)
-	rider.visible_message("<span class='danger'>[rider] crashed into \the [A]!</span>")
+	occupant.visible_message("<span class='danger'>[occupant] crashed into \the [A]!</span>")
 
 /obj/structure/stool/bed/chair/attackby(obj/item/weapon/W, mob/user)
 	..()
@@ -86,25 +83,24 @@
 /obj/structure/stool/bed/chair/attack_hand(mob/user)
 	if(can_flip(user))
 		var/flip_time = 20	//2 sec without someone
-		if(!isnull(rider))
+		if(!isnull(buckled_mob))
 			flip_time = 60	//6 sec with
 		user.SetNextMove(CLICK_CD_MELEE)
 		if(!flipped)
 			user.visible_message("<span class='notice'>[usr] flips \the [src] down.</span>","<span class='notice'>You flips \the [src] down.</span>")
 			flip()
-			if(rider)
-				if(ismob(rider) && !rider.restrained())
-					var/mob/living/L = rider
-					L.apply_effect(2, WEAKEN, 0)
-					L.apply_damage(3, BRUTE, BP_HEAD)
-				unbuckle(harm = TRUE)
+			if(buckled_mob && !buckled_mob.restrained())
+				var/mob/living/L = buckled_mob
+				unbuckle_mob()
+				L.apply_effect(2, WEAKEN, 0)
+				L.apply_damage(3, BRUTE, BP_HEAD)
 		else if(!user.is_busy() && do_after(user, flip_time, target = usr))
 			user.visible_message("<span class='notice'>[user] flips \the [src] up.</span>","<span class='notice'>You flips \the [src] up.</span>")
 			flip()
 	else
 		..()
 
-/obj/structure/stool/bed/chair/buckle(atom/movable/M, mob/user)
+/obj/structure/stool/bed/chair/user_buckle_mob(mob/living/M, mob/user)
 	if(dir == NORTH && !istype(src, /obj/structure/stool/bed/chair/schair/wagon/bench))
 		layer = FLY_LAYER
 	else
@@ -117,21 +113,21 @@
 		..()
 
 /obj/structure/stool/bed/chair/attack_tk(mob/user)
-	if(rider)
+	if(buckled_mob)
 		..()
 	else
 		rotate()
 	return
 
 /obj/structure/stool/bed/chair/handle_rotation() // making this into a seperate proc so office chairs can call it on Move()
-	if(dir == NORTH && rider)
+	if(dir == NORTH && buckled_mob)
 		layer = FLY_LAYER
 	else
 		layer = OBJ_LAYER
 
-	if(rider)
-		rider.set_dir(dir)
-		rider.update_canmove()
+	if(buckled_mob)
+		buckled_mob.set_dir(dir)
+		buckled_mob.update_canmove()
 
 /obj/structure/stool/bed/chair/verb/rotate()
 	set name = "Rotate Chair"
@@ -151,13 +147,13 @@
 	handle_rotation()
 	return
 
-/obj/structure/stool/bed/chair/post_buckle(atom/movable/M)
+/obj/structure/stool/bed/chair/post_buckle_mob(mob/living/M)
 	. = ..()
-	if(rider && behind)
+	if(buckled_mob && behind)
 		icon_state = behind
 	else
 		icon_state = initial(icon_state)
-	if(dir == NORTH && rider && !istype(src, /obj/structure/stool/bed/chair/schair/wagon/bench))
+	if(dir == NORTH && buckled_mob && !istype(src, /obj/structure/stool/bed/chair/schair/wagon/bench))
 		layer = FLY_LAYER
 	else
 		layer = OBJ_LAYER
@@ -239,7 +235,7 @@
 	. = ..()
 
 /obj/structure/stool/bed/chair/schair/post_buckle_mob(mob/living/M)
-	if(rider)
+	if(buckled_mob)
 		add_overlay(sarmrest)
 	else
 		cut_overlay(sarmrest)
@@ -302,8 +298,8 @@
 	QDEL_NULL(overlay)
 	return ..()
 
-/obj/structure/stool/bed/chair/noose/post_buckle(atom/movable/M)
-	if(rider)
+/obj/structure/stool/bed/chair/noose/post_buckle_mob(mob/living/M)
+	if(has_buckled_mobs())
 		layer = MOB_LAYER
 		START_PROCESSING(SSobj, src)
 		M.dir = SOUTH
@@ -315,47 +311,46 @@
 		pixel_x = initial(pixel_x)
 		M.pixel_y = M.lying ? -6 : initial(M.pixel_y)
 
-/obj/structure/stool/bed/chair/noose/unbuckle(mob/living/user)
-	if(!rider)
+/obj/structure/stool/bed/chair/noose/user_unbuckle_mob(mob/living/user)
+	if(!has_buckled_mobs())
 		return
 	if(user.is_busy())
 		return
-	if(rider != user)
-		user.visible_message("<span class='notice'>[user] begins to untie the noose over [rider]'s neck...</span>")
-		to_chat(user, "<span class='notice'>You begin to untie the noose over [rider]'s neck...</span>")
-		if(!do_mob(user, rider, 10 SECONDS))
+	if(buckled_mob != user)
+		user.visible_message("<span class='notice'>[user] begins to untie the noose over [buckled_mob]'s neck...</span>")
+		to_chat(user, "<span class='notice'>You begin to untie the noose over [buckled_mob]'s neck...</span>")
+		if(!do_mob(user, buckled_mob, 10 SECONDS))
 			return
-		user.visible_message("<span class='notice'>[user] unties the noose over [rider]'s neck!</span>")
-		to_chat(user,"<span class='notice'>You untie the noose over [rider]'s neck!</span>")
+		user.visible_message("<span class='notice'>[user] unties the noose over [buckled_mob]'s neck!</span>")
+		to_chat(user,"<span class='notice'>You untie the noose over [buckled_mob]'s neck!</span>")
 	else
-		rider.visible_message("<span class='warning'>[rider] struggles to untie the noose over their neck!</span>")
-		to_chat(rider,"<span class='notice'>You struggle to untie the noose over your neck... (Stay still for 15 seconds.)</span>")
-		if(!do_after(rider, 15 SECONDS, target = src))
-			if(rider && rider.mount)
-				to_chat(rider, "<span class='warning'>You fail to untie yourself!</span>")
+		buckled_mob.visible_message("<span class='warning'>[buckled_mob] struggles to untie the noose over their neck!</span>")
+		to_chat(buckled_mob,"<span class='notice'>You struggle to untie the noose over your neck... (Stay still for 15 seconds.)</span>")
+		if(!do_after(buckled_mob, 15 SECONDS, target = src))
+			if(buckled_mob && buckled_mob.buckled)
+				to_chat(buckled_mob, "<span class='warning'>You fail to untie yourself!</span>")
 			return
-		if(!rider.mount)
+		if(!buckled_mob.buckled)
 			return
-		rider.visible_message("<span class='warning'>[rider] unties the noose over their neck!</span>")
-		to_chat(rider,"<span class='notice'>You untie the noose over your neck!</span>")
-	if(rider)
-		rider.pixel_z = initial(rider.pixel_z)
-		rider.pixel_x = initial(rider.pixel_x)
-		rider.AdjustWeakened(5)
-		unbuckle()
+		buckled_mob.visible_message("<span class='warning'>[buckled_mob] unties the noose over their neck!</span>")
+		to_chat(buckled_mob,"<span class='notice'>You untie the noose over your neck!</span>")
+	if(buckled_mob)
+		buckled_mob.pixel_z = initial(buckled_mob.pixel_z)
+		buckled_mob.pixel_x = initial(buckled_mob.pixel_x)
+		buckled_mob.AdjustWeakened(5)
+		unbuckle_mob(buckled_mob)
 	pixel_z = initial(pixel_z)
 	pixel_x = initial(pixel_x)
 	add_fingerprint(user)
 
-/obj/structure/stool/bed/chair/noose/buckle(atom/movable/M, mob/user)
+/obj/structure/stool/bed/chair/noose/user_buckle_mob(mob/living/carbon/human/M, mob/user)
 	if(!Adjacent(user) || user.stat || user.restrained() || !ishuman(M) || user.is_busy())
 		return FALSE
-	if(ishuman(M))
-		var/obj/item/organ/external/BP = M.bodyparts_by_name[BP_HEAD]
 
-		if(!BP || BP.is_stump)
-			to_chat(user, "<span class='warning'>[M] has no head!</span>")
-			return FALSE
+	var/obj/item/organ/external/BP = M.bodyparts_by_name[BP_HEAD]
+	if(!BP || BP.is_stump)
+		to_chat(user, "<span class='warning'>[M] has no head!</span>")
+		return FALSE
 
 	if(M.loc != loc)
 		return FALSE
@@ -365,27 +360,19 @@
 		return FALSE
 
 	add_fingerprint(user)
-	if(ishuman(M))
-		message_admins("[key_name_admin(user)] attempted to hang [key_name(M)]. [ADMIN_JMP(M)]")
-	if(ismob(M))
-		M.visible_message("<span class='danger'>[user] attempts to tie \the [src] over [M]'s neck!</span>")
-	else
-		M.visible_message("<span class='danger'>[user] attempts to tie \the [src].</span>")
+	message_admins("[key_name_admin(user)] attempted to hang [key_name(M)]. [ADMIN_JMP(M)]")
+	M.visible_message("<span class='danger'>[user] attempts to tie \the [src] over [M]'s neck!</span>")
 	if(user != M)
 		to_chat(user, "<span class='notice'>It will take 15 seconds and you have to stand still.</span>")
 	if(do_mob(user, M, user == M ? 3 : 15 SECONDS))
-		if(buckle(M, user))
-			if(ismob(M))
-				user.visible_message("<span class='warning'>[user] ties \the [src] over [M]'s neck!</span>")
-				if(user == M)
-					to_chat(M, "<span class='userdanger'>You tie \the [src] over your neck!</span>")
-				else
-					to_chat(M, "<span class='userdanger'>[user] ties \the [src] over your neck!</span>")
+		if(buckle_mob(M))
+			user.visible_message("<span class='warning'>[user] ties \the [src] over [M]'s neck!</span>")
+			if(user == M)
+				to_chat(M, "<span class='userdanger'>You tie \the [src] over your neck!</span>")
 			else
-				to_chat(M, "<span class='userdanger'>[user] ties \the [src] over [M].</span>")
+				to_chat(M, "<span class='userdanger'>[user] ties \the [src] over your neck!</span>")
 			playsound(src, 'sound/effects/noosed.ogg', VOL_EFFECTS_MASTER)
-			if(ishuman(M))
-				message_admins("[key_name_admin(M)] was hanged by [key_name(user)]. [ADMIN_JMP(M)]")
+			message_admins("[key_name_admin(M)] was hanged by [key_name(user)]. [ADMIN_JMP(M)]")
 			for(var/alert in M.alerts)
 				var/atom/movable/screen/alert/A = M.alerts[alert]
 				if(A.master.icon_state == "noose") // our alert icon is terrible, let's build a new one
@@ -393,29 +380,24 @@
 					A.add_overlay(image(icon, "noose"))
 					A.add_overlay(image(icon, "noose_overlay"))
 			return TRUE
-	if(ismob(M))
-		user.visible_message("<span class='warning'>[user] fails to tie \the [src] over [M]'s neck!</span>")
-		to_chat(user, "<span class='warning'>You fail to tie \the [src] over [M]'s neck!</span>")
-	else
-		user.visible_message("<span class='warning'>[user] fails to tie \the [src] over [M].</span>")
-		to_chat(user, "<span class='warning'>You fail to tie \the [src] over [M].</span>")
-
+	user.visible_message("<span class='warning'>[user] fails to tie \the [src] over [M]'s neck!</span>")
+	to_chat(user, "<span class='warning'>You fail to tie \the [src] over [M]'s neck!</span>")
 	return FALSE
 
 /obj/structure/stool/bed/chair/noose/process()
-	if(!rider)
+	if(!has_buckled_mobs())
 		STOP_PROCESSING(SSobj, src)
 		return
 	if(can_hang()) // well you have to remove the support first
 		return
 	if(pixel_x >= 0)
 		animate(src, pixel_x = -3, time = 45, easing = ELASTIC_EASING)
-		animate(rider, pixel_x = -3, pixel_y = 8, time = 45, easing = ELASTIC_EASING)
+		animate(buckled_mob, pixel_x = -3, pixel_y = 8, time = 45, easing = ELASTIC_EASING)
 	else
 		animate(src, pixel_x = 3, time = 45, easing = ELASTIC_EASING)
-		animate(rider, pixel_x = 3, pixel_y = 8, time = 45, easing = ELASTIC_EASING)
-	if(ismob(rider) && rider.mob_has_gravity())
-		var/mob/living/carbon/human/bm = rider
+		animate(buckled_mob, pixel_x = 3, pixel_y = 8, time = 45, easing = ELASTIC_EASING)
+	if(buckled_mob.mob_has_gravity())
+		var/mob/living/carbon/human/bm = buckled_mob
 		var/obj/item/organ/external/BP = bm.bodyparts_by_name[BP_HEAD]
 		if(BP && !BP.is_stump)
 			if(bm.stat != DEAD)
@@ -437,9 +419,7 @@
 			pixel_z = initial(pixel_z)
 			bm.pixel_x = initial(bm.pixel_x)
 			pixel_x = initial(pixel_x)
-			unbuckle()
-	else if(rider.has_gravity())
-		playsound(src, 'sound/effects/noose_idle.ogg', VOL_EFFECTS_MASTER)
+			unbuckle_mob(bm)
 
 /obj/structure/stool/bed/chair/noose/proc/can_hang()
 	var/turf/src_turf = get_turf(src)
@@ -455,14 +435,12 @@
 /obj/structure/stool/bed/chair/noose/proc/rip(mob/user, forced = FALSE)
 	if(user)
 		user.visible_message("<span class='notice'>[user] cuts the noose.</span>", "<span class='notice'>You cut the noose.</span>")
-	if(rider && rider.has_gravity())
-		rider.visible_message("<span class='danger'>[rider] falls over and hits the ground!</span>")
-		to_chat(rider, "<span class='userdanger'>You fall over and hit the ground!</span>")
-		if(ismob(rider))
-			var/mob/Mob = rider
-			Mob.adjustBruteLoss(10)
-			Mob.AdjustWeakened(5)
-		unbuckle()
+	if(has_buckled_mobs() && buckled_mob.mob_has_gravity())
+		buckled_mob.visible_message("<span class='danger'>[buckled_mob] falls over and hits the ground!</span>")
+		to_chat(buckled_mob, "<span class='userdanger'>You fall over and hit the ground!</span>")
+		buckled_mob.adjustBruteLoss(10)
+		buckled_mob.AdjustWeakened(5)
+		unbuckle_mob(buckled_mob)
 	if(forced)
 		var/obj/item/stack/cable_coil/C = new(get_turf(src))
 		C.color = color
@@ -484,7 +462,7 @@
 	if(user.is_busy())
 		return
 	var/mob/M = grab.affecting
-	buckle(M, user)
+	user_buckle_mob(M, user)
 
 /obj/structure/stool/bed/chair/noose/attack_alien()
 	..()
@@ -507,8 +485,8 @@
 	armrest = image("icons/obj/objects.dmi", "comfychair_armrest", layer = FLY_LAYER)
 	. = ..()
 
-/obj/structure/stool/bed/chair/comfy/post_buckle(mob/living/M)
-	if(rider)
+/obj/structure/stool/bed/chair/comfy/post_buckle_mob(mob/living/M)
+	if(buckled_mob)
 		add_overlay(armrest)
 	else
 		cut_overlay(armrest)

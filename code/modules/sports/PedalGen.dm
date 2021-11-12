@@ -55,33 +55,32 @@
 			Generator.loc = null
 
 /obj/structure/stool/bed/chair/pedalgen/attack_hand(mob/user)
-	if(rider)
+	if(buckled_mob)
 		pedal(user)
 	return 0
 
 /obj/structure/stool/bed/chair/pedalgen/proc/pedal(mob/user)
 	pedaled = 1
-	if(rider.mount == src)
-		if(rider != user)
-			rider.visible_message(\
-				"<span class='notice'>[rider.name] was unbuckled by [user.name]!</span>",\
+	if(buckled_mob.buckled == src)
+		if(buckled_mob != user)
+			buckled_mob.visible_message(\
+				"<span class='notice'>[buckled_mob.name] was unbuckled by [user.name]!</span>",\
 				"You were unbuckled from [src] by [user.name].",\
 				"You hear metal clanking")
-			unbuckle()
+			unbuckle_mob()
 			add_fingerprint(user)
 		else
 			user.SetNextMove(CLICK_CD_INTERACT)
-			if(ishuman(rider))
-				var/mob/living/carbon/human/pedaler = rider
-			if(pedaler.nutrition > 10)
+			if(buckled_mob.nutrition > 10)
 				playsound(src, 'sound/items/Ratchet.ogg', VOL_EFFECTS_MASTER, 20)
 				Generator.Rotated()
+				var/mob/living/carbon/human/pedaler = buckled_mob
 				pedaler.nutrition -= 0.5
 				pedaler.apply_effect(1,AGONY,0)
 				if(pedaler.halloss > 80)
 					to_chat(user, "You pushed yourself too hard.")
 					pedaler.apply_effect(24,AGONY,0)
-					unbuckle()
+					unbuckle_mob()
 				sleep(5)
 				pedaled = 0
 			else
@@ -90,10 +89,10 @@
 
 /obj/structure/stool/bed/chair/pedalgen/relaymove(mob/user, direction)
 	if(!ishuman(user))
-		unbuckle()
+		unbuckle_mob()
 	var/mob/living/carbon/human/pedaler = user
 	if(!pedaler.handcuffed)
-		unbuckle()
+		unbuckle_mob()
 	else
 		if(!pedaled)
 			pedal(user)
@@ -101,11 +100,10 @@
 
 /obj/structure/stool/bed/chair/pedalgen/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0)
 	. = ..()
-	if(rider && !moving_diagonally)
-		if(rider.mount == src)
-			rider.loc = loc
-			if(ismob(rider))
-				update_mob(rider)
+	if(buckled_mob && !moving_diagonally)
+		if(buckled_mob.buckled == src)
+			buckled_mob.loc = loc
+			update_mob(buckled_mob)
 
 
 /obj/structure/stool/bed/chair/pedalgen/post_buckle_mob(mob/user)
@@ -117,16 +115,15 @@
 	else
 		layer = OBJ_LAYER
 
-	if(rider)
-		if(rider.loc != loc)
-			rider.mount = null //Temporary, so Move() succeeds.
-			rider.mount = src //Restoring
-		if(ismob(rider))
-			update_mob(rider)
+	if(buckled_mob)
+		if(buckled_mob.loc != loc)
+			buckled_mob.buckled = null //Temporary, so Move() succeeds.
+			buckled_mob.buckled = src //Restoring
+		update_mob(buckled_mob)
 
 
 /obj/structure/stool/bed/chair/pedalgen/proc/update_mob(mob/M, buckling = 0)
-	if(M == rider)
+	if(M == buckled_mob)
 		M.set_dir(dir)
 		var/new_pixel_x = 0
 		var/new_pixel_y = 0
@@ -152,9 +149,9 @@
 		animate(M, pixel_x = 0, pixel_y = 0, 2, 1, LINEAR_EASING)
 
 /obj/structure/stool/bed/chair/pedalgen/bullet_act(obj/item/projectile/Proj)
-	if(rider)
+	if(buckled_mob)
 		if(prob(85))
-			return rider.bullet_act(Proj)
+			return buckled_mob.bullet_act(Proj)
 	visible_message("<span class='warning'>[Proj] ricochets off the [src]!</span>")
 
 /obj/structure/stool/bed/chair/pedalgen/Destroy()
@@ -170,4 +167,4 @@
 		to_chat(usr, "You can't do it until you restrained")
 		return
 
-	unbuckle()
+	unbuckle_mob()

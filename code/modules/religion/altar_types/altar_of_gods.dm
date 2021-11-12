@@ -139,8 +139,8 @@
 	return FALSE
 
 /obj/structure/altar_of_gods/attack_hand(mob/living/carbon/human/user)
-	if(can_buckle && rider && istype(user))
-		unbuckle(user)
+	if(can_buckle && buckled_mob && istype(user))
+		user_unbuckle_mob(user)
 		return
 
 	user.SetNextMove(CLICK_CD_INTERACT)

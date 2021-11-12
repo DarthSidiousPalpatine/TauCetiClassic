@@ -60,8 +60,8 @@
 			msg += "<span class='warning'>[t_He] [t_is] [bicon(handcuffed)] handcuffed!</span>\n"
 
 	//buckled
-	if(mount)
-		msg += "<span class='warning'>[t_He] [t_is] [bicon(mount)] buckled to [mount]!</span>\n"
+	if(buckled)
+		msg += "<span class='warning'>[t_He] [t_is] [bicon(buckled)] buckled to [buckled]!</span>\n"
 
 	//ID
 	if(neck)

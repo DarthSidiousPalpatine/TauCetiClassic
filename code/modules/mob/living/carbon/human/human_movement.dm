@@ -41,11 +41,11 @@
 	if(hungry >= 70) // Slow down if nutrition <= 150
 		tally += hungry / 50
 
-	if(mount) // so, if we buckled we have large debuff
+	if(buckled) // so, if we buckled we have large debuff
 		tally += 5.5
 
 	var/hands_or_legs
-	if(istype(mount, /obj/structure/stool/bed/chair/wheelchair))
+	if(istype(buckled, /obj/structure/stool/bed/chair/wheelchair))
 		hands_or_legs = list(BP_L_ARM , BP_R_ARM)
 	else
 		hands_or_legs = list(BP_L_LEG , BP_R_LEG)

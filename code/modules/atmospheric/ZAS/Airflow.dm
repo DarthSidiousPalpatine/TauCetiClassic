@@ -11,7 +11,7 @@ Contains helper procs for airflow, handled in /connection_group.
 	if(!(status_flags & CANSTUN) && !(status_flags & CANWEAKEN))
 		to_chat(src, "<span class='notice'>You stay upright as the air rushes past you.</span>")
 		return FALSE
-	if(mount)
+	if(buckled)
 		to_chat(src, "<span class='notice'>Air suddenly rushes past you!</span>")
 		return FALSE
 	if(!lying)
@@ -101,7 +101,7 @@ Contains helper procs for airflow, handled in /connection_group.
 /mob/AirflowCanMove(n)
 	if(status_flags & GODMODE)
 		return FALSE
-	if(mount)
+	if(buckled)
 		return FALSE
 	return TRUE
 

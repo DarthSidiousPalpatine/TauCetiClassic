@@ -72,7 +72,7 @@ var/global/list/image/splatter_cache=list()
 		var/obj/item/organ/external/r_foot = H.bodyparts_by_name[BP_R_LEG]
 		if((!l_foot || l_foot.is_stump) && (!r_foot || r_foot.is_stump))
 			hasfeet = FALSE
-		if(perp.shoes && !perp.mount)//Adding blood to shoes
+		if(perp.shoes && !perp.buckled)//Adding blood to shoes
 			var/obj/item/clothing/shoes/S = perp.shoes
 			if(istype(S))
 				if((dirt_overlay && dirt_overlay.color != basedatum.color) || (!dirt_overlay))
@@ -94,8 +94,8 @@ var/global/list/image/splatter_cache=list()
 		if(!perp.feet_blood_DNA)
 			perp.feet_blood_DNA = list()
 		perp.feet_blood_DNA |= blood_DNA.Copy()
-	else if (perp.mount && istype(perp.mount, /obj/structure/stool/bed/chair/wheelchair))
-		var/obj/structure/stool/bed/chair/wheelchair/W = perp.mount
+	else if (perp.buckled && istype(perp.buckled, /obj/structure/stool/bed/chair/wheelchair))
+		var/obj/structure/stool/bed/chair/wheelchair/W = perp.buckled
 		W.bloodiness = 4
 
 	perp.update_inv_shoes()

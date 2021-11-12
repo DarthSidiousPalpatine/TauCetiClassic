@@ -37,8 +37,8 @@
 	if(isliving(AM))
 		var/mob/living/M = AM
 		M.Weaken(16) // Keep them from moving during the duration of the extraction.
-		if(M && M.mount)
-			M.mount.unbuckle_mob()
+		if(M && M.buckled)
+			M.buckled.unbuckle_mob()
 	else
 		AM.anchored = TRUE
 		AM.density = FALSE

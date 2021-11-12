@@ -15,8 +15,8 @@
 	if(in_use)
 		to_chat(user, "It's already in use - wait a bit.")
 		return
-	if(user.mount && user.mount != src)
-		to_chat(user, "You should get off the [user.mount] first.")
+	if(user.buckled && user.buckled != src)
+		to_chat(user, "You should get off the [user.buckled] first.")
 		return
 	if(gymnast.halloss > 80 || gymnast.shock_stage > 80)
 		to_chat(user, "You are too exausted.")
@@ -73,8 +73,8 @@
 	if(in_use)
 		to_chat(user, "It's already in use - wait a bit.")
 		return
-	if(user.mount && user.mount != src)
-		to_chat(user, "You should get off the [user.mount] first.")
+	if(user.buckled && user.buckled != src)
+		to_chat(user, "You should get off the [user.buckled] first.")
 		return
 	if(gymnast.halloss > 80 || gymnast.shock_stage > 80)
 		to_chat(user, "You are too exausted.")

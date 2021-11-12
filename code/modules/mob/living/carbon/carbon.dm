@@ -318,7 +318,7 @@
 	set name = "Crawl"
 	set category = "IC"
 
-	if(incapacitated() || (status_flags & FAKEDEATH) || mount)
+	if(incapacitated() || (status_flags & FAKEDEATH) || buckled)
 		return
 	if(crawl_getup)
 		return
@@ -470,7 +470,7 @@
 /mob/living/carbon/can_use_hands()
 	if(handcuffed)
 		return 0
-	if(mount && ! istype(mount, /obj/structure/stool/bed/chair)) // buckling does not restrict hands
+	if(buckled && ! istype(buckled, /obj/structure/stool/bed/chair)) // buckling does not restrict hands
 		return 0
 	return 1
 
@@ -485,8 +485,8 @@
 	else if (W == handcuffed)
 		handcuffed = null
 		update_inv_handcuffed()
-		if(mount && mount.buckle_require_restraints)
-			mount.unbuckle()
+		if(buckled && buckled.buckle_require_restraints)
+			buckled.unbuckle_mob()
 
 	else if (W == legcuffed)
 		legcuffed = null
@@ -627,8 +627,8 @@
 	if(handcuffed)
 		var/obj/item/weapon/W = handcuffed
 		handcuffed = null
-		if(mount && mount.buckle_require_restraints)
-			mount.unbuckle()
+		if(buckled && buckled.buckle_require_restraints)
+			buckled.unbuckle_mob()
 		update_inv_handcuffed()
 		if(client)
 			client.screen -= W
@@ -654,7 +654,7 @@
 //-TG- port for smooth lying/standing animations
 /mob/living/carbon/get_pixel_y_offset(lying_current = FALSE)
 	if(lying)
-		if(mount && istype(mount, /obj/structure/stool/bed/roller))
+		if(buckled && istype(buckled, /obj/structure/stool/bed/roller))
 			return 1
 		else if(locate(/obj/structure/stool/bed/roller, src.loc))
 			return -5

@@ -14,7 +14,7 @@
 		return
 
 	if(prob(2))
-		if(C.m_intent == "run" && !C.mount)
+		if(C.m_intent == "run" && !C.buckled)
 			if(ishuman(C))
 				var/mob/living/carbon/human/H = C
 				if(istype(H.shoes, /obj/item/clothing/shoes) && H.shoes.flags & NOSLIP)

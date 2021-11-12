@@ -36,7 +36,7 @@
 
 	var/turf/T = loc
 
-	unbuckle()
+	unbuckle_mob()
 
 	if(loc)
 		loc.handle_atom_del(src)
@@ -106,7 +106,7 @@
 
 	last_move = Dir
 
-	if(. && rider && !handle_buckled_mob_movement(loc,Dir)) //movement failed due to buckled mob
+	if(. && buckled_mob && !handle_buckled_mob_movement(loc,Dir)) //movement failed due to buckled mob
 		. = 0
 
 	if(dir != old_dir)
@@ -189,8 +189,8 @@
 /mob/living/forceMove(atom/destination, keep_pulling = FALSE)
 	if(!keep_pulling)
 		stop_pulling()
-	if(mount)
-		mount.unbuckle()
+	if(buckled)
+		buckled.unbuckle_mob()
 	. = ..()
 	update_canmove()
 
@@ -348,16 +348,16 @@
 	return
 
 /atom/movable/proc/handle_buckled_mob_movement(newloc,direct)
-	if(!rider.Move(newloc, direct))
-		loc = rider.loc
-		last_move = rider.last_move
+	if(!buckled_mob.Move(newloc, direct))
+		loc = buckled_mob.loc
+		last_move = buckled_mob.last_move
 		inertia_dir = last_move
-		rider.inertia_dir = last_move
+		buckled_mob.inertia_dir = last_move
 		return 0
 	return 1
 
 /atom/movable/CanPass(atom/movable/mover, turf/target, height=1.5)
-	if(rider == mover)
+	if(buckled_mob == mover)
 		return 1
 	return ..()
 

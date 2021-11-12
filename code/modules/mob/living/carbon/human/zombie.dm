@@ -41,7 +41,7 @@
 
 	if(isobj(target))
 		var/obj/O = target
-		if(O.can_buckle && O.mount_mob)
+		if(O.can_buckle && O.buckled_mob)
 			O.user_unbuckle_mob(user)
 
 /obj/item/weapon/melee/zombie_hand/proc/opendoor(mob/user, obj/machinery/door/A)
@@ -269,7 +269,7 @@
 	if(embedded_flag)
 		handle_embedded_objects()
 
-	if(mount)
+	if(buckled)
 		tally += 5.5
 
 	if(pull_debuff)

@@ -83,8 +83,6 @@
 	density = FALSE
 	anchored = TRUE
 	buckle_lying = 0
-	can_buckle = TRUE
-	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_BIG_HUMAN)
 	var/burning = 0
 	var/grill = FALSE
 	var/fire_stack_strength = 5
@@ -148,7 +146,7 @@
 	if(burning)
 		to_chat(user, "<span class='warning'>You need to extinguish [src] before removing it!</span>")
 		return
-	if(!rider && !user.is_busy() && do_after(user, 50, target = src))
+	if(!has_buckled_mobs()&& !user.is_busy() && do_after(user, 50, target = src))
 		onDismantle()
 		qdel(src)
 		return
@@ -237,8 +235,8 @@
 //		M.pixel_y += 13
 
 
-/obj/structure/bonfire/post_buckle(mob/living/M)
-	if(rider == M)
+/obj/structure/bonfire/post_buckle_mob(mob/living/M)
+	if(buckled_mob == M)
 		M.pixel_y = 13
 		M.layer = 5.1
 	else

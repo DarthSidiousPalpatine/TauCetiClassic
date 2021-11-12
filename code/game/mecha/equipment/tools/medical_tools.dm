@@ -38,8 +38,8 @@
 		return
 	if(!istype(target))
 		return
-	if(target.mount)
-		occupant_message("[target] will not fit into the sleeper because they are buckled to [target.mount].")
+	if(target.buckled)
+		occupant_message("[target] will not fit into the sleeper because they are buckled to [target.buckled].")
 		return
 	if(occupant)
 		occupant_message("The sleeper is already occupied")

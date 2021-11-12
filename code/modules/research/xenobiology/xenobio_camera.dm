@@ -221,7 +221,7 @@
 					S.visible_message("<span class='notice'>[S] vanishes!</span>")
 					X.connected_recycler.grind(S,owner)
 			else if(!S.ckey)
-				if(S.mount)
+				if(S.buckled)
 					S.Feedstop()
 				S.animate_teleport()
 				S.visible_message("<span class='notice'>[S] vanishes!</span>")
@@ -380,7 +380,7 @@
 			if(X.stored_slimes.len >= X.max_slimes)
 				to_chat(C, "<span class='warning'>Slime storage is full.</span>")
 				return
-			if(S.mount)
+			if(S.buckled)
 				S.Feedstop()
 			S.animate_teleport()
 			S.visible_message("<span class='notice'>[S] vanishes!</span>")

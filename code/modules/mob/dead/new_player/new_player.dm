@@ -224,9 +224,9 @@
 	character.lastarea = get_area(loc)
 	show_location_blurb(character.client)
 	// Moving wheelchair if they have one
-	if(character.mount && istype(character.mount, /obj/structure/stool/bed/chair/wheelchair))
-		character.mount.loc = character.loc
-		character.mount.set_dir(character.dir)
+	if(character.buckled && istype(character.buckled, /obj/structure/stool/bed/chair/wheelchair))
+		character.buckled.loc = character.loc
+		character.buckled.set_dir(character.dir)
 
 	SSticker.mode.latespawn(character)
 

@@ -128,7 +128,7 @@ ADD_TO_GLOBAL_LIST(/obj/structure/scrap, scrap_list)
 	if(ismob(AM) &&  !HAS_TRAIT(AM, TRAIT_LIGHT_STEP))
 		var/mob/M = AM
 		playsound(src, 'sound/effects/glass_step.ogg', VOL_EFFECTS_MASTER)
-		if(ishuman(M) && !M.mount)
+		if(ishuman(M) && !M.buckled)
 			var/mob/living/carbon/human/H = M
 			if(H.species.flags[IS_SYNTHETIC])
 				return

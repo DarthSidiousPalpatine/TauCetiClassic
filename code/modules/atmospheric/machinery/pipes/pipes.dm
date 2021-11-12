@@ -112,7 +112,7 @@
 		return pipe_color
 
 /obj/machinery/atmospherics/pipe/attack_hand(mob/living/carbon/human/H)
-	if(can_buckle && rider && istype(H))
-		unbuckle(H)
+	if(can_buckle && buckled_mob && istype(H))
+		user_unbuckle_mob(H)
 	else
 		..()

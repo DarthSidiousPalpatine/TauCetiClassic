@@ -516,8 +516,8 @@
 			if(get_size_ratio(M, src) > pull_size_ratio)
 				to_chat(src, "<span class=warning>You are too small in comparison to [M] to pull them!</span>")
 				return
-			if(M.mount) // If we are trying to pull something that is buckled we will pull the thing its buckled to
-				start_pulling(M.mount)
+			if(M.buckled) // If we are trying to pull something that is buckled we will pull the thing its buckled to
+				start_pulling(M.buckled)
 				return
 
 		AM.add_fingerprint(src)
@@ -747,25 +747,25 @@ note dizziness decrements automatically in the mob's Life() proc.
 
 	var/ko = weakened || paralysis || stat || (status_flags & FAKEDEATH)
 
-	lying = (ko || crawling || resting) && !captured && !mount && !pinned.len
+	lying = (ko || crawling || resting) && !captured && !buckled && !pinned.len
 	canmove = !(ko || resting || stunned || captured || pinned.len)
 	anchored = captured || pinned.len
 
-	if(mount)
-		if(mount.buckle_lying != -1)
-			lying = mount.buckle_lying
-		canmove = canmove && mount.buckle_movable
-		anchored = anchored || mount.buckle_movable
+	if(buckled)
+		if(buckled.buckle_lying != -1)
+			lying = buckled.buckle_lying
+		canmove = canmove && buckled.buckle_movable
+		anchored = anchored || buckled.buckle_movable
 
-		if(istype(mount, /obj/vehicle))
-			var/obj/vehicle/V = mount
+		if(istype(buckled, /obj/vehicle))
+			var/obj/vehicle/V = buckled
 			if(!canmove)
 				V.unload(src)
 			else
 				pixel_y = V.mob_offset_y
 		else
-			if(istype(mount, /obj/structure/stool/bed/chair))
-				var/obj/structure/stool/bed/chair/C = mount
+			if(istype(buckled, /obj/structure/stool/bed/chair))
+				var/obj/structure/stool/bed/chair/C = buckled
 				if(C.flipped)
 					lying = 1
 
@@ -799,9 +799,9 @@ note dizziness decrements automatically in the mob's Life() proc.
 	if(!canface())
 		return 0
 	set_dir(ndir)
-	if(mount && mount.buckle_movable)
-		mount.set_dir(ndir)
-		mount.handle_rotation()
+	if(buckled && buckled.buckle_movable)
+		buckled.set_dir(ndir)
+		buckled.handle_rotation()
 	client.move_delay += movement_delay()
 	return 1
 
@@ -1142,7 +1142,7 @@ note dizziness decrements automatically in the mob's Life() proc.
 
 //You can buckle on mobs if you're next to them since most are dense
 /mob/buckle_mob(mob/living/M)
-	if(M.mount)
+	if(M.buckled)
 		return 0
 	var/turf/T = get_turf(src)
 	if(M.loc != T)
@@ -1155,8 +1155,8 @@ note dizziness decrements automatically in the mob's Life() proc.
 	return ..()
 
 //Default buckling shift visual for mobs
-/mob/post_buckle(mob/living/M)
-	if(M == rider) //post buckling
+/mob/post_buckle_mob(mob/living/M)
+	if(M == buckled_mob) //post buckling
 		M.pixel_y = initial(M.pixel_y) + 9
 		if(M.layer < layer)
 			M.layer = layer + 0.1
@@ -1164,6 +1164,9 @@ note dizziness decrements automatically in the mob's Life() proc.
 		M.layer = initial(M.layer)
 		M.plane = initial(M.plane)
 		M.pixel_y = initial(M.pixel_y)
+
+/mob/proc/can_unbuckle(mob/user)
+	return 1
 
 /mob/proc/get_targetzone()
 	return null

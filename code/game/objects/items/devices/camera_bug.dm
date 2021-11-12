@@ -167,7 +167,7 @@
 			else
 				names[M.name] = 1
 				dat += "[M.name]"
-			if(M.mount && !M.lying)
+			if(M.buckled && !M.lying)
 				dat += " (Sitting)"
 			if(M.lying)
 				dat += " (Laying down)"

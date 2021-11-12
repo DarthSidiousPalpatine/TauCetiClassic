@@ -6,10 +6,6 @@
 	buckle_movable = 1
 	flags = NODECONSTRUCT
 
-	can_buckle = TRUE
-	can_be_controlled = TRUE
-	rider_size_min_max = list(SIZE_NORMAL, SIZE_BIG_HUMAN)
-
 	var/driving = 0
 	var/mob/living/pulling = null
 	var/bloodiness
@@ -20,12 +16,12 @@
 	cut_overlays()
 	var/image/O = image(icon = 'icons/obj/objects.dmi', icon_state = "w_overlay", layer = FLY_LAYER, dir = src.dir)
 	add_overlay(O)
-	if(rider)
-		rider.set_dir(dir)
+	if(buckled_mob)
+		buckled_mob.set_dir(dir)
 
-/obj/structure/stool/bed/chair/wheelchair/post_buckle(atom/movable/M)
+/obj/structure/stool/bed/chair/wheelchair/post_buckle_mob(mob/living/M)
 	. = ..()
-	if(!rider && alert)
+	if(!buckled_mob && alert)
 		M.clear_alert("brake")
 		alert = 0
 
@@ -38,7 +34,7 @@
 
 	if(isliving(usr))
 		var/mob/living/M = usr
-		if(rider == M)
+		if(buckled_mob == M)
 			if(brake)
 				M.throw_alert("brake", /atom/movable/screen/alert/brake)
 				alert = 1
@@ -74,7 +70,7 @@
 	if(pulling && (get_dir(src.loc, pulling.loc) == direction))
 		to_chat(user, "<span class='red'>You cannot go there.</span>")
 		return
-	if(pulling && rider && (rider == user))
+	if(pulling && buckled_mob && (buckled_mob == user))
 		to_chat(user, "<span class='red'>You cannot drive while being pushed.</span>")
 		return
 
@@ -82,19 +78,19 @@
 	driving = 1
 	var/turf/T = null
 	//--1---Move occupant---1--//
-	if(rider)
-		rider.mount = null
-		step(rider, direction)
-		rider.mount = src
+	if(buckled_mob)
+		buckled_mob.buckled = null
+		step(buckled_mob, direction)
+		buckled_mob.buckled = src
 	//--2----Move driver----2--//
 	if(pulling)
 		T = pulling.loc
 		if(get_dist(src, pulling) >= 1)
 			step(pulling, get_dir(pulling.loc, src.loc))
 	//--3--Move wheelchair--3--//
-	if(!rider)
+	if(!buckled_mob)
 		step(src, direction)
-	Move(rider.loc)
+	Move(buckled_mob.loc)
 	set_dir(direction)
 	handle_rotation()
 	if(pulling) // Driver
@@ -114,25 +110,26 @@
 	if(brake)
 		return FALSE
 	. = ..()
-	if(rider)
+	if(buckled_mob)
+		var/mob/living/occupant = buckled_mob
 		if(!driving)
-			rider.mount = null
-			rider.Move(src.loc)
-			rider.mount = src
-			if (rider && (src.loc != rider.loc))
+			occupant.buckled = null
+			occupant.Move(src.loc)
+			occupant.buckled = src
+			if (occupant && (src.loc != occupant.loc))
 				if (propelled)
 					for (var/mob/O in src.loc)
-						if (O != rider)
+						if (O != occupant)
 							Bump(O)
 				else
-					unbuckle()
+					unbuckle_mob()
 			if (pulling && (get_dist(src, pulling) > 1))
 				pulling.pulledby = null
 				to_chat(pulling, "<span class='red'>You lost your grip!</span>")
 				pulling = null
 		else
-			if (rider && (src.loc != rider.loc))
-				src.loc = rider.loc // Failsafe to make sure the wheelchair stays beneath the occupant after driving
+			if (occupant && (src.loc != occupant.loc))
+				src.loc = occupant.loc // Failsafe to make sure the wheelchair stays beneath the occupant after driving
 	if(has_gravity(src))
 		playsound(src, 'sound/effects/roll.ogg', VOL_EFFECTS_MASTER)
 	handle_rotation()
@@ -141,14 +138,14 @@
 	if (pulling)
 		MouseDrop(usr)
 	else
-		unbuckle(user)
+		user_unbuckle_mob(user)
 	return
 
 /obj/structure/stool/bed/chair/wheelchair/MouseDrop(over_object, src_location, over_location)
 	..()
 	if(over_object == usr && Adjacent(usr))
 		if(!ishuman(usr))	return
-		if(usr == rider)
+		if(usr == buckled_mob)
 			to_chat(usr, "<span class='red'>You realize you are unable to push the wheelchair you sit in.</span>")
 			return
 		if(!pulling)
