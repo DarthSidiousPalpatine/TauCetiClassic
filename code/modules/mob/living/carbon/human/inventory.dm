@@ -213,8 +213,8 @@
 	else if (W == handcuffed)
 		handcuffed = null
 		update_inv_handcuffed()
-		if(buckled && buckled.buckle_require_restraints)
-			buckled.unbuckle_mob()
+		if(mount && mount.buckle_require_restraints)
+			mount.unbuckle()
 	else if (W == legcuffed)
 		legcuffed = null
 		update_inv_legcuffed()

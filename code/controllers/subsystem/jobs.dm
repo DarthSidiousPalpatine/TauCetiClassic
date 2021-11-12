@@ -454,9 +454,9 @@ SUBSYSTEM_DEF(job)
 		if(istype(spawn_mark, /obj/effect/landmark/start) && istype(spawn_mark.loc, /turf))
 			H.loc = spawn_mark.loc
 		// Moving wheelchair if they have one
-		if(H.buckled && istype(H.buckled, /obj/structure/stool/bed/chair/wheelchair))
-			H.buckled.loc = H.loc
-			H.buckled.set_dir(H.dir)
+		if(H.mount && istype(H.mount, /obj/structure/stool/bed/chair/wheelchair))
+			H.mount.loc = H.loc
+			H.mount.set_dir(H.dir)
 
 	//give them an account in the station database
 	var/datum/money_account/M = create_random_account_and_store_in_mind(H, job.salary)	//starting funds = salary

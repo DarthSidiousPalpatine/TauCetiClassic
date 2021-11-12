@@ -389,12 +389,12 @@
 
 	if(isobj(AM))
 		var/obj/O = AM
-		if(O.buckled_mob || (locate(/mob) in AM)) //can't load non crates objects with mobs buckled to it or inside it.
+		if(O.mount_mob || (locate(/mob) in AM)) //can't load non crates objects with mobs buckled to it or inside it.
 			buzz(SIGH)
 			return
 
 	if(isliving(AM))
-		if(!buckle_mob(AM))
+		if(!buckle(AM))
 			return
 	else
 		AM.loc = src
@@ -407,8 +407,8 @@
 	mode = 0
 	send_status()
 
-/obj/machinery/bot/mulebot/buckle_mob(mob/living/M)
-	if(M.buckled)
+/obj/machinery/bot/mulebot/buckle(mob/living/M)
+	if(M.mount)
 		return 0
 	var/turf/T = get_turf(src)
 	if(M.loc != T)
@@ -420,8 +420,8 @@
 	return ..()
 
 
-/obj/machinery/bot/mulebot/post_buckle_mob(mob/living/M)
-	if(M == buckled_mob) //post buckling
+/obj/machinery/bot/mulebot/post_buckle(mob/living/M)
+	if(M == rider) //post buckling
 		M.pixel_y = initial(M.pixel_y) + 9
 		if(M.layer < layer)
 			M.layer = layer + 0.1
@@ -443,8 +443,8 @@
 
 	cut_overlays()
 
-	if(buckled_mob)
-		unbuckle_mob()
+	if(rider)
+		unbuckle()
 		return
 
 	load.loc = loc

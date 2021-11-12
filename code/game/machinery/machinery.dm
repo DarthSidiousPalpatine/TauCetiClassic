@@ -217,11 +217,11 @@ Class Procs:
 	density = TRUE
 	if(!target)
 		for(var/mob/living/carbon/C in loc)
-			if(C.buckled)
+			if(C.mount)
 				continue
 			else
 				target = C
-	if(target && !target.buckled)
+	if(target && !target.mount)
 		if(target.client)
 			target.client.perspective = EYE_PERSPECTIVE
 			target.client.eye = src

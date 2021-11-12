@@ -407,25 +407,26 @@ var/bomb_set
 		return
 	if(user.is_busy())
 		return
-	if(buckled_mob)
+	if(rider)
 		do_after(usr, 30, 1, src)
-		unbuckle_mob()
+		unbuckle()
 	else if(do_after(usr, 30, 1, src))
 		M.loc = loc
 		..()
 
-/obj/machinery/nuclearbomb/post_buckle_mob(mob/living/M)
+/obj/machinery/nuclearbomb/post_buckle(mob/living/M)
 	..()
-	if(M == buckled_mob)
+	if(M == rider)
 		M.pixel_y = 10
 	else
 		M.pixel_y = 0
 
 /obj/machinery/nuclearbomb/bullet_act(obj/item/projectile/Proj)
-	if(buckled_mob)
-		buckled_mob.bullet_act(Proj)
-		if(buckled_mob.weakened || buckled_mob.health < 0 || buckled_mob.halloss > 80)
-			unbuckle_mob()
+	if(rider)
+		rider.bullet_act(Proj)
+		if(ismob(rider))
+			if(rider.weakened || rider.health < 0 || rider.halloss > 80)
+				unbuckle()
 	return ..()
 
 /obj/machinery/nuclearbomb/MouseDrop(over_object, src_location, over_location)
@@ -435,11 +436,11 @@ var/bomb_set
 	if(!ishuman(usr) || !Adjacent(usr) || !Adjacent(over_object) || !usr.Adjacent(over_object))
 		return
 	var/obj/structure/droppod/D = over_object
-	if(!timing && !auth && !buckled_mob)
+	if(!timing && !auth && !rider)
 		if(usr.is_busy())
 			return
 		visible_message("<span class='notice'>[usr] start putting [src] into [D]!</span>","<span class='notice'>You start putting [src] into [D]!</span>")
-		if(do_after(usr, 100, 1, src) && !timing && !auth && !buckled_mob)
+		if(do_after(usr, 100, 1, src) && !timing && !auth && !rider)
 			D.Stored_Nuclear = src
 			loc = D
 			D.icon_state = "dropod_opened_n[D.item_state]"

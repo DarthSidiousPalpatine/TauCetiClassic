@@ -93,7 +93,7 @@
 	zone = check_zone(zone)
 
 	// you can only miss if your target is standing and not restrained
-	if(!target.buckled && !target.lying)
+	if(!target.mount && !target.lying)
 		var/miss_chance = 10
 		switch(zone)
 			if(BP_HEAD)

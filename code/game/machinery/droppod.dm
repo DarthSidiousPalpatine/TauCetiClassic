@@ -154,14 +154,14 @@
 		if(!passed)
 			to_chat(usr, "<span class='warning'>The interface is blocked down with Dna key!</span>")
 			return
-	if (usr.buckled)
+	if (usr.mount)
 		to_chat(usr, "<span class='warning'>You can't climb into the [src] while buckled!</span>")
 		return
 	if(intruder)
 		to_chat(usr, "<span class='userdanger'>Someone already inside here!</span>")
 		return
 	if(usr.is_busy()) return
-	if(do_after(usr, 10, 1, src) && !intruder && !usr.buckled && usr != second_intruder)
+	if(do_after(usr, 10, 1, src) && !intruder && !usr.mount && usr != second_intruder)
 		usr.forceMove(src)
 		mob_overlay = image(usr.icon, usr.icon_state)
 		mob_overlay.copy_overlays(usr)
@@ -196,14 +196,14 @@
 	set src in orange(1)
 	if(!(ishuman(usr) || isrobot(usr)) || usr == intruder || usr.incapacitated())
 		return
-	if (usr.buckled)
+	if (usr.mount)
 		to_chat(usr, "<span class='warning'>You can't climb into the [src] while buckled!</span>")
 		return
 	if(flags & IS_LOCKED)
 		to_chat(usr, "<span class='userdanger'>[src] is lock down!</span>")
 		return
 	if(usr.is_busy()) return
-	if(do_after(usr, 10, 1, src) && !second_intruder && !usr.buckled && !(flags & IS_LOCKED) && !(flags & STATE_DROPING) && usr != intruder)
+	if(do_after(usr, 10, 1, src) && !second_intruder && !usr.mount && !(flags & IS_LOCKED) && !(flags & STATE_DROPING) && usr != intruder)
 		usr.forceMove(src)
 		second_intruder = usr
 		verbs -= /obj/structure/droppod/verb/move_inside_second

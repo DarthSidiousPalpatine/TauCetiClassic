@@ -305,8 +305,8 @@
 					Tp.breaktape(null, src, TRUE)
 
 /mob/living/simple_animal/hostile/proc/EscapeConfinement()
-	if(buckled)
-		buckled.attack_animal(src)
+	if(mount)
+		mount.attack_animal(src)
 	if(!isturf(src.loc) && src.loc != null)//Did someone put us in something?
 		var/atom/A = src.loc
 		A.attack_animal(src)//Bang on it till we get out

@@ -57,7 +57,7 @@
 /obj/vehicle/space/spacebike/load(mob/living/M)
 	if(!istype(M))
 		return FALSE
-	if(M.buckled || M.incapacitated() || M.lying || !Adjacent(M) || !M.Adjacent(src))
+	if(M.mount || M.incapacitated() || M.lying || !Adjacent(M) || !M.Adjacent(src))
 		return FALSE
 	return ..()
 
@@ -162,7 +162,7 @@
 	. = ..()
 	if(kickstand)
 		return 0
-	if(buckled_mob && (buckled_mob.stat || buckled_mob.lying))
+	if(rider && (rider.stat || rider.lying))
 		return 0
 
 /obj/vehicle/space/spacebike/turn_on()

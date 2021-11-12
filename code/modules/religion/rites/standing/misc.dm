@@ -341,15 +341,15 @@
 		to_chat(user, "<span class='warning'>This rite requires an altar to be performed.</span>")
 		return FALSE
 
-	if(!AOG.buckled_mob)
+	if(!AOG.rider)
 		to_chat(user, "<span class='warning'>This rite requires an individual to be buckled to [AOG].</span>")
 		return FALSE
 
-	if(!isanimal(AOG.buckled_mob))
+	if(!isanimal(AOG.rider))
 		to_chat(user, "<span class='warning'>Only a animal can go through the ritual.</span>")
 		return FALSE
 
-	var/mob/living/simple_animal/S = AOG.buckled_mob
+	var/mob/living/simple_animal/S = AOG.rider
 	if(!S.animalistic)
 		to_chat(user, "<span class='warning'>Only a animal can go through the ritual.</span>")
 		return FALSE
@@ -365,7 +365,7 @@
 	if(!.)
 		return FALSE
 
-	var/mob/living/simple_animal/animal = AOG.buckled_mob
+	var/mob/living/simple_animal/animal = AOG.rider
 	if(!istype(animal))
 		to_chat(user, "<span class='warning'>Only a animal can go through the ritual.</span>")
 		return FALSE

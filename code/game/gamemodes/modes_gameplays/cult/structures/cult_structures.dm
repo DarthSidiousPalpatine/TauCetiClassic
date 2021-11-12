@@ -145,8 +145,8 @@
 
 /obj/machinery/optable/torture_table/MouseDrop_T(atom/A, mob/user)
 	if(A.loc == loc)
-		if(can_buckle && !buckled_mob)
-			user_buckle_mob(A, user)
+		if(can_buckle && !rider)
+			buckle(A, user)
 	else
 		return ..()
 
@@ -165,11 +165,11 @@
 	cut_overlay(belt)
 
 /obj/machinery/optable/torture_table/attack_hand(mob/living/user)
-	if(user == buckled_mob)
+	if(user == rider)
 		user.resist()
 	else
-		if(can_buckle && buckled_mob && istype(user))
-			user_unbuckle_mob(user)
+		if(can_buckle && rider && istype(user))
+			unbuckle(user)
 
 /obj/structure/mineral_door/cult
 	name = "door"

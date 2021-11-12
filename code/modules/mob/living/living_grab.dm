@@ -15,7 +15,7 @@
 		var/mob/M = target
 		if(!(M.status_flags & CANPUSH))
 			return
-		if(M.buckled)
+		if(M.mount)
 			if(show_warnings)
 				to_chat(src, "<span class='notice'>You cannot grab [M], \he is buckled in!</span>")
 			return
@@ -35,7 +35,7 @@
 		var/mob/M = target
 		if(!(M.status_flags & CANPUSH))
 			return
-		if(M.buckled)
+		if(M.mount)
 			if(show_warnings)
 				to_chat(src, "<span class='notice'>You cannot grab [M], \he is buckled in!</span>")
 			return

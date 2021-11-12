@@ -26,7 +26,7 @@
 	//shake the station!
 	for(var/mob/living/carbon/C in carbon_list)
 		if(C.z == T.z)
-			if(C.buckled)
+			if(C.mount)
 				shake_camera(C, 4, 1)
 			else
 				shake_camera(C, 10, 2)

@@ -140,8 +140,8 @@
 	playSpecials(curturf,effectin,soundin)
 
 	if(force_teleport)
-		if(teleatom.buckled_mob)
-			teleatom.unbuckle_mob()
+		if(teleatom.rider)
+			teleatom.unbuckle()
 		teleatom.forceMove(destturf)
 		playSpecials(destturf,effectout,soundout)
 	else
@@ -150,8 +150,8 @@
 
 	if(isliving(teleatom))
 		var/mob/living/L = teleatom
-		if(L.buckled)
-			L.buckled.unbuckle_mob()
+		if(L.mount)
+			L.mount.unbuckle()
 
 	teleatom.newtonian_move(entrydir)
 	return 1

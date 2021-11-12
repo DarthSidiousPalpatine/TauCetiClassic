@@ -27,7 +27,7 @@
 			return custom_emote(m_type, message)
 
 		if ("salute")
-			if (!src.buckled)
+			if (!src.mount)
 				var/M = null
 				if (param)
 					for (var/mob/A in view(null, null))
@@ -44,7 +44,7 @@
 			m_type = SHOWMSG_VISUAL
 
 		if ("bow")
-			if (!src.buckled)
+			if (!src.mount)
 				var/M = null
 				if (param)
 					for (var/mob/A in view(null, null))

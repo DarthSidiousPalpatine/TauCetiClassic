@@ -18,13 +18,13 @@
 	. = ..()
 	update_icon()
 
-/obj/structure/stool/bed/chair/pew/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/pew/post_buckle(mob/living/M)
 	return
 
 /obj/structure/stool/bed/chair/pew/handle_rotation()
-	if(buckled_mob)
-		buckled_mob.set_dir(dir)
-		buckled_mob.update_canmove()
+	if(rider)
+		rider.set_dir(dir)
+		rider.update_canmove()
 
 /obj/structure/stool/bed/chair/pew/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	if(istype(mover) && mover.checkpass(PASSTABLE))

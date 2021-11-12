@@ -143,7 +143,7 @@
 	// List of being that carry carry_obj.
 	var/list/carriers
 	// Assoc list of carrier_ref = list("px"=..., "py"=..., "pz"=..., "layer"=...)
-	// Contains data about carry_obj, carriers, carry_obj.buckled
+	// Contains data about carry_obj, carriers, carry_obj.mount
 	var/list/carrier_default_pos
 
 	// Whether this entire "structure" is moving due to carrier.
@@ -337,8 +337,8 @@
 	))
 	carry_obj.pixel_z = carry_obj.pixel_z + carry_pixel_z
 	carry_obj.layer = FLY_LAYER
-	if(carry_obj.buckled_mob)
-		on_buckle(carry_obj, carry_obj.buckled_mob)
+	if(carry_obj.rider)
+		on_buckle(carry_obj, carry_obj.rider)
 
 	RegisterSignal(carry_obj, list(COMSIG_ATOM_CANPASS), .proc/check_canpass)
 	RegisterSignal(carry_obj, list(COMSIG_MOVABLE_MOVED), .proc/check_carriers)
@@ -382,8 +382,8 @@
 	carry_obj.pixel_z = pos_obj["pz"]
 	carry_obj.layer = pos_obj["layer"]
 	LAZYREMOVE(carrier_default_pos, carry_obj)
-	if(carry_obj.buckled_mob)
-		on_unbuckle(carry_obj, carry_obj.buckled_mob)
+	if(carry_obj.rider)
+		on_unbuckle(carry_obj, carry_obj.rider)
 
 	carriers = null
 
@@ -433,7 +433,7 @@
 
 	if(carry_obj.can_waddle())
 		carry_obj.waddle(pick(-waddle_strength, 0, waddle_strength), pz_raise)
-		var/mob/M = carry_obj.buckled_mob
+		var/mob/M = carry_obj.rider
 		if(M && M.can_waddle())
 			M.waddle(pick(-waddle_strength, 0, waddle_strength), pz_raise)
 			M.set_dir(pick(WEST, EAST))

@@ -16,7 +16,7 @@
 	var/mob/living/silicon/S = locate() in get_turf(AOG)
 	if(S)
 		return TRUE
-	else if(!ishuman(AOG.buckled_mob))
+	else if(!ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>Только человек может пройти через ритуал.</span>")
 		return FALSE
 	return TRUE
@@ -33,14 +33,14 @@
 			to_chat(user, "<span class='[religion.style_text]'>Я͒̐͐ п͆̚͝р̒͘и̐̀͊н͋͠͝и͒́̾м͐͒а̒̕͝ю̀͒̾ э̾͑̓т͊̓͝у̾͊̾ ж̿͛͝е͝͠͠р̓͑̾т͋͌͐в̓͆͘у͋͌͠,͐̽̒ т͒̾̀в́̿̓о̒͋͝я́̽ ц͛̓͝е͆̒̚л͋̓ь͛͑̚ т̔̐̚е̽̐͘п͘͝͝е̒̕͠р͐̓̚ь͑͠ м͛̈́̚о̀͘̕ж͌̽͋е̓̾͊т́͐͝ с́͛͝ч̀̿͠и̔͊͝т͑́͌а͌̀͝т̓͋̈́ь̈́͆͘с̓̀͝я̈́̒͝ в͋̔̀ы̿͌͛п̓͑о͛̀̈́л͌͛͘н͆͛͝е͋̈́н̐͆̈́н͐̔͝о͆͋̾й̈́̈́̚.</span>")
 			R.adjust_favor(300 * divine_power)
 		S.dust()
-	else if(ishuman(AOG.buckled_mob))
-		R.mode.sacrificed += AOG.buckled_mob.mind
-		if(sacrifice_target && sacrifice_target == AOG.buckled_mob.mind)
+	else if(ishuman(AOG.rider))
+		R.mode.sacrificed += AOG.rider.mind
+		if(sacrifice_target && sacrifice_target == AOG.rider.mind)
 			to_chat(user, "<span class='[religion.style_text]'>Я͒̐͐ п͆̚͝р̒͘и̐̀͊н͋͠͝и͒́̾м͐͒а̒̕͝ю̀͒̾ э̾͑̓т͊̓͝у̾͊̾ ж̿͛͝е͝͠͠р̓͑̾т͋͌͐в̓͆͘у͋͌͠,͐̽̒ т͒̾̀в́̿̓о̒͋͝я́̽ ц͛̓͝е͆̒̚л͋̓ь͛͑̚ т̔̐̚е̽̐͘п͘͝͝е̒̕͠р͐̓̚ь͑͠ м͛̈́̚о̀͘̕ж͌̽͋е̓̾͊т́͐͝ с́͛͝ч̀̿͠и̔͊͝т͑́͌а͌̀͝т̓͋̈́ь̈́͆͘с̓̀͝я̈́̒͝ в͋̔̀ы̿͌͛п̓͑о͛̀̈́л͌͛͘н͆͛͝е͋̈́н̐͆̈́н͐̔͝о͆͋̾й̈́̈́̚.</span>")
 			R.adjust_favor(300 * divine_power)
-		AOG.buckled_mob.gib()
+		AOG.rider.gib()
 
-	R.adjust_favor(calc_sacrifice_favor(AOG.buckled_mob) * divine_power)
+	R.adjust_favor(calc_sacrifice_favor(AOG.rider) * divine_power)
 
 	playsound(AOG, 'sound/magic/disintegrate.ogg', VOL_EFFECTS_MASTER)
 	return TRUE
@@ -80,7 +80,7 @@
 	if(!..())
 		return FALSE
 
-	if(!religion.can_convert(AOG.buckled_mob))
+	if(!religion.can_convert(AOG.rider))
 		to_chat(user, "<span class='warning'>Вы не можете обратить это существо.</span>")
 		return FALSE
 
@@ -88,11 +88,11 @@
 
 /datum/religion_rites/instant/cult/convert/invoke_effect(mob/living/user, obj/AOG)
 	..()
-	if(!religion.can_convert(AOG.buckled_mob))
+	if(!religion.can_convert(AOG.rider))
 		return FALSE
 
-	religion.add_member(AOG.buckled_mob, CULT_ROLE_HIGHPRIEST)
-	to_chat(AOG.buckled_mob, "<span class='[religion.style_text]'>Помогай другим культистам в тёмных делах. Их цель - твоя цель, а твоя - их. Вы вместе служите Тьме и тёмным богам.</span>")
+	religion.add_member(AOG.rider, CULT_ROLE_HIGHPRIEST)
+	to_chat(AOG.rider, "<span class='[religion.style_text]'>Помогай другим культистам в тёмных делах. Их цель - твоя цель, а твоя - их. Вы вместе служите Тьме и тёмным богам.</span>")
 	religion.adjust_favor(300 * divine_power)
 	return TRUE
 
@@ -133,7 +133,7 @@
 
 	var/datum/religion/cult/C = religion
 	for(var/obj/machinery/optable/torture_table/table in C.torture_tables)
-		if(table.buckled_mob?.stat != DEAD)
+		if(table.rider?.stat != DEAD)
 			return TRUE
 
 	to_chat(user, "<span class='warning'>На заряженном столе пыток должна лежать хотя бы одна жертва.</span>")
@@ -144,12 +144,12 @@
 	var/drain = 0
 	var/datum/religion/cult/C = religion
 	for(var/obj/machinery/optable/torture_table/table in C.torture_tables)
-		if(!table.buckled_mob || table.buckled_mob.stat == DEAD)
+		if(!table.rider || table.rider.stat == DEAD)
 			continue
 		var/bdrain = rand(1, 25) * divine_power
-		to_chat(table.buckled_mob, "<span class='userdanger'>Вы чувствуете слабость.</span>")
-		table.buckled_mob.take_overall_damage(bdrain, 0)
-		table.buckled_mob.Paralyse(5 SECONDS)
+		to_chat(table.rider, "<span class='userdanger'>Вы чувствуете слабость.</span>")
+		table.rider.take_overall_damage(bdrain, 0)
+		table.rider.Paralyse(5 SECONDS)
 		playsound(table, 'sound/magic/transfer_blood.ogg', VOL_EFFECTS_MASTER)
 		drain += bdrain
 
@@ -188,13 +188,13 @@
 	if(!..())
 		return FALSE
 
-	if(!AOG.buckled_mob || AOG.buckled_mob.stat != DEAD || !ishuman(AOG.buckled_mob))
+	if(!AOG.rider || AOG.rider.stat != DEAD || !ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>На алтаре должен лежать мертвый человек.</span>")
 		return FALSE
 
 	var/datum/religion/cult/C = religion
 	for(var/obj/machinery/optable/torture_table/table in C.torture_tables)
-		if(table.buckled_mob?.stat != DEAD)
+		if(table.rider?.stat != DEAD)
 			return TRUE
 
 	to_chat(user, "<span class='warning'>На заряженном столе пыток должна лежать хотя бы одна жертва.</span>")
@@ -202,7 +202,7 @@
 
 /datum/religion_rites/instant/cult/raise_torture/invoke_effect(mob/living/user, obj/AOG)
 	..()
-	if(!AOG.buckled_mob || AOG.buckled_mob.stat != DEAD || !ishuman(AOG.buckled_mob))
+	if(!AOG.rider || AOG.rider.stat != DEAD || !ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>На алтаре должен лежать мертвый человек.</span>")
 		return FALSE
 
@@ -210,16 +210,16 @@
 	var/list/mob/living/carbon/human/bodys_to_sacrifice = list()
 
 	var/datum/religion/cult/C = religion
-	if(C.mode.sacrifice_target && C.mode.sacrifice_target == AOG.buckled_mob.mind)
+	if(C.mode.sacrifice_target && C.mode.sacrifice_target == AOG.rider.mind)
 		to_chat(user, "<span class='[religion.style_text]'>Я̿̀͝ ӟ́͌͝а̓͌́п̒͛̈́р͌͌̕е̾̈́̀щ̈́̚а̓͊ю̔͌͋ е̽̕г͆͛ӧ́̕̕ в̈́͝о͆̽̈́с̾͐̐к̽͒͌р̔̔̕е͋͑̈́ш̀̕͝а́͒̕т̈́̽̒ь͊̓̕!</span>")
 		return FALSE
-	if(AOG.buckled_mob.mind)
-		corpse_to_raise = AOG.buckled_mob
+	if(AOG.rider.mind)
+		corpse_to_raise = AOG.rider
 
 	for(var/obj/machinery/optable/torture_table/table in C.torture_tables)
-		if(!table.buckled_mob || table.buckled_mob.stat == DEAD)
+		if(!table.rider || table.rider.stat == DEAD)
 			continue
-		bodys_to_sacrifice += table.buckled_mob
+		bodys_to_sacrifice += table.rider
 
 	if(!bodys_to_sacrifice.len)
 		to_chat(user, "<span class='[religion.style_text]'>Не хватает тел для жертвы.</span>")
@@ -340,8 +340,8 @@
 	if(!cultist)
 		return FALSE
 
-	if(cultist.buckled)
-		cultist.buckled.unbuckle_mob()
+	if(cultist.mount)
+		cultist.mount.unbuckle()
 		is_processed = TRUE
 	if (cultist.handcuffed)
 		cultist.drop_from_inventory(cultist.handcuffed)
@@ -409,8 +409,8 @@
 	cultist.visible_message("<span class='userdanger'>[cultist] внезапно исчезает!</span>")
 	cultist.forceMove(get_turf(AOG))
 
-	if(AOG.can_buckle && !AOG.buckled_mob)
-		AOG.user_buckle_mob(cultist, user)
+	if(AOG.can_buckle && !AOG.rider)
+		AOG.buckle(cultist, user)
 
 	cultist.visible_message("<span class='userdanger'>С красной вспышкой появляется [cultist].</span>", \
 		"<span class='[religion.style_text]'>Вас на мгновенье ослепила красная вспышка. Теперь вы видите перед собой внезапно появившееся тело.</span>", \
@@ -482,15 +482,15 @@
 	if(!..())
 		return FALSE
 
-	if(!ishuman(AOG.buckled_mob))
+	if(!ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>Только люди могут пройти через этот ритуал.</span>")
 		return FALSE
 
-	if(!AOG.buckled_mob.mind)
-		to_chat(user, "<span class='warning'>Тело [AOG.buckled_mob] слишком слабо!</span>")
+	if(!AOG.rider.mind)
+		to_chat(user, "<span class='warning'>Тело [AOG.rider] слишком слабо!</span>")
 		return FALSE
 
-	if(AOG.buckled_mob.GetComponent(/datum/component/forcefield))
+	if(AOG.rider.GetComponent(/datum/component/forcefield))
 		to_chat(user, "<span class='warning'>Эта оболочка уже под защитой.</span>")
 		return FALSE
 
@@ -498,7 +498,7 @@
 
 /datum/religion_rites/instant/cult/give_forcearmor/invoke_effect(mob/living/user, obj/AOG)
 	..()
-	var/mob/living/carbon/human/H = AOG.buckled_mob
+	var/mob/living/carbon/human/H = AOG.rider
 	if(!H)
 		return FALSE
 

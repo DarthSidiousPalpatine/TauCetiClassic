@@ -69,7 +69,7 @@
 		return
 
 	// buckled cannot prevent machine interlinking but stops arm movement
-	if(buckled)
+	if(mount)
 		return
 
 	if(SEND_SIGNAL(W, COMSIG_HAND_IS))

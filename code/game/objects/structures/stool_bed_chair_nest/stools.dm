@@ -26,8 +26,8 @@
 	return
 
 /obj/structure/stool/airlock_crush_act()
-	if(has_buckled_mobs())
-		unbuckle_mob()
+	if(rider)
+		unbuckle(harm = TRUE)
 
 /obj/structure/stool/blob_act()
 	if(prob(75))

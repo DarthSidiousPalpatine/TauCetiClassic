@@ -12,7 +12,8 @@
 	desc = "This is used to lie in, sleep in or strap on."
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "bed"
-	can_buckle = 1
+	can_buckle = TRUE
+	rider_size_min_max = list(SIZE_NORMAL, SIZE_BIG_HUMAN)
 	buckle_lying = 1
 
 /obj/structure/stool/bed/psych
@@ -41,8 +42,8 @@
 	return ..()
 
 /obj/structure/stool/bed/Process_Spacemove(movement_dir = 0)
-	if(buckled_mob)
-		return buckled_mob.Process_Spacemove(movement_dir)
+	if(rider)
+		return rider.Process_Spacemove(movement_dir)
 	return ..()
 
 /obj/structure/stool/bed/examine(mob/user)
@@ -65,8 +66,8 @@
 /obj/structure/stool/bed/roller/attackby(obj/item/weapon/W, mob/user)
 	if(istype(W,src) || istype(W, /obj/item/roller_holder))
 		user.SetNextMove(CLICK_CD_INTERACT)
-		if(buckled_mob)
-			user_unbuckle_mob(user)
+		if(rider)
+			unbuckle()
 		else
 			visible_message("[user] collapses \the [src.name].")
 			new type_roller(get_turf(src))
@@ -136,8 +137,8 @@
 	qdel(held)
 	held = null
 
-/obj/structure/stool/bed/roller/post_buckle_mob(mob/living/M)
-	if(M == buckled_mob)
+/obj/structure/stool/bed/roller/post_buckle(atom/movable/M)
+	if(M == rider)
 		if(M.crawling)
 			M.pass_flags &= ~PASSCRAWL
 			M.crawling = FALSE
@@ -154,7 +155,7 @@
 	if(over_object == usr && Adjacent(usr))
 		if(!ishuman(usr))
 			return
-		if(buckled_mob)
+		if(rider)
 			return 0
 		visible_message("[usr] collapses \the [src.name].")
 		new type_roller(get_turf(src))
@@ -170,7 +171,7 @@
 		user.visible_message("<span class='notice'>[user] attempts to buckle [L] into \the [src]!</span>")
 		if(G.use_tool(src, user, 20, volume = 50))
 			L.loc = loc
-			if(buckle_mob(L))
+			if(buckle(L, user))
 				L.visible_message(\
 					"<span class='danger'>[L.name] is buckled to [src] by [user.name]!</span>",\
 					"<span class='danger'>You are buckled to [src] by [user.name]!</span>",\

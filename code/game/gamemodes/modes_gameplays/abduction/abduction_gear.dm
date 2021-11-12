@@ -293,8 +293,8 @@
 
 /obj/item/weapon/implant/abductor/attack_self()
 	if(cooldown == initial(cooldown))
-		if(imp_in.buckled)
-			imp_in.buckled.unbuckle_mob()
+		if(imp_in.mount)
+			imp_in.mount.unbuckle_mob()
 		home.Retrieve(imp_in)
 		cooldown = 0
 		START_PROCESSING(SSobj, src)

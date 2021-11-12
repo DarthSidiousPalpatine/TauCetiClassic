@@ -121,12 +121,12 @@
 	if(!..())
 		return FALSE
 
-	if(!ishuman(AOG.buckled_mob))
+	if(!ishuman(AOG.rider))
 		if(user)
 			to_chat(user, "<span class='warning'>На алтаре должен быть человек.</span>")
 		return FALSE
 
-	var/mob/living/carbon/human/H = AOG.buckled_mob
+	var/mob/living/carbon/human/H = AOG.rider
 	if(H.species.flags[NO_BLOOD] || jobban_isbanned(H, ROLE_CULTIST) || jobban_isbanned(H, "Syndicate") || H.ismindprotect())
 		if(user)
 			to_chat(user, "<span class='warning'>Неподходящее существо.</span>")
@@ -137,7 +137,7 @@
 /datum/religion_rites/pedestals/cult/make_skeleton/invoke_effect(mob/living/user, obj/structure/altar_of_gods/AOG)
 	. = ..()
 
-	var/mob/living/carbon/human/H = AOG.buckled_mob
+	var/mob/living/carbon/human/H = AOG.rider
 	if(!H || !ishuman(H))
 		to_chat(user, "<span class='warning'>На алтаре должен быть человек.</span>")
 		return FALSE

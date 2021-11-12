@@ -33,12 +33,12 @@
 
 	var/mob/living/simple_animal/shade/god/god = locate() in get_turf(AOG)
 	if(!istype(god))
-		if(!ishuman(AOG.buckled_mob))
+		if(!ishuman(AOG.rider))
 			to_chat(user, "<span class='warning'>Only humanoid bodies can be accepted.</span>")
 			return FALSE
 
-		if(jobban_isbanned(AOG.buckled_mob, "Cyborg") || role_available_in_minutes(AOG.buckled_mob, ROLE_GHOSTLY))
-			to_chat(user, "<span class='warning'>[AOG.buckled_mob]Тело [AOG.buckled_mob] слишком слабо!</span>")
+		if(jobban_isbanned(AOG.rider, "Cyborg") || role_available_in_minutes(AOG.rider, ROLE_GHOSTLY))
+			to_chat(user, "<span class='warning'>[AOG.rider]Тело [AOG.rider] слишком слабо!</span>")
 			return FALSE
 	else
 		if(jobban_isbanned(god, "Cyborg") || role_available_in_minutes(god, ROLE_GHOSTLY))
@@ -53,7 +53,7 @@
 	if(convert_god(AOG))
 		return TRUE
 
-	var/mob/living/carbon/human/human2borg = AOG.buckled_mob
+	var/mob/living/carbon/human/human2borg = AOG.rider
 	if(!istype(human2borg))
 		return FALSE
 	hgibs(get_turf(AOG), human2borg.viruses, human2borg.dna, human2borg.species.flesh_color, human2borg.species.blood_datum)
@@ -102,7 +102,7 @@
 /datum/religion_rites/standing/consent/sacrifice/invoke_effect(mob/living/user, obj/AOG)
 	..()
 
-	var/mob/living/L = AOG.buckled_mob
+	var/mob/living/L = AOG.rider
 	if(!istype(L))
 		return FALSE
 
@@ -152,20 +152,20 @@
 	if(!..())
 		return FALSE
 
-	if(!ishuman(AOG.buckled_mob))
+	if(!ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>Только люди могут пройти через этот ритуал.</span>")
 		return FALSE
 
-	if(jobban_isbanned(AOG.buckled_mob, "Clown"))
+	if(jobban_isbanned(AOG.rider, "Clown"))
 		to_chat(user, "<span class='warning'>[pick(religion.deity_names)] don't accept this person!</span>")
 		return FALSE
 
-	if(!AOG.buckled_mob.mind)
-		to_chat(user, "<span class='warning'>Тело [AOG.buckled_mob] слишком слабо!</span>")
+	if(!AOG.rider.mind)
+		to_chat(user, "<span class='warning'>Тело [AOG.rider] слишком слабо!</span>")
 		return FALSE
 
-	if(AOG.buckled_mob.mind.holy_role >= HOLY_ROLE_PRIEST)
-		to_chat(user, "<span class='warning'>[AOG.buckled_mob]уже святой!</span>")
+	if(AOG.rider.mind.holy_role >= HOLY_ROLE_PRIEST)
+		to_chat(user, "<span class='warning'>[AOG.rider]уже святой!</span>")
 		return FALSE
 
 	return TRUE
@@ -173,7 +173,7 @@
 /datum/religion_rites/standing/consent/clownconversion/invoke_effect(mob/living/user, obj/AOG)
 	..()
 
-	var/mob/living/carbon/human/H = AOG.buckled_mob
+	var/mob/living/carbon/human/H = AOG.rider
 	if(!istype(H))
 		return FALSE
 
@@ -224,16 +224,16 @@
 	if(!..())
 		return FALSE
 
-	if(!ishuman(AOG.buckled_mob))
+	if(!ishuman(AOG.rider))
 		to_chat(user, "<span class='warning'>Только люди могут пройти через этот ритуал.</span>")
 		return FALSE
 
-	if(!AOG.buckled_mob.mind)
-		to_chat(user, "<span class='warning'>Тело [AOG.buckled_mob] слишком слабо!</span>")
+	if(!AOG.rider.mind)
+		to_chat(user, "<span class='warning'>Тело [AOG.rider] слишком слабо!</span>")
 		return FALSE
 
-	if(AOG.buckled_mob.my_religion)
-		to_chat(user, "<span class='warning'>[AOG.buckled_mob] уже святой!</span>")
+	if(AOG.rider.my_religion)
+		to_chat(user, "<span class='warning'>[AOG.rider] уже святой!</span>")
 		return FALSE
 
 	return TRUE
@@ -241,7 +241,7 @@
 /datum/religion_rites/standing/consent/invite/invoke_effect(mob/living/user, obj/AOG)
 	..()
 
-	var/mob/living/carbon/human/H = AOG.buckled_mob
+	var/mob/living/carbon/human/H = AOG.rider
 	if(!istype(H))
 		return FALSE
 

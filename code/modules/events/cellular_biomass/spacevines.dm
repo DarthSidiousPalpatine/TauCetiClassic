@@ -28,12 +28,12 @@
 		//Plant-b-gone damage is handled in its entry in chemistry-reagents.dm
 
 /obj/effect/spacevine/attack_hand(mob/user)
-	user_unbuckle_mob(user)
+	unbuckle(user)
 	user.SetNextMove(CLICK_CD_MELEE)
 
 
 /obj/effect/spacevine/attack_paw(mob/user)
-	user_unbuckle_mob(user)
+	unbuckle(user)
 	user.SetNextMove(CLICK_CD_MELEE)
 
 /obj/effect/spacevine_controller
@@ -96,7 +96,7 @@
 			if(prob(20))
 				SV.grow()
 		else //If tile is fully grown
-			SV.buckle_mob()
+			SV.buckle()
 
 		//if(prob(25))
 		SV.spread()
@@ -117,14 +117,14 @@
 		src.icon_state = pick("Hvy1", "Hvy2", "Hvy3")
 		energy = 2
 
-/obj/effect/spacevine/buckle_mob()
-	if(!buckled_mob && prob(25))
+/obj/effect/spacevine/buckle(rider)
+	if(!rider && prob(25))
 		for(var/mob/living/carbon/V in src.loc)
-			if((V.stat != DEAD)  && (V.buckled != src)) //if mob not dead or captured
-				V.buckled = src
+			if((V.stat != DEAD)  && (V.mount != src)) //if mob not dead or captured
+				V.mount = src
 				V.loc = src.loc
 				V.update_canmove()
-				src.buckled_mob = V
+				src.mount_mob = V
 				to_chat(V, "<span class='danger'>The vines [pick("wind", "tangle", "tighten")] around you!</span>")
 				break //only capture one mob at a time.
 

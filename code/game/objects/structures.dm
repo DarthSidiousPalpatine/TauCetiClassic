@@ -220,7 +220,7 @@
 		return 0
 	if(!Adjacent(user))
 		return 0
-	if(user.buckled)
+	if(user.mount)
 		to_chat(user, "<span class='notice'>You need your hands and legs free for this.</span>")
 		return 0
 	if(user.incapacitated())

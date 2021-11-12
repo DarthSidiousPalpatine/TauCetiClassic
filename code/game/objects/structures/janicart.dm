@@ -98,10 +98,10 @@
 	var/turf/T = get_turf(src)
 	if(T == get_turf(AM))
 		if(isliving(AM))
-			if(buckled_mob)
-				user_unbuckle_mob(AM)
+			if(rider)
+				unbuckle(AM)
 			else
-				user_buckle_mob(AM, user)
+				buckle(AM, user)
 	else
 		..()
 
@@ -312,10 +312,10 @@
 		mybag.spill()//trashbag spills its contents too
 		mybag = null
 
-	if(buckled_mob && prob(chance * 0.5))
-		buckled_mob.apply_effect(6, STUN, 0)
-		buckled_mob.apply_effect(6, WEAKEN, 0)
-		buckled_mob.apply_effect(12, STUTTER, 0)
+	if(rider && ismob(rider) && prob(chance * 0.5))
+		rider.apply_effect(6, STUN, 0)
+		rider.apply_effect(6, WEAKEN, 0)
+		rider.apply_effect(12, STUTTER, 0)
 
 	update_icon()
 

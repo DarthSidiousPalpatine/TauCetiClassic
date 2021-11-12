@@ -97,12 +97,12 @@ var/mining_shuttle_location = 0 // 0 = station 13, 1 = mining station
 		for(var/mob/M in toArea)
 			if(M.client)
 				spawn(0)
-					if(M.buckled)
+					if(M.mount)
 						shake_camera(M, 3, 1) // buckled, not a lot of shaking
 					else
 						shake_camera(M, 10, 1) // unbuckled, HOLY SHIT SHAKE THE ROOM
 			if(istype(M, /mob/living/carbon))
-				if(!M.buckled)
+				if(!M.mount)
 					M.Weaken(3)
 
 		mining_shuttle_moving = 0
