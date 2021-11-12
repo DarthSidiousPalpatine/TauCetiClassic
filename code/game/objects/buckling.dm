@@ -1,17 +1,24 @@
 /atom/movable
-	var/can_buckle = 0
-	var/buckle_movable = 0
+	//Mounting
+	var/can_be_mounted = FALSE
+	var/can_ride = null
+	var/can_be_controlled = FALSE
+	var/can_control = FALSE
+	var/list/rider_size_min_max = (null, null)
+	var/list/mount_size_min_max = (null, null)
+	var/rider = null
+	var/mount = null
+	//require people to be handcuffed before being able to buckle. eg: pipes
+	var/riding_require_restraints = 0
 	//bed-like behavior, forces mob.lying = buckle_lying if != -1
-	var/buckle_lying = -1
+	var/rider_lying = -1
 	// Delay in ticks for the lying anim on buckle_lying objs.
 	var/buckle_delay = 2
-	//require people to be handcuffed before being able to buckle. eg: pipes
-	var/buckle_require_restraints = 0
-	var/mob/living/buckled_mob = null
+
 
 /atom/movable/attack_hand(mob/living/user)
 	. = ..()
-	if(can_buckle && buckled_mob && istype(user))
+	if(can_buckle && rider && istype(user))
 		user_unbuckle_mob(user)
 
 /atom/movable/attack_robot(mob/living/user)
