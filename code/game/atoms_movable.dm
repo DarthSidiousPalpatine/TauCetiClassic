@@ -36,7 +36,7 @@
 
 	var/turf/T = loc
 
-	unbuckle_mob()
+	unbuckle()
 
 	if(loc)
 		loc.handle_atom_del(src)
@@ -189,8 +189,8 @@
 /mob/living/forceMove(atom/destination, keep_pulling = FALSE)
 	if(!keep_pulling)
 		stop_pulling()
-	if(buckled)
-		buckled.unbuckle_mob()
+	if(mount)
+		mount.unbuckle()
 	. = ..()
 	update_canmove()
 

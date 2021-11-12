@@ -38,6 +38,10 @@
 	has_arm = TRUE
 	has_leg = TRUE
 
+	can_be_buckled = TRUE
+	can_control = TRUE
+	mount_size_min_max = list(SIZE_MINUSCULE, SIZE_SMALL)
+
 /mob/living/simple_animal/mouse/Life()
 	..()
 	if(!stat && prob(speak_chance))

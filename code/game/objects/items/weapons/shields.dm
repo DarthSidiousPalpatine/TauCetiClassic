@@ -31,8 +31,8 @@
 	if(isliving(target) && prob(Get_shield_chance())) // Better shields have more chance to stun.
 		var/mob/living/M = target
 		user.visible_message("<span class='warning'>[M] is stunned by [user] with [src]!</span>", "<span class='warning'>You stun [M] with [src]!</span>")
-		if(M.buckled)
-			M.buckled.user_unbuckle_mob(M)
+		if(M.mount)
+			M.mount.unbuckle(M)
 
 		M.apply_effect(4, STUTTER, 0)
 		shake_camera(M, 1, 1)
@@ -60,8 +60,8 @@
 				M.log_combat(user, "pushed with [name]")
 
 				user.visible_message("<span class='warning'>[M] is stunned by [user] with [src]!</span>", "<span class='warning'>You stun [M] with [src]!</span>")
-				if(M.buckled)
-					M.buckled.user_unbuckle_mob(M)
+				if(M.mount)
+					M.mount.unbuckle(M)
 
 				M.apply_effect(6, STUTTER, 0)
 				shake_camera(M, 1, 1)

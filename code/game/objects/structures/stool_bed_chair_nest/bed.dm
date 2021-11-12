@@ -12,8 +12,10 @@
 	desc = "This is used to lie in, sleep in or strap on."
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "bed"
-	can_buckle = 1
 	buckle_lying = 1
+
+	can_buckle = TRUE
+	rider_size_min_max = list(SIZE_NORMAL, SIZE_BIG_HUMAN)
 
 /obj/structure/stool/bed/psych
 	name = "psychiatrists couch"
@@ -66,7 +68,7 @@
 	if(istype(W,src) || istype(W, /obj/item/roller_holder))
 		user.SetNextMove(CLICK_CD_INTERACT)
 		if(buckled_mob)
-			user_unbuckle_mob(user)
+			unbuckle(user)
 		else
 			visible_message("[user] collapses \the [src.name].")
 			new type_roller(get_turf(src))
@@ -136,7 +138,7 @@
 	qdel(held)
 	held = null
 
-/obj/structure/stool/bed/roller/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/roller/post_buckle(mob/living/M)
 	if(M == buckled_mob)
 		if(M.crawling)
 			M.pass_flags &= ~PASSCRAWL
@@ -170,7 +172,7 @@
 		user.visible_message("<span class='notice'>[user] attempts to buckle [L] into \the [src]!</span>")
 		if(G.use_tool(src, user, 20, volume = 50))
 			L.loc = loc
-			if(buckle_mob(L))
+			if(buckle(L))
 				L.visible_message(\
 					"<span class='danger'>[L.name] is buckled to [src] by [user.name]!</span>",\
 					"<span class='danger'>You are buckled to [src] by [user.name]!</span>",\

@@ -19,7 +19,7 @@
 
 			final_pixel_y = get_pixel_y_offset(lying_current)
 			final_pixel_x = get_pixel_x_offset(lying_current)
-			if((dir & (EAST|WEST)) && !buckled) //Facing east or west
+			if((dir & (EAST|WEST)) && !mount) //Facing east or west
 				final_dir = pick(NORTH, SOUTH) //So you fall on your side rather than your face or ass
 	else
 		if(lying != lying_prev)
@@ -42,17 +42,17 @@
 		default_pixel_x = final_pixel_x
 		default_pixel_y = final_pixel_y
 		default_layer = final_layer
-		animate(src, transform = ntransform, time = buckled ? buckled.buckle_delay : 2, pixel_y = final_pixel_y, pixel_x = final_pixel_x, dir = final_dir, easing = EASE_IN|EASE_OUT, layer = final_layer)
+		animate(src, transform = ntransform, time = mount ? mount.buckle_delay : 2, pixel_y = final_pixel_y, pixel_x = final_pixel_x, dir = final_dir, easing = EASE_IN|EASE_OUT, layer = final_layer)
 		floating = FALSE
 
 /mob/living/carbon/proc/get_lying_angle()
 	. = lying_current
 
-	if(istype(buckled, /obj/structure/stool/bed/chair))
-		var/obj/structure/stool/bed/chair/C = buckled
+	if(istype(mount, /obj/structure/stool/bed/chair))
+		var/obj/structure/stool/bed/chair/C = mount
 		if(C.flipped)
 			lying_current = C.flip_angle
-	else if(istype(buckled, /obj/structure/closet/coffin))
+	else if(istype(mount, /obj/structure/closet/coffin))
 		lying_current = 90
 	else if(locate(/obj/machinery/optable, loc) || locate(/obj/structure/stool/bed, loc))
 		lying_current = 90

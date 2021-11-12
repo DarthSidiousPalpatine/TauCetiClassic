@@ -1197,7 +1197,7 @@ var/global/list/common_tools = list(
 /proc/can_operate(mob/living/carbon/M)
 	if(locate(/obj/machinery/optable, M.loc) && M.resting)
 		return TRUE
-	if((M.buckled || M.lying || M.incapacitated()) && prob(get_surg_chance(M.loc)))
+	if((M.mount || M.lying || M.incapacitated()) && prob(get_surg_chance(M.loc)))
 		return TRUE
 	return FALSE
 

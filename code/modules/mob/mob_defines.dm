@@ -3,6 +3,8 @@
 	layer = 4.0
 	animate_movement = 2
 	w_class = SIZE_LARGE
+	buckle_movable = TRUE
+
 //	flags = NOREACT
 	var/datum/mind/mind
 	var/lighting_alpha = LIGHTING_PLANE_ALPHA_VISIBLE
@@ -122,7 +124,6 @@
 	var/m_int = null//Living
 	var/m_intent = "run"//Living
 	var/lastKnownIP = null
-	var/atom/movable/buckled = null//Living
 	var/obj/item/l_hand = null//Living
 	var/obj/item/r_hand = null//Living
 	var/obj/item/weapon/back = null//Human/Monkey

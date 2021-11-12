@@ -19,7 +19,7 @@
 	if(buckled_mob)
 		buckled_mob.set_dir(dir)
 
-/obj/structure/stool/bed/chair/wheelchair/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/wheelchair/post_buckle(mob/living/M)
 	. = ..()
 	if(!buckled_mob && alert)
 		M.clear_alert("brake")
@@ -79,9 +79,9 @@
 	var/turf/T = null
 	//--1---Move occupant---1--//
 	if(buckled_mob)
-		buckled_mob.buckled = null
+		buckled_mob.mount = null
 		step(buckled_mob, direction)
-		buckled_mob.buckled = src
+		buckled_mob.mount = src
 	//--2----Move driver----2--//
 	if(pulling)
 		T = pulling.loc
@@ -113,16 +113,16 @@
 	if(buckled_mob)
 		var/mob/living/occupant = buckled_mob
 		if(!driving)
-			occupant.buckled = null
+			occupant.mount = null
 			occupant.Move(src.loc)
-			occupant.buckled = src
+			occupant.mount = src
 			if (occupant && (src.loc != occupant.loc))
 				if (propelled)
 					for (var/mob/O in src.loc)
 						if (O != occupant)
 							Bump(O)
 				else
-					unbuckle_mob()
+					unbuckle()
 			if (pulling && (get_dist(src, pulling) > 1))
 				pulling.pulledby = null
 				to_chat(pulling, "<span class='red'>You lost your grip!</span>")
@@ -138,7 +138,7 @@
 	if (pulling)
 		MouseDrop(usr)
 	else
-		user_unbuckle_mob(user)
+		unbuckle(user)
 	return
 
 /obj/structure/stool/bed/chair/wheelchair/MouseDrop(over_object, src_location, over_location)

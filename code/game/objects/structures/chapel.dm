@@ -18,7 +18,7 @@
 	. = ..()
 	update_icon()
 
-/obj/structure/stool/bed/chair/pew/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/pew/post_buckle(mob/living/M)
 	return
 
 /obj/structure/stool/bed/chair/pew/handle_rotation()

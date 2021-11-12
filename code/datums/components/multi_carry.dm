@@ -9,7 +9,7 @@
 
 // This proc is needed to update layers, offsets and etc when a buckled mob is being carried with us.
 // TO-DO: Replace with getters setters for: layer, pixel_x, pixel_y
-/atom/movable/proc/update_buckle_mob(mob/living/L)
+/atom/movable/proc/update_buckle(mob/living/L)
 	return
 
 // This datum contains all info, and checks needed by multi_carry "dance move" integration.
@@ -143,7 +143,7 @@
 	// List of being that carry carry_obj.
 	var/list/carriers
 	// Assoc list of carrier_ref = list("px"=..., "py"=..., "pz"=..., "layer"=...)
-	// Contains data about carry_obj, carriers, carry_obj.buckled
+	// Contains data about carry_obj, carriers, carry_obj.mount
 	var/list/carrier_default_pos
 
 	// Whether this entire "structure" is moving due to carrier.
@@ -468,21 +468,21 @@
 	stop_carry()
 	return COMPONENT_PREVENT_GRAB
 
-/datum/component/multi_carry/proc/on_buckle(datum/source, mob/buckled)
-	LAZYSET(carrier_default_pos, buckled, list(
-		"pz"=buckled.pixel_z,
-		"layer"=buckled.layer
+/datum/component/multi_carry/proc/on_buckle(datum/source, mob/mount)
+	LAZYSET(carrier_default_pos, mount, list(
+		"pz"=mount.pixel_z,
+		"layer"=mount.layer
 	))
-	buckled.pixel_z = carry_pixel_z
-	buckled.layer = FLY_LAYER + 0.1
-	carry_obj.update_buckle_mob(buckled)
+	mount.pixel_z = carry_pixel_z
+	mount.layer = FLY_LAYER + 0.1
+	carry_obj.update_buckle(mount)
 
-/datum/component/multi_carry/proc/on_unbuckle(datum/source, mob/buckled)
-	var/list/pos = carrier_default_pos[buckled]
-	buckled.pixel_z = pos["pz"]
-	buckled.layer = pos["layer"]
-	LAZYREMOVE(carrier_default_pos, buckled)
-	carry_obj.update_buckle_mob(buckled)
+/datum/component/multi_carry/proc/on_unbuckle(datum/source, mob/mount)
+	var/list/pos = carrier_default_pos[mount]
+	mount.pixel_z = pos["pz"]
+	mount.layer = pos["layer"]
+	LAZYREMOVE(carrier_default_pos, mount)
+	carry_obj.update_buckle(mount)
 
 // Return TRUE to permit carrywaddle/rotatepositions/swappositions.
 /datum/component/multi_carry/proc/can_dance(mob/dancer, atom/target, movename)

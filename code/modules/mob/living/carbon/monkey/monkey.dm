@@ -8,6 +8,10 @@
 	pass_flags = PASSTABLE
 	update_icon = 0		///no need to call regenerate_icon
 	ventcrawler = 1
+
+	can_control = TRUE
+	mount_size_min_max = list(SIZE_BIG, SIZE_BIG_HUMAN)
+
 	var/hazard_high_pressure = HAZARD_HIGH_PRESSURE
 	var/warning_high_pressure = WARNING_HIGH_PRESSURE
 	var/warning_low_pressure = WARNING_LOW_PRESSURE

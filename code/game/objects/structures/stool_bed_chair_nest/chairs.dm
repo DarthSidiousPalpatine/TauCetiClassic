@@ -12,6 +12,9 @@
 	var/behind = null
 	var/behind_buckled = null
 
+	can_buckle = TRUE
+	rider_size_min_max = list(SIZE_NORMAL, SIZE_BIG_HUMAN)
+
 	var/roll_sound = null // Janicart and office chair use this when moving.
 
 /obj/structure/stool/bed/chair/atom_init()
@@ -35,7 +38,7 @@
 					if(O != occupant)
 						Bump(O)
 			else
-				unbuckle_mob()
+				unbuckle()
 	if(has_gravity(src) && roll_sound)
 		playsound(src, roll_sound, VOL_EFFECTS_MASTER)
 	handle_rotation()
@@ -49,7 +52,7 @@
 		on_propelled_bump(A)
 
 /obj/structure/stool/bed/chair/proc/on_propelled_bump(atom/A)
-	var/mob/living/occupant = unbuckle_mob()
+	var/mob/living/occupant = unbuckle()
 	. = occupant
 	occupant.throw_at(A, 3, propelled)
 	shake_camera(occupant, 1, 1)
@@ -91,7 +94,7 @@
 			flip()
 			if(buckled_mob && !buckled_mob.restrained())
 				var/mob/living/L = buckled_mob
-				unbuckle_mob()
+				unbuckle()
 				L.apply_effect(2, WEAKEN, 0)
 				L.apply_damage(3, BRUTE, BP_HEAD)
 		else if(!user.is_busy() && do_after(user, flip_time, target = usr))
@@ -100,7 +103,7 @@
 	else
 		..()
 
-/obj/structure/stool/bed/chair/user_buckle_mob(mob/living/M, mob/user)
+/obj/structure/stool/bed/chair/buckle(mob/living/M, mob/user)
 	if(dir == NORTH && !istype(src, /obj/structure/stool/bed/chair/schair/wagon/bench))
 		layer = FLY_LAYER
 	else
@@ -147,7 +150,7 @@
 	handle_rotation()
 	return
 
-/obj/structure/stool/bed/chair/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/post_buckle(mob/living/M)
 	. = ..()
 	if(buckled_mob && behind)
 		icon_state = behind
@@ -234,7 +237,7 @@
 	sarmrest = image("icons/obj/objects.dmi", "schair_armrest", layer = FLY_LAYER)
 	. = ..()
 
-/obj/structure/stool/bed/chair/schair/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/schair/post_buckle(mob/living/M)
 	if(buckled_mob)
 		add_overlay(sarmrest)
 	else
@@ -298,8 +301,8 @@
 	QDEL_NULL(overlay)
 	return ..()
 
-/obj/structure/stool/bed/chair/noose/post_buckle_mob(mob/living/M)
-	if(has_buckled_mobs())
+/obj/structure/stool/bed/chair/noose/post_buckle(mob/living/M)
+	if(buckled_mob)
 		layer = MOB_LAYER
 		START_PROCESSING(SSobj, src)
 		M.dir = SOUTH
@@ -311,8 +314,8 @@
 		pixel_x = initial(pixel_x)
 		M.pixel_y = M.lying ? -6 : initial(M.pixel_y)
 
-/obj/structure/stool/bed/chair/noose/user_unbuckle_mob(mob/living/user)
-	if(!has_buckled_mobs())
+/obj/structure/stool/bed/chair/noose/unbuckle(mob/living/user)
+	if(!buckled_mob)
 		return
 	if(user.is_busy())
 		return
@@ -327,10 +330,10 @@
 		buckled_mob.visible_message("<span class='warning'>[buckled_mob] struggles to untie the noose over their neck!</span>")
 		to_chat(buckled_mob,"<span class='notice'>You struggle to untie the noose over your neck... (Stay still for 15 seconds.)</span>")
 		if(!do_after(buckled_mob, 15 SECONDS, target = src))
-			if(buckled_mob && buckled_mob.buckled)
+			if(buckled_mob && buckled_mob.mount)
 				to_chat(buckled_mob, "<span class='warning'>You fail to untie yourself!</span>")
 			return
-		if(!buckled_mob.buckled)
+		if(!buckled_mob.mount)
 			return
 		buckled_mob.visible_message("<span class='warning'>[buckled_mob] unties the noose over their neck!</span>")
 		to_chat(buckled_mob,"<span class='notice'>You untie the noose over your neck!</span>")
@@ -338,12 +341,12 @@
 		buckled_mob.pixel_z = initial(buckled_mob.pixel_z)
 		buckled_mob.pixel_x = initial(buckled_mob.pixel_x)
 		buckled_mob.AdjustWeakened(5)
-		unbuckle_mob(buckled_mob)
+		unbuckle(buckled_mob)
 	pixel_z = initial(pixel_z)
 	pixel_x = initial(pixel_x)
 	add_fingerprint(user)
 
-/obj/structure/stool/bed/chair/noose/user_buckle_mob(mob/living/carbon/human/M, mob/user)
+/obj/structure/stool/bed/chair/noose/buckle(mob/living/carbon/human/M, mob/user)
 	if(!Adjacent(user) || user.stat || user.restrained() || !ishuman(M) || user.is_busy())
 		return FALSE
 
@@ -365,7 +368,7 @@
 	if(user != M)
 		to_chat(user, "<span class='notice'>It will take 15 seconds and you have to stand still.</span>")
 	if(do_mob(user, M, user == M ? 3 : 15 SECONDS))
-		if(buckle_mob(M))
+		if(buckle(M))
 			user.visible_message("<span class='warning'>[user] ties \the [src] over [M]'s neck!</span>")
 			if(user == M)
 				to_chat(M, "<span class='userdanger'>You tie \the [src] over your neck!</span>")
@@ -385,7 +388,7 @@
 	return FALSE
 
 /obj/structure/stool/bed/chair/noose/process()
-	if(!has_buckled_mobs())
+	if(!buckled_mob)
 		STOP_PROCESSING(SSobj, src)
 		return
 	if(can_hang()) // well you have to remove the support first
@@ -419,7 +422,7 @@
 			pixel_z = initial(pixel_z)
 			bm.pixel_x = initial(bm.pixel_x)
 			pixel_x = initial(pixel_x)
-			unbuckle_mob(bm)
+			unbuckle(bm)
 
 /obj/structure/stool/bed/chair/noose/proc/can_hang()
 	var/turf/src_turf = get_turf(src)
@@ -435,12 +438,12 @@
 /obj/structure/stool/bed/chair/noose/proc/rip(mob/user, forced = FALSE)
 	if(user)
 		user.visible_message("<span class='notice'>[user] cuts the noose.</span>", "<span class='notice'>You cut the noose.</span>")
-	if(has_buckled_mobs() && buckled_mob.mob_has_gravity())
+	if(buckled_mob && buckled_mob.mob_has_gravity())
 		buckled_mob.visible_message("<span class='danger'>[buckled_mob] falls over and hits the ground!</span>")
 		to_chat(buckled_mob, "<span class='userdanger'>You fall over and hit the ground!</span>")
 		buckled_mob.adjustBruteLoss(10)
 		buckled_mob.AdjustWeakened(5)
-		unbuckle_mob(buckled_mob)
+		unbuckle(buckled_mob)
 	if(forced)
 		var/obj/item/stack/cable_coil/C = new(get_turf(src))
 		C.color = color
@@ -462,7 +465,7 @@
 	if(user.is_busy())
 		return
 	var/mob/M = grab.affecting
-	user_buckle_mob(M, user)
+	buckle(M, user)
 
 /obj/structure/stool/bed/chair/noose/attack_alien()
 	..()
@@ -485,7 +488,7 @@
 	armrest = image("icons/obj/objects.dmi", "comfychair_armrest", layer = FLY_LAYER)
 	. = ..()
 
-/obj/structure/stool/bed/chair/comfy/post_buckle_mob(mob/living/M)
+/obj/structure/stool/bed/chair/comfy/post_buckle(mob/living/M)
 	if(buckled_mob)
 		add_overlay(armrest)
 	else

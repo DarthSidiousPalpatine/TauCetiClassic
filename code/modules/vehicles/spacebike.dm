@@ -57,7 +57,7 @@
 /obj/vehicle/space/spacebike/load(mob/living/M)
 	if(!istype(M))
 		return FALSE
-	if(M.buckled || M.incapacitated() || M.lying || !Adjacent(M) || !M.Adjacent(src))
+	if(M.mount || M.incapacitated() || M.lying || !Adjacent(M) || !M.Adjacent(src))
 		return FALSE
 	return ..()
 

@@ -22,6 +22,10 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_BIG)
+
 	var/facehugger
 
 /obj/item/weapon/reagent_containers/food/snacks/meat/corgi
@@ -75,7 +79,7 @@
 /mob/living/simple_animal/corgi/Lisa/Life()
 	..()
 
-	if(!stat && !resting && !buckled)
+	if(!stat && !resting && !mount)
 		turns_since_scan++
 		if(turns_since_scan > 15)
 			turns_since_scan = 0

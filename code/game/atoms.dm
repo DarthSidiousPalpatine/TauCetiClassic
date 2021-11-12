@@ -589,9 +589,9 @@
 /turf/simulated/handle_slip(mob/living/carbon/C, weaken_amount, obj/O, lube)
 	if(has_gravity(src))
 		var/obj/buckled_obj
-		if(C.buckled)
-			buckled_obj = C.buckled
-			if(!(lube & GALOSHES_DONT_HELP)) //can't slip while buckled unless it's lube.
+		if(C.mount)
+			buckled_obj = C.mount
+			if(!(lube & GALOSHES_DONT_HELP)) //can't slip while mount unless it's lube.
 				return FALSE
 		else
 			if((C.lying && !C.crawling) || !(C.status_flags & CANWEAKEN)) // can't slip unbuckled mob if they're lying or can't fall.
@@ -611,7 +611,7 @@
 			C.Weaken(2)
 
 		if(buckled_obj)
-			buckled_obj.unbuckle_mob(C)
+			buckled_obj.unbuckle(C)
 			lube |= SLIDE_ICE
 
 		if(lube & SLIDE)

@@ -72,7 +72,7 @@
 	return 0
 
 /obj/machinery/sleeper/MouseDrop_T(mob/target, mob/user)
-	if(user.incapacitated() || !iscarbon(target) || target.buckled)
+	if(user.incapacitated() || !iscarbon(target) || target.mount)
 		return
 	if(!user.IsAdvancedToolUser())
 		to_chat(user, "<span class='warning'>You can not comprehend what to do with this.</span>")

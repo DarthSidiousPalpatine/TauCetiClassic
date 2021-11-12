@@ -409,12 +409,12 @@ var/bomb_set
 		return
 	if(buckled_mob)
 		do_after(usr, 30, 1, src)
-		unbuckle_mob()
+		unbuckle()
 	else if(do_after(usr, 30, 1, src))
 		M.loc = loc
 		..()
 
-/obj/machinery/nuclearbomb/post_buckle_mob(mob/living/M)
+/obj/machinery/nuclearbomb/post_buckle(mob/living/M)
 	..()
 	if(M == buckled_mob)
 		M.pixel_y = 10
@@ -425,7 +425,7 @@ var/bomb_set
 	if(buckled_mob)
 		buckled_mob.bullet_act(Proj)
 		if(buckled_mob.weakened || buckled_mob.health < 0 || buckled_mob.halloss > 80)
-			unbuckle_mob()
+			unbuckle()
 	return ..()
 
 /obj/machinery/nuclearbomb/MouseDrop(over_object, src_location, over_location)

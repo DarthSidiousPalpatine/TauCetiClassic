@@ -340,8 +340,8 @@
 	if(!cultist)
 		return FALSE
 
-	if(cultist.buckled)
-		cultist.buckled.unbuckle_mob()
+	if(cultist.mount)
+		cultist.mount.unbuckle()
 		is_processed = TRUE
 	if (cultist.handcuffed)
 		cultist.drop_from_inventory(cultist.handcuffed)
@@ -410,7 +410,7 @@
 	cultist.forceMove(get_turf(AOG))
 
 	if(AOG.can_buckle && !AOG.buckled_mob)
-		AOG.user_buckle_mob(cultist, user)
+		AOG.buckle(cultist, user)
 
 	cultist.visible_message("<span class='userdanger'>С красной вспышкой появляется [cultist].</span>", \
 		"<span class='[religion.style_text]'>Вас на мгновенье ослепила красная вспышка. Теперь вы видите перед собой внезапно появившееся тело.</span>", \

@@ -367,7 +367,7 @@
 			if(H.species.flags[NO_MINORCUTS])
 				return
 
-			if(H.buckled)
+			if(H.mount)
 				return
 
 			if(!H.shoes)

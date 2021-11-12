@@ -58,13 +58,13 @@
 	toggle(user)
 
 /obj/structure/closet/coffin/attack_hand(mob/user)
-	user_unbuckle_mob(user)
+	unbuckle(user)
 
 /obj/structure/closet/coffin/dump_contents()
 	var/mob/M = locate() in src
 	if(M)
 		M.forceMove(loc)
-		buckle_mob(M)
+		buckle(M)
 		M.instant_vision_update(0)
 
 	..()
@@ -72,7 +72,7 @@
 /obj/structure/closet/coffin/collect_contents()
 	for(var/mob/M in loc)
 		if(M == buckled_mob)
-			unbuckle_mob(M)
+			unbuckle(M)
 			M.forceMove(src)
 			M.lying = TRUE
 			M.update_transform()
@@ -109,16 +109,16 @@
 /obj/structure/closet/coffin/correct_pixel_shift(mob/living/M)
 	return
 
-/obj/structure/closet/coffin/post_buckle_mob(mob/living/M)
+/obj/structure/closet/coffin/post_buckle(mob/living/M)
 	if(M == buckled_mob)
 		M.pixel_x = 1
 		M.pixel_y = -1
-		update_buckle_mob(M)
+		update_buckle(M)
 	else
 		M.pixel_x = 0
 		M.pixel_y = 0
 
-/obj/structure/closet/coffin/update_buckle_mob(mob/living/M)
+/obj/structure/closet/coffin/update_buckle(mob/living/M)
 	// When mob layering will properly work:
 	// - mob layer won't be reset to MOB_LAYER after crawling under table, rollerbed
 	// - mob layer won't be reset to MOB_LAYER after pressing rest
@@ -138,7 +138,7 @@
 		return
 
 	if(M.loc == loc && can_buckle && istype(M) && !buckled_mob && istype(user))
-		user_buckle_mob(M, user)
+		buckle(M, user)
 	else
 		..()
 

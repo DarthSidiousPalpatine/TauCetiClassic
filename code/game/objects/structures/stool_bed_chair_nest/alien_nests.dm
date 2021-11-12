@@ -8,19 +8,19 @@
 	var/health = 100
 	layer = 2.55
 
-/obj/structure/stool/bed/nest/user_unbuckle_mob(mob/user)
+/obj/structure/stool/bed/nest/unbuckle(mob/user)
 	if(buckled_mob)
 		if(user.is_busy())
 			return
 
-		if(buckled_mob.buckled == src)
+		if(buckled_mob.mount == src)
 			if(buckled_mob != user)
 				buckled_mob.visible_message(\
 					"<span class='notice'>[user.name] pulls [buckled_mob.name] free from the sticky nest!</span>",\
 					"<span class='notice'>[user.name] pulls you free from the gelatinous resin.</span>",\
 					"<span class='notice'>You hear squelching...</span>")
 				buckled_mob.pixel_y = 0
-				unbuckle_mob()
+				unbuckle()
 			else
 				if(user.is_busy()) return
 				buckled_mob.visible_message(\
@@ -28,14 +28,14 @@
 					"<span class='warning'>You struggle to break free from the gelatinous resin...</span>",\
 					"<span class='notice'>You hear squelching...</span>")
 				if(do_after(buckled_mob, 3000, target = user))
-					if(user && buckled_mob && user.buckled == src)
+					if(user && buckled_mob && user.mount == src)
 						buckled_mob.pixel_y = 0
-						unbuckle_mob()
+						unbuckle()
 			add_fingerprint(user)
 	return
 
-/obj/structure/stool/bed/nest/user_buckle_mob(mob/M, mob/user)
-	if ( !ismob(M) || (get_dist(src, user) > 1) || (M.loc != src.loc) || user.incapacitated() || M.buckled || istype(user, /mob/living/silicon/pai) )
+/obj/structure/stool/bed/nest/buckle(mob/M, mob/user)
+	if ( !ismob(M) || (get_dist(src, user) > 1) || (M.loc != src.loc) || user.incapacitated() || M.mount || istype(user, /mob/living/silicon/pai) )
 		return
 
 	if(user.is_busy())
@@ -53,7 +53,7 @@
 			"<span class='notice'>[user.name] secretes a thick vile goo, securing [M.name] into [src]!</span>",\
 			"<span class='warning'>[user.name] drenches you in a foul-smelling resin, trapping you in the [src]!</span>",\
 			"<span class='notice'>You hear squelching...</span>")
-		buckle_mob(M)
+		buckle(M)
 		M.pixel_y = 2
 	return
 

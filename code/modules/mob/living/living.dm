@@ -52,7 +52,7 @@
 
 //Generic Bump(). Override MobBump() and ObjBump() instead of this.
 /mob/living/Bump(atom/A, yes)
-	if (buckled || !yes || now_pushing)
+	if (mount || !yes || now_pushing)
 		return
 	if(!ismovable(A) || is_blocked_turf(A))
 		if(confused && stat == CONSCIOUS && m_intent == "run")
@@ -105,7 +105,7 @@
 
 	//switch our position with M
 	//BubbleWrap: people in handcuffs are always switched around as if they were on 'help' intent to prevent a person being pulled from being seperated from their puller
-	if((M.a_intent == INTENT_HELP || M.restrained()) && (a_intent == INTENT_HELP || restrained()) && M.canmove && canmove && !M.buckled && !M.buckled_mob) // mutual brohugs all around!
+	if((M.a_intent == INTENT_HELP || M.restrained()) && (a_intent == INTENT_HELP || restrained()) && M.canmove && canmove && !M.mount && !M.buckled_mob) // mutual brohugs all around!
 		var/can_switch = TRUE
 		var/turf/T = get_turf(src)
 		for(var/atom/A in T.contents - src)
@@ -520,8 +520,8 @@
 
 /mob/living/proc/revive()
 	rejuvenate()
-	if(buckled)
-		buckled.user_unbuckle_mob(src)
+	if(mount)
+		mount.unbuckle(src)
 	if(iscarbon(src))
 		var/mob/living/carbon/C = src
 
@@ -675,9 +675,9 @@
 	return
 
 /mob/living/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0)
-	if (buckled && buckled.loc != NewLoc)
-		if (!buckled.anchored)
-			return buckled.Move(NewLoc, Dir)
+	if (mount && mount.loc != NewLoc)
+		if (!mount.anchored)
+			return mount.Move(NewLoc, Dir)
 		else
 			return FALSE
 
@@ -745,7 +745,7 @@
 /mob/living/proc/pull_trail_damage(turf/new_loc, turf/old_loc, old_dir)
 	if(!isturf(old_loc) || old_loc == loc)
 		return FALSE
-	if(!lying || buckled || grabbed_by.len || !mob_has_gravity())
+	if(!lying || mount || grabbed_by.len || !mob_has_gravity())
 		return FALSE
 	if(prob(getBruteLoss() / 2))
 		makeTrail(new_loc, old_loc, old_dir)
@@ -910,24 +910,24 @@
 		var/obj/structure/pit/P = loc
 		spawn() P.digout(src)
 	//unbuckling yourself
-	if(L.buckled && (L.last_special <= world.time) )
+	if(L.mount && (L.last_special <= world.time) )
 		if(iscarbon(L))
 			var/mob/living/carbon/C = L
-			if (istype(C.buckled,/obj/structure/stool/bed/nest))
-				C.buckled.user_unbuckle_mob(C)
+			if (istype(C.mount,/obj/structure/stool/bed/nest))
+				C.mount.unbuckle(C)
 				return
-			if(C.handcuffed || istype(C.buckled, /obj/machinery/optable/torture_table))
+			if(C.handcuffed || istype(C.mount, /obj/machinery/optable/torture_table))
 				C.next_move = world.time + 100
 				C.last_special = world.time + 100
 				C.visible_message("<span class='danger'>[usr] attempts to unbuckle themself!</span>", self_message = "<span class='rose'>You attempt to unbuckle yourself. (This will take around 2 minutes and you need to stand still)</span>")
 				spawn(0)
 					if(do_after(usr, 1200, target = usr))
-						if(!C.buckled)
+						if(!C.mount)
 							return
 						C.visible_message("<span class='danger'>[usr] manages to unbuckle themself!</span>", self_message = "<span class='notice'>You successfully unbuckle yourself.</span>")
-						C.buckled.user_unbuckle_mob(C)
+						C.mount.unbuckle(C)
 		else
-			L.buckled.user_unbuckle_mob(L)
+			L.mount.unbuckle(L)
 
 	//Breaking out of a container (Locker, sleeper, cryo...)
 	else if(loc && istype(loc, /obj) && !isturf(loc))
@@ -956,7 +956,7 @@
 				CM.visible_message("<span class='danger'>[CM] is trying to break the handcuffs!</span>", self_message = "<span class='rose'>You attempt to break your handcuffs. (This will take around 5 seconds and you need to stand still)</span>")
 				spawn(0)
 					if(do_after(CM, 50, target = usr))
-						if(!CM.handcuffed || CM.buckled)
+						if(!CM.handcuffed || CM.mount)
 							return
 						CM.visible_message("<span class='danger'>[CM] manages to break the handcuffs!</span>", self_message = "<span class='notice'>You successfully break your handcuffs.</span>")
 						CM.say(pick(";RAAAAAAAARGH!", ";HNNNNNNNNNGGGGGGH!", ";GWAAAAAAAARRRHHH!", "NNNNNNNNGGGGGGGGHH!", ";AAAAAAARRRGH!" ))
@@ -973,7 +973,7 @@
 				CM.visible_message("<span class='danger'>[usr] attempts to remove \the [HC]!</span>", self_message = "<span class='notice'>You attempt to remove \the [HC]. (This will take around [displaytime] minutes and you need to stand still)</span>")
 				spawn(0)
 					if(do_after(CM, breakouttime, target = usr))
-						if(!CM.handcuffed || CM.buckled)
+						if(!CM.handcuffed || CM.mount)
 							return // time leniency for lag which also might make this whole thing pointless but the server lags so hard that 40s isn't lenient enough - Quarxink
 						if(istype(HC, /obj/item/weapon/handcuffs/alien))
 							CM.visible_message("<span class='danger'>[CM] break in a discharge of energy!</span>", \
@@ -995,7 +995,7 @@
 				CM.visible_message("<span class='danger'>[CM] is trying to break the legcuffs!</span>", self_message = "<span class='notice'>You attempt to break your legcuffs. (This will take around 5 seconds and you need to stand still)</span>")
 				spawn(0)
 					if(do_after(CM, 50, target = usr))
-						if(!CM.legcuffed || CM.buckled)
+						if(!CM.legcuffed || CM.mount)
 							return
 						CM.visible_message("<span class='danger'>[CM] manages to break the legcuffs!</span>", self_message = "<span class='notice'>You successfully break your legcuffs.</span>")
 						CM.say(pick(";RAAAAAAAARGH!", ";HNNNNNNNNNGGGGGGH!", ";GWAAAAAAAARRRHHH!", "NNNNNNNNGGGGGGGGHH!", ";AAAAAAARRRGH!" ))
@@ -1012,7 +1012,7 @@
 				CM.visible_message("<span class='danger'>[usr] attempts to remove \the [HC]!</span>", self_message = "<span class='notice'>You attempt to remove \the [HC]. (This will take around [displaytime] minutes and you need to stand still)</span>")
 				spawn(0)
 					if(do_after(CM, breakouttime, target = usr))
-						if(!CM.legcuffed || CM.buckled)
+						if(!CM.legcuffed || CM.mount)
 							return // time leniency for lag which also might make this whole thing pointless but the server lags so hard that 40s isn't lenient enough - Quarxink
 						if(istype(HC, /obj/item/weapon/handcuffs/alien))
 							CM.visible_message("<span class='danger'>[CM] break in a discharge of energy!</span>", \
@@ -1177,9 +1177,9 @@
 	float(!has_gravity)
 
 /mob/living/proc/float(on)
-	if(on && !floating && !buckled)
+	if(on && !floating && !mount)
 		start_floating()
-	else if((!on || buckled) && floating)
+	else if((!on || mount) && floating)
 		stop_floating()
 
 /mob/living/proc/start_floating()
@@ -1204,7 +1204,7 @@
 	floating = 0
 
 /mob/living/proc/attempt_harvest(obj/item/I, mob/user)
-	if(stat == DEAD && butcher_results && istype(buckled, /obj/structure/kitchenspike)) //can we butcher it? Mob must be buckled to a meatspike to butcher it
+	if(stat == DEAD && butcher_results && istype(mount, /obj/structure/kitchenspike)) //can we butcher it? Mob must be buckled to a meatspike to butcher it
 		if(user.is_busy())
 			return
 		to_chat(user, "<span class='notice'>You begin to butcher [src]...</span>")

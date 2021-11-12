@@ -29,6 +29,10 @@
 	var/turns_since_scan = 0
 	var/mob/living/simple_animal/mouse/movement_target
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_SMALL)
+
 /obj/item/weapon/reagent_containers/food/snacks/meat/shiba
 	name = "shiba meat"
 	desc = "Tastes like... well you know..."
@@ -53,7 +57,7 @@
 /mob/living/simple_animal/shiba/Life()
 	..()
 
-	if(!stat && !resting && !buckled)
+	if(!stat && !resting && !mount)
 		if(prob(1))
 			emote(pick("chases its tail"))
 			spawn(0)
@@ -66,7 +70,7 @@
 			emote(pick("barks!","woofs loudly!","eyes [histoy] joyfully."))
 		break
 
-	if(!stat && !resting && !buckled)
+	if(!stat && !resting && !mount)
 		turns_since_scan++
 		if(turns_since_scan > 5)
 			walk_to(src,0)

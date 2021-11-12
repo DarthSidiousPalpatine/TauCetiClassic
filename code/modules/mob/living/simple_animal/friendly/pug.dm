@@ -22,10 +22,14 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_SMALL)
+
 /mob/living/simple_animal/pug/Life()
 	..()
 
-	if(!stat && !resting && !buckled)
+	if(!stat && !resting && !mount)
 		if(prob(1))
 			emote(pick("chases its tail"))
 			spawn(0)

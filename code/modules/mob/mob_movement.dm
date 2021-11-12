@@ -11,7 +11,7 @@
 		return (!density || lying)
 	if(mover.checkpass(PASSMOB))
 		return 1
-	if(buckled == mover)
+	if(mount == mover)
 		return 1
 	if(ismob(mover))
 		var/mob/moving_mob = mover
@@ -106,14 +106,14 @@
 
 	Process_Grab()
 
-	if(istype(mob.buckled, /obj/vehicle))
+	if(istype(mob.mount, /obj/vehicle))
 		//manually set move_delay for vehicles so we don't inherit any mob movement penalties
 		//specific vehicle move delays are set in code\modules\vehicles\vehicle.dm
 		move_delay = world.time
 		//drunk driving
 		if(mob.confused)
 			direct = pick(cardinal)
-		return mob.buckled.relaymove(mob,direct)
+		return mob.mount.relaymove(mob,direct)
 
 	if(!forced && !mob.canmove)
 		return
@@ -157,20 +157,20 @@
 		add_delay += mob.movement_delay()
 		move_delay += add_delay
 
-		if(mob.pulledby || mob.buckled) // Wheelchair driving!
+		if(mob.pulledby || mob.mount) // Wheelchair driving!
 			if(istype(mob.loc, /turf/space))
 				return // No wheelchair driving in space
 			if(istype(mob.pulledby, /obj/structure/stool/bed/chair/wheelchair))
 				return mob.pulledby.relaymove(mob, direct)
-			else if(istype(mob.buckled, /obj/structure/stool/bed/chair/wheelchair))
-				if(ishuman(mob.buckled))
-					var/mob/living/carbon/human/driver = mob.buckled
+			else if(istype(mob.mount, /obj/structure/stool/bed/chair/wheelchair))
+				if(ishuman(mob.mount))
+					var/mob/living/carbon/human/driver = mob.mount
 					var/obj/item/organ/external/l_hand = driver.bodyparts_by_name[BP_L_ARM]
 					var/obj/item/organ/external/r_hand = driver.bodyparts_by_name[BP_R_ARM]
 					if((!l_hand || (l_hand.is_stump)) && (!r_hand || (r_hand.is_stump)))
 						return // No hands to drive your chair? Tough luck!
 				move_delay += 2
-				return mob.buckled.relaymove(mob,direct)
+				return mob.mount.relaymove(mob,direct)
 
 		//We are now going to move
 		moving = 1
@@ -252,7 +252,7 @@
 	var/obj/machinery/computer/security/console = machine
 	var/turf/T = get_turf(console.active_camera)
 	var/list/cameras = list()
-	
+
 	for(var/cam_tag in console.camera_cache)
 		var/obj/C = console.camera_cache[cam_tag]
 		if(C == console.active_camera)
@@ -374,7 +374,7 @@
 
 		else
 			var/atom/movable/AM = A
-			if(AM == buckled || AM.type == /obj/effect/portal/tsci_wormhole) //hardcoded type check, since idk if we need such feature for something else at all.
+			if(AM == mount || AM.type == /obj/effect/portal/tsci_wormhole) //hardcoded type check, since idk if we need such feature for something else at all.
 				continue
 			if(AM.density)
 				if(AM.anchored)

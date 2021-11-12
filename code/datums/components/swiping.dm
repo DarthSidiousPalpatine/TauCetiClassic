@@ -317,11 +317,11 @@
 	user.face_atom(T)
 	user.do_attack_animation(T)
 
-	if(istype(get_turf(W), /turf/simulated) && istype(user.buckled, /obj/structure/stool/bed/chair) && !user.buckled.anchored && user.buckled != target)
-		var/obj/structure/stool/bed/chair/buckled_to = user.buckled
+	if(istype(get_turf(W), /turf/simulated) && istype(user.mount, /obj/structure/stool/bed/chair) && !user.mount.anchored && user.mount != target)
+		var/obj/structure/stool/bed/chair/buckled_to = user.mount
 		if(!buckled_to.flipped)
 			var/direction = get_dir(T_target, W_turf)
-			INVOKE_ASYNC(src, .proc/push_on_chair, user.buckled, user, direction)
+			INVOKE_ASYNC(src, .proc/push_on_chair, user.mount, user, direction)
 			qdel(WS)
 			return COMSIG_ITEM_CANCEL_CLICKWITH
 
@@ -343,8 +343,8 @@
 
 	if(S && prob(S.Get_shield_chance()))
 		user.visible_message("<span class='warning'>[user] knocks [target] down with \a [src]!</span>", "<span class='warning'>You knock [target] down with \a [src]!</span>")
-		if(target.buckled)
-			target.buckled.user_unbuckle_mob(target)
+		if(target.mount)
+			target.mount.unbuckle(target)
 
 		target.apply_effect(2, STUN, 0)
 		target.apply_effect(2, WEAKEN, 0)
@@ -508,8 +508,8 @@
 		on_sweep_interupt.Invoke(current_turf, user)
 		return
 
-	if(user.buckled)
-		user.buckled.user_unbuckle_mob(user)
+	if(user.mount)
+		user.mount.unbuckle(user)
 	// You hit a wall!
 	user.apply_effect(2, STUN, 0)
 	user.apply_effect(2, WEAKEN, 0)

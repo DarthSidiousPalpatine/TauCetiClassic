@@ -442,7 +442,7 @@ var/const/MAX_SAVE_SLOTS = 10
 	var/obj/item/organ/external/r_leg = character.bodyparts_by_name[BP_R_LEG]
 	if(!l_leg && !r_leg) // TODO cane if its only single leg.
 		var/obj/structure/stool/bed/chair/wheelchair/W = new /obj/structure/stool/bed/chair/wheelchair (character.loc)
-		character.buckled = W
+		character.mount = W
 		character.update_canmove()
 		W.set_dir(character.dir)
 		W.buckled_mob = character

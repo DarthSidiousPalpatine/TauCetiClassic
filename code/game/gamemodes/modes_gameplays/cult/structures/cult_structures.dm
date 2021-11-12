@@ -146,11 +146,11 @@
 /obj/machinery/optable/torture_table/MouseDrop_T(atom/A, mob/user)
 	if(A.loc == loc)
 		if(can_buckle && !buckled_mob)
-			user_buckle_mob(A, user)
+			buckle(A, user)
 	else
 		return ..()
 
-/obj/machinery/optable/torture_table/buckle_mob(mob/living/M, mob/user)
+/obj/machinery/optable/torture_table/buckle(mob/living/M, mob/user)
 	..()
 	if(M.pixel_x != 0)
 		M.pixel_x = 0
@@ -160,7 +160,7 @@
 		M.dir = SOUTH
 	add_overlay(belt)
 
-/obj/machinery/optable/torture_table/unbuckle_mob(mob/user)
+/obj/machinery/optable/torture_table/unbuckle(mob/user)
 	..()
 	cut_overlay(belt)
 
@@ -169,7 +169,7 @@
 		user.resist()
 	else
 		if(can_buckle && buckled_mob && istype(user))
-			user_unbuckle_mob(user)
+			unbuckle(user)
 
 /obj/structure/mineral_door/cult
 	name = "door"

@@ -26,6 +26,10 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_TINY, SIZE_HUMAN)
+
 /mob/living/simple_animal/hostile/retaliate/goat/atom_init()
 	udder = new(50)
 	udder.my_atom = src
@@ -121,6 +125,10 @@
 	has_leg = TRUE
 
 	var/datum/reagents/udder = null
+
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_TINY, SIZE_HUMAN)
 
 /mob/living/simple_animal/cow/atom_init()
 	udder = new(50)
@@ -220,6 +228,10 @@ var/global/chicken_count = 0
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_TINY)
+
 /mob/living/simple_animal/chicken/atom_init()
 	. = ..()
 	if(!body_color)
@@ -293,6 +305,10 @@ var/global/chicken_count = 0
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = FALSE
+	rider_size_min_max = list(SIZE_SMALL, SIZE_HUMAN)
+
 /mob/living/simple_animal/turkey
 	name = "turkey"
 	desc = "Benjamin Franklin would be proud."
@@ -311,6 +327,10 @@ var/global/chicken_count = 0
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_TINY)
+
 /mob/living/simple_animal/goose
 	name = "goose"
 	desc = "A pretty goose. Would make a nice comforter."
@@ -328,6 +348,10 @@ var/global/chicken_count = 0
 
 	has_head = TRUE
 	has_leg = TRUE
+
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_TINY)
 
 /mob/living/simple_animal/seal
 	name = "seal"

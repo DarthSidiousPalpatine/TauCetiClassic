@@ -24,6 +24,10 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_BIG)
+
 //Captain fox
 ADD_TO_GLOBAL_LIST(/mob/living/simple_animal/fox/Renault, chief_animal_list)
 /mob/living/simple_animal/fox/Renault

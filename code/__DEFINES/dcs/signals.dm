@@ -243,9 +243,9 @@
 #define COMSIG_LIVING_START_PULL "living_start_pull"
 /// from base of /mob/stop_pulling(): (/atom/movable/target)
 #define COMSIG_LIVING_STOP_PULL "living_stop_pull"
-/// from base of atom/movable/buckle_mob(): (mob/buckled)
+/// from base of atom/movable/buckle(): (mob/mount)
 #define COMSIG_MOVABLE_BUCKLE "buckle"
-/// from base of atom/movable/unbuckle_mob(): (mob/buckled)
+/// from base of atom/movable/unbuckle(): (mob/mount)
 #define COMSIG_MOVABLE_UNBUCKLE "unbuckle"
 /// from base of /mob/Move_Pulled(): (atom/target)
 #define COMSIG_LIVING_MOVE_PULLED "living_move_pulled"

@@ -25,8 +25,8 @@
 	if(!L.len)
 		return
 
-	if(target && target.buckled)
-		target.buckled.unbuckle_mob()
+	if(target && target.mount)
+		target.mount.unbuckle()
 
 	var/list/tempL = L
 	var/attempt = null

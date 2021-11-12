@@ -52,6 +52,10 @@ ADD_TO_GLOBAL_LIST(/mob/living/carbon/ian, chief_animal_list)
 	var/pose_prev = 0
 	var/pose_last = 0
 
+	can_buckle = TRUE
+	can_be_controlled = TRUE
+	rider_size_min_max = list(SIZE_MINUSCULE, SIZE_BIG)
+
 /mob/living/carbon/ian/atom_init()
 	reagents = new(1000)
 	reagents.my_atom = src

@@ -4,6 +4,10 @@
 	health = 20
 	maxHealth = 20
 
+	can_be_buckled = TRUE
+	can_control = FALSE
+	mount_size_min_max = list(SIZE_NORMAL, SIZE_BIG_HUMAN)
+
 	var/icon_living = ""
 	var/icon_dead = ""
 	var/icon_gib = null	// We only try to show a gibbing animation if this exists.
@@ -149,7 +153,7 @@
 
 	// Movement
 	if(!client && !stop_automated_movement && wander && !anchored)
-		if(isturf(src.loc) && !resting && !buckled && canmove) // This is so it only moves if it's not inside a closet, gentics machine, etc.
+		if(isturf(src.loc) && !resting && !mount && canmove) // This is so it only moves if it's not inside a closet, gentics machine, etc.
 			turns_since_move++
 			if(turns_since_move >= turns_per_move)
 				if(!(stop_automated_movement_when_pulled && pulledby)) // Some animals don't move when pulled

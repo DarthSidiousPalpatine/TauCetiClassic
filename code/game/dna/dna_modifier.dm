@@ -110,7 +110,7 @@
 		open = 0
 		density = TRUE
 		for(var/mob/living/carbon/C in loc)
-			if(C.buckled)	continue
+			if(C.mount)	continue
 			if(C.client)
 				C.client.perspective = EYE_PERSPECTIVE
 				C.client.eye = src

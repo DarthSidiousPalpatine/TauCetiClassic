@@ -61,13 +61,13 @@
 
 /obj/structure/stool/bed/chair/pedalgen/proc/pedal(mob/user)
 	pedaled = 1
-	if(buckled_mob.buckled == src)
+	if(buckled_mob.mount == src)
 		if(buckled_mob != user)
 			buckled_mob.visible_message(\
 				"<span class='notice'>[buckled_mob.name] was unbuckled by [user.name]!</span>",\
 				"You were unbuckled from [src] by [user.name].",\
 				"You hear metal clanking")
-			unbuckle_mob()
+			unbuckle()
 			add_fingerprint(user)
 		else
 			user.SetNextMove(CLICK_CD_INTERACT)
@@ -80,7 +80,7 @@
 				if(pedaler.halloss > 80)
 					to_chat(user, "You pushed yourself too hard.")
 					pedaler.apply_effect(24,AGONY,0)
-					unbuckle_mob()
+					unbuckle()
 				sleep(5)
 				pedaled = 0
 			else
@@ -89,10 +89,10 @@
 
 /obj/structure/stool/bed/chair/pedalgen/relaymove(mob/user, direction)
 	if(!ishuman(user))
-		unbuckle_mob()
+		unbuckle()
 	var/mob/living/carbon/human/pedaler = user
 	if(!pedaler.handcuffed)
-		unbuckle_mob()
+		unbuckle()
 	else
 		if(!pedaled)
 			pedal(user)
@@ -101,12 +101,12 @@
 /obj/structure/stool/bed/chair/pedalgen/Move(NewLoc, Dir = 0, step_x = 0, step_y = 0)
 	. = ..()
 	if(buckled_mob && !moving_diagonally)
-		if(buckled_mob.buckled == src)
+		if(buckled_mob.mount == src)
 			buckled_mob.loc = loc
 			update_mob(buckled_mob)
 
 
-/obj/structure/stool/bed/chair/pedalgen/post_buckle_mob(mob/user)
+/obj/structure/stool/bed/chair/pedalgen/post_buckle(mob/user)
 	update_mob(user,1)
 
 /obj/structure/stool/bed/chair/pedalgen/handle_rotation()
@@ -117,8 +117,8 @@
 
 	if(buckled_mob)
 		if(buckled_mob.loc != loc)
-			buckled_mob.buckled = null //Temporary, so Move() succeeds.
-			buckled_mob.buckled = src //Restoring
+			buckled_mob.mount = null //Temporary, so Move() succeeds.
+			buckled_mob.mount = src //Restoring
 		update_mob(buckled_mob)
 
 
@@ -167,4 +167,4 @@
 		to_chat(usr, "You can't do it until you restrained")
 		return
 
-	unbuckle_mob()
+	unbuckle()

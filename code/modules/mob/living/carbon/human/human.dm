@@ -10,6 +10,10 @@
 	w_class = SIZE_HUMAN
 	//icon_state = "body_m_s"
 
+	can_be_buckled = TRUE
+	can_control = TRUE
+	mount_size_min_max = list(SIZE_BIG_HUMAN, SIZE_GYGANT)
+
 	var/datum/species/species //Contains icon generation and language information, set during New().
 	var/heart_beat = 0
 	var/embedded_flag	  //To check if we've need to roll for damage on movement while an item is imbedded in us.
@@ -401,7 +405,7 @@
 		return TRUE
 	if (istype(wear_suit, /obj/item/clothing/suit/straight_jacket))
 		return TRUE
-	if (istype(buckled, /obj/structure/stool/bed/nest))
+	if (istype(mount, /obj/structure/stool/bed/nest))
 		return TRUE
 	return 0
 
@@ -1650,7 +1654,7 @@
 		to_chat(src, "<span class='notice'>It is unsafe to leap without gravity!</span>")
 		return
 
-	if(incapacitated(LEGS) || buckled || pinned.len || stance_damage >= 4) //because you need !restrained legs to leap
+	if(incapacitated(LEGS) || mount || pinned.len || stance_damage >= 4) //because you need !restrained legs to leap
 		to_chat(src, "<span class='warning'>You cannot leap in your current state.</span>")
 		return
 

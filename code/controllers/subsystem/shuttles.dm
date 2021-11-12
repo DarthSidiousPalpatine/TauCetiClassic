@@ -369,12 +369,12 @@ SUBSYSTEM_DEF(shuttle)
 /datum/controller/subsystem/shuttle/proc/shake_mobs_in_area(area/A, fall_direction)
 	for(var/mob/M in A)
 		if(M.client)
-			if(M.buckled || issilicon(M))
+			if(M.mount || issilicon(M))
 				shake_camera(M, 2, 1) // buckled, not a lot of shaking
 			else
 				shake_camera(M, 4, 2)// unbuckled, HOLY SHIT SHAKE THE ROOM
 				M.Weaken(3)
-		if(isliving(M) && !issilicon(M) && !M.buckled)
+		if(isliving(M) && !issilicon(M) && !M.mount)
 			var/mob/living/L = M
 			if(isturf(L.loc))
 				for(var/i=0, i < 5, i++)

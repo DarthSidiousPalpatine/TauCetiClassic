@@ -99,9 +99,9 @@
 	if(T == get_turf(AM))
 		if(isliving(AM))
 			if(buckled_mob)
-				user_unbuckle_mob(AM)
+				unbuckle(AM)
 			else
-				user_buckle_mob(AM, user)
+				buckle(AM, user)
 	else
 		..()
 

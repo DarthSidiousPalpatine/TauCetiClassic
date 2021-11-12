@@ -68,8 +68,8 @@
 		A.attack_robot(src)
 		return
 
-	// buckled cannot prevent machine interlinking but stops arm movement
-	if(buckled)
+	// mount cannot prevent machine interlinking but stops arm movement
+	if(mount)
 		return
 
 	if(SEND_SIGNAL(W, COMSIG_HAND_IS))

@@ -146,7 +146,7 @@
 	if(burning)
 		to_chat(user, "<span class='warning'>You need to extinguish [src] before removing it!</span>")
 		return
-	if(!has_buckled_mobs()&& !user.is_busy() && do_after(user, 50, target = src))
+	if(!buckled_mob&& !user.is_busy() && do_after(user, 50, target = src))
 		onDismantle()
 		qdel(src)
 		return
@@ -230,12 +230,12 @@
 		set_light(0)
 		STOP_PROCESSING(SSobj, src)
 
-//obj/structure/bonfire/buckle_mob(mob/living/M)
+//obj/structure/bonfire/buckle(mob/living/M)
 //	if(..())
 //		M.pixel_y += 13
 
 
-/obj/structure/bonfire/post_buckle_mob(mob/living/M)
+/obj/structure/bonfire/post_buckle(mob/living/M)
 	if(buckled_mob == M)
 		M.pixel_y = 13
 		M.layer = 5.1
