@@ -351,11 +351,10 @@
 	if(!Adjacent(user) || user.stat || user.restrained() || !ishuman(M) || user.is_busy())
 		return FALSE
 	if(ishuman(M))
-		var/mob/living/carbon/human/H = M
-		var/obj/item/organ/external/BP = H.bodyparts_by_name[BP_HEAD]
+		var/obj/item/organ/external/BP = M.bodyparts_by_name[BP_HEAD]
 
 		if(!BP || BP.is_stump)
-			to_chat(user, "<span class='warning'>[H] has no head!</span>")
+			to_chat(user, "<span class='warning'>[M] has no head!</span>")
 			return FALSE
 
 	if(M.loc != loc)
@@ -386,14 +385,13 @@
 				to_chat(M, "<span class='userdanger'>[user] ties \the [src] over [M].</span>")
 			playsound(src, 'sound/effects/noosed.ogg', VOL_EFFECTS_MASTER)
 			if(ishuman(M))
-				var/mob/living/carbon/human/H = M
-				message_admins("[key_name_admin(H)] was hanged by [key_name(user)]. [ADMIN_JMP(H)]")
-				for(var/alert in H.alerts)
-					var/atom/movable/screen/alert/A = H.alerts[alert]
-					if(A.master.icon_state == "noose") // our alert icon is terrible, let's build a new one
-						A.cut_overlays()
-						A.add_overlay(image(icon, "noose"))
-						A.add_overlay(image(icon, "noose_overlay"))
+				message_admins("[key_name_admin(M)] was hanged by [key_name(user)]. [ADMIN_JMP(M)]")
+			for(var/alert in M.alerts)
+				var/atom/movable/screen/alert/A = M.alerts[alert]
+				if(A.master.icon_state == "noose") // our alert icon is terrible, let's build a new one
+					A.cut_overlays()
+					A.add_overlay(image(icon, "noose"))
+					A.add_overlay(image(icon, "noose_overlay"))
 			return TRUE
 	if(ismob(M))
 		user.visible_message("<span class='warning'>[user] fails to tie \the [src] over [M]'s neck!</span>")
@@ -461,7 +459,7 @@
 		rider.visible_message("<span class='danger'>[rider] falls over and hits the ground!</span>")
 		to_chat(rider, "<span class='userdanger'>You fall over and hit the ground!</span>")
 		if(ismob(rider))
-			var/mob/living/Mob = rider
+			var/mob/Mob = rider
 			Mob.adjustBruteLoss(10)
 			Mob.AdjustWeakened(5)
 		unbuckle()

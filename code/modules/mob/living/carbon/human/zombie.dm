@@ -41,8 +41,8 @@
 
 	if(isobj(target))
 		var/obj/O = target
-		if(O.can_buckle && O.rider)
-			O.unbuckle(user)
+		if(O.can_buckle && O.mount_mob)
+			O.user_unbuckle_mob(user)
 
 /obj/item/weapon/melee/zombie_hand/proc/opendoor(mob/user, obj/machinery/door/A)
 	if(!A.density)

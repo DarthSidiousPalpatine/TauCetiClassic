@@ -162,10 +162,8 @@
 	. = ..()
 	if(kickstand)
 		return 0
-	if(rider && ismob(rider))
-		var/mob/M = rider
-		if((M.stat || M.lying))
-			return 0
+	if(rider && (rider.stat || rider.lying))
+		return 0
 
 /obj/vehicle/space/spacebike/turn_on()
 	ion.start()

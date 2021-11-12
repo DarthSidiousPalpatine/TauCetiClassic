@@ -150,7 +150,7 @@
 	else
 		return ..()
 
-/obj/machinery/optable/torture_table/buckle(mob/living/M, mob/user)
+/obj/machinery/optable/torture_table/buckle_mob(mob/living/M, mob/user)
 	..()
 	if(M.pixel_x != 0)
 		M.pixel_x = 0
@@ -160,7 +160,7 @@
 		M.dir = SOUTH
 	add_overlay(belt)
 
-/obj/machinery/optable/torture_table/unbuckle(mob/user)
+/obj/machinery/optable/torture_table/unbuckle_mob(mob/user)
 	..()
 	cut_overlay(belt)
 

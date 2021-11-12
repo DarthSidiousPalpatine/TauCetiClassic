@@ -73,19 +73,19 @@
 			user.SetNextMove(CLICK_CD_INTERACT)
 			if(ishuman(rider))
 				var/mob/living/carbon/human/pedaler = rider
-				if(pedaler.nutrition > 10)
-					playsound(src, 'sound/items/Ratchet.ogg', VOL_EFFECTS_MASTER, 20)
-					Generator.Rotated()
-					pedaler.nutrition -= 0.5
-					pedaler.apply_effect(1,AGONY,0)
-					if(pedaler.halloss > 80)
-						to_chat(user, "You pushed yourself too hard.")
-						pedaler.apply_effect(24,AGONY,0)
-						unbuckle()
-					sleep(5)
-					pedaled = 0
-				else
-					to_chat(user, "You are too exausted to pedal that thing.")
+			if(pedaler.nutrition > 10)
+				playsound(src, 'sound/items/Ratchet.ogg', VOL_EFFECTS_MASTER, 20)
+				Generator.Rotated()
+				pedaler.nutrition -= 0.5
+				pedaler.apply_effect(1,AGONY,0)
+				if(pedaler.halloss > 80)
+					to_chat(user, "You pushed yourself too hard.")
+					pedaler.apply_effect(24,AGONY,0)
+					unbuckle()
+				sleep(5)
+				pedaled = 0
+			else
+				to_chat(user, "You are too exausted to pedal that thing.")
 		return 1
 
 /obj/structure/stool/bed/chair/pedalgen/relaymove(mob/user, direction)
