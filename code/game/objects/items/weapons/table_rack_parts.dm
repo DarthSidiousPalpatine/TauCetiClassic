@@ -153,3 +153,19 @@
 	R.add_fingerprint(user)
 	qdel(src)
 	return
+
+/*
+ * Shelf Parts
+ */
+/obj/item/weapon/shelf_parts/attackby(obj/item/I, mob/user, params)
+	if(iswrench(I))
+		new /obj/item/stack/sheet/metal( user.loc )
+		qdel(src)
+		return
+	return ..()
+
+/obj/item/weapon/shelf_parts/attack_self(mob/user)
+	var/obj/structure/rack/R = new /obj/structure/table/shelf( user.loc )
+	R.add_fingerprint(user)
+	qdel(src)
+	return

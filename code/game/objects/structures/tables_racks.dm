@@ -696,3 +696,21 @@
 
 /obj/structure/rack/attack_tk() // no telehulk sorry
 	return
+
+/obj/structure/shelf
+	name = "shelf"
+	desc = "A square piece of metal standing on four metal legs. It can not move."
+	icon = 'icons/obj/smooth_structures/table.dmi'
+	icon_state = "shelf"
+	density = FALSE
+	anchored = TRUE
+	layer = CONTAINER_STRUCTURE_LAYER
+	throwpass = 1	//You can throw objects over this, despite it's density.")
+	climbable = FALSE
+	smooth = SMOOTH_FALSE
+
+	parts = /obj/item/weapon/shelf_parts
+	flipped = 0
+	flipable = FALSE
+	health = 100
+	canconnect = FALSE
