@@ -39,32 +39,36 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 			if(T && T.z == turf_source.z)
 				M.playsound_local(turf_source, soundin, volume_channel, vol, vary, frequency, falloff, channel, null, wait, ignore_environment, voluminosity)
 				if(HAS_TRAIT(M, TRAIT_BLIND) && !HAS_TRAIT(M, TRAIT_DEAF))
-					M.hear_object(source, soundin, source.dir)
+					M.hear_object(source, soundin)
 
-/mob/proc/hear_object(atom/A, soundin, direction)
+/mob/proc/hear_object(atom/A, soundin)
+	var/atom/source = A
+	if(soundin in SOUNDIN_FOOTSTEPS)
+		source = get_turf(A)
 	var/image/heared_object
-	heared_object = image(icon = A.icon, icon_state = A.icon_state, loc = get_turf(A))
+	heared_object = image(icon = source.icon, icon_state = source.icon_state, loc = get_turf(source))
+	if(soundin in SOUNDIN_FOOTSTEPS)
+		heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(get_footprints(A)))
+	if(soundin == 'sound/effects/mob/footstep/crawl1.ogg')
+		heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(icon('icons/effects/footprints.dmi', icon_state = "footsteps_crawl")))
 	heared_object.plane = FULLSCREEN_PLANE
 	heared_object.layer = 10000 //OMG, THEY LIE TO US, BLINDNESS LAYER ISNT 2.2!
-	heared_object.dir = direction
+	heared_object.dir = A.dir
 	heared_object.appearance_flags = RESET_COLOR | RESET_TRANSFORM
 	heared_object.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	for(var/list/X in footstep)
-		if(soundin in X)
-			heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(get_footprints(), render_source, flags))
-	flick_overlay(heared_object, list(client), sound(soundin).len*10)
+	flick_overlay(heared_object, list(client), 10)
 
-/mob/proc/get_footprints()
+/mob/proc/get_footprints(A)
 	var/icon/footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps")
-	if(ishuman(src))
-		var/mob/living/carbon/human/H = src
+	if(ishuman(A))
+		var/mob/living/carbon/human/H = A
 		footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_naked")
 		if(H.shoes)
 			footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_boots")
 		if(!H.has_bodypart(BP_R_LEG))
-			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND)
-		if(!H.has_bodypart(BP_L_LEG))
 			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_left"), ICON_AND)
+		if(!H.has_bodypart(BP_L_LEG))
+			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND)
 		if(istype(H.r_hand, /obj/item/weapon/cane))
 			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane").Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND), ICON_OVERLAY)
 		if(istype(H.l_hand, /obj/item/weapon/cane))

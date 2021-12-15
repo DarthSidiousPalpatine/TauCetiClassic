@@ -44,7 +44,7 @@
 	var/mob/living/LM = parent
 	if(!T.footstep || LM.buckled || LM.lying || LM.throwing || LM.crawling || LM.is_ventcrawling)
 		if (LM.lying && !LM.buckled && LM.crawling && !(!T.footstep || LM.is_ventcrawling)) //play crawling sound if we're lying
-			playsound(T, 'sound/effects/mob/footstep/crawl1.ogg', VOL_EFFECTS_MASTER, 100 * volume)
+			playsound(parent, 'sound/effects/mob/footstep/crawl1.ogg', VOL_EFFECTS_MASTER, 100 * volume)
 		return
 
 	if(ishuman(LM))
@@ -84,7 +84,7 @@
 			turf_footstep = T.footstep
 	if(!turf_footstep)
 		return
-	playsound(T, pick(footstep_sounds[turf_footstep][1]), VOL_EFFECTS_MASTER, footstep_sounds[turf_footstep][2] * volume, TRUE, null, footstep_sounds[turf_footstep][3] + e_range)
+	playsound(parent, pick(footstep_sounds[turf_footstep][1]), VOL_EFFECTS_MASTER, footstep_sounds[turf_footstep][2] * volume, TRUE, null, footstep_sounds[turf_footstep][3] + e_range)
 
 /datum/component/footstep/proc/play_humanstep()
 	var/turf/simulated/T = prepare_step()
@@ -95,13 +95,13 @@
 	var/obj/effect/fluid/F = locate(/obj/effect/fluid) in H.loc
 	if(F && F.fluid_amount > 0)
 		if(F.fluid_amount > 200)
-			playsound(T, pick(SOUNDIN_WATER_DEEP), VOL_EFFECTS_MASTER)
+			playsound(parent, pick(SOUNDIN_WATER_DEEP), VOL_EFFECTS_MASTER)
 			return
-		playsound(T, pick(SOUNDIN_WATER_SHALLOW), VOL_EFFECTS_MASTER)
+		playsound(parent, pick(SOUNDIN_WATER_SHALLOW), VOL_EFFECTS_MASTER)
 		return
 
 	if(H.shoes) //are we wearing shoes
-		playsound(T, pick(global.footstep[T.footstep][1]), VOL_EFFECTS_MASTER, global.footstep[T.footstep][2] * volume, TRUE, null, global.footstep[T.footstep][3] + e_range)
+		playsound(parent, pick(global.footstep[T.footstep][1]), VOL_EFFECTS_MASTER, global.footstep[T.footstep][2] * volume, TRUE, null, global.footstep[T.footstep][3] + e_range)
 		H.shoes.play_unique_footstep_sound() // TODO: port https://github.com/tgstation/tgstation/blob/master/code/datums/components/squeak.dm
 	else
-		playsound(T, pick(global.barefootstep[T.barefootstep][1]), VOL_EFFECTS_MASTER, global.barefootstep[T.barefootstep][2] * volume, TRUE, null, global.barefootstep[T.barefootstep][3] + e_range)
+		playsound(parent, pick(global.barefootstep[T.barefootstep][1]), VOL_EFFECTS_MASTER, global.barefootstep[T.barefootstep][2] * volume, TRUE, null, global.barefootstep[T.barefootstep][3] + e_range)
