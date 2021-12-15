@@ -11,6 +11,7 @@ var/global/list/SOUNDIN_HORROR    = list('sound/effects/ghost.ogg', 'sound/effec
 // Simple footsteps
 var/global/list/SOUNDIN_CLOWNSTEP     = list('sound/effects/clownstep1.ogg', 'sound/effects/clownstep2.ogg')
 var/global/list/SOUNDIN_FOOTSTEPS     = list('sound/effects/tile1.wav', 'sound/effects/tile2.wav', 'sound/effects/tile3.wav', 'sound/effects/tile4.wav')
+
 var/global/list/SOUNDIN_WATER         = list('sound/effects/mob/footstep/water1.ogg', 'sound/effects/mob/footstep/water2.ogg', 'sound/effects/mob/footstep/water3.ogg', 'sound/effects/mob/footstep/water4.ogg')
 var/global/list/SOUNDIN_WATER_SHALLOW = list('sound/effects/mob/footstep/waterstep1.ogg', 'sound/effects/mob/footstep/waterstep2.ogg', 'sound/effects/mob/footstep/waterstep3.ogg')
 var/global/list/SOUNDIN_WATER_DEEP    = list('sound/effects/mob/footstep/swimming1.ogg', 'sound/effects/mob/footstep/swimming2.ogg', 'sound/effects/mob/footstep/swimming3.ogg')
@@ -86,6 +87,67 @@ extra range addition
 )
 
 */
+var/global/list/FOOTSTEPS_ALL = list(
+		'sound/effects/mob/footstep/wood1.ogg',
+		'sound/effects/mob/footstep/wood2.ogg',
+		'sound/effects/mob/footstep/wood3.ogg',
+		'sound/effects/mob/footstep/wood4.ogg',
+		'sound/effects/mob/footstep/wood5.ogg',
+		'sound/effects/mob/footstep/floor1.ogg',
+		'sound/effects/mob/footstep/floor2.ogg',
+		'sound/effects/mob/footstep/floor3.ogg',
+		'sound/effects/mob/footstep/floor4.ogg',
+		'sound/effects/mob/footstep/floor5.ogg',
+		'sound/effects/mob/footstep/catwalk1.ogg',
+		'sound/effects/mob/footstep/catwalk2.ogg',
+		'sound/effects/mob/footstep/catwalk3.ogg',
+		'sound/effects/mob/footstep/catwalk4.ogg',
+		'sound/effects/mob/footstep/catwalk5.ogg',
+		'sound/effects/mob/footstep/plating1.ogg',
+		'sound/effects/mob/footstep/plating2.ogg',
+		'sound/effects/mob/footstep/plating3.ogg',
+		'sound/effects/mob/footstep/plating4.ogg',
+		'sound/effects/mob/footstep/plating5.ogg',
+		'sound/effects/mob/footstep/carpet1.ogg',
+		'sound/effects/mob/footstep/carpet2.ogg',
+		'sound/effects/mob/footstep/carpet3.ogg',
+		'sound/effects/mob/footstep/carpet4.ogg',
+		'sound/effects/mob/footstep/carpet5.ogg',
+		'sound/effects/mob/footstep/asteroid1.ogg',
+		'sound/effects/mob/footstep/asteroid2.ogg',
+		'sound/effects/mob/footstep/asteroid3.ogg',
+		'sound/effects/mob/footstep/asteroid4.ogg',
+		'sound/effects/mob/footstep/asteroid5.ogg',
+		'sound/effects/mob/footstep/grass1.ogg',
+		'sound/effects/mob/footstep/grass2.ogg',
+		'sound/effects/mob/footstep/grass3.ogg',
+		'sound/effects/mob/footstep/grass4.ogg',
+		'sound/effects/mob/footstep/lava1.ogg',
+		'sound/effects/mob/footstep/lava2.ogg',
+		'sound/effects/mob/footstep/lava3.ogg',
+		'sound/effects/mob/footstep/woodbarefoot1.ogg',
+		'sound/effects/mob/footstep/woodbarefoot2.ogg',
+		'sound/effects/mob/footstep/woodbarefoot3.ogg',
+		'sound/effects/mob/footstep/woodbarefoot4.ogg',
+		'sound/effects/mob/footstep/woodbarefoot5.ogg',
+		'sound/effects/mob/footstep/hardbarefoot1.ogg',
+		'sound/effects/mob/footstep/hardbarefoot2.ogg',
+		'sound/effects/mob/footstep/hardbarefoot3.ogg',
+		'sound/effects/mob/footstep/hardbarefoot4.ogg',
+		'sound/effects/mob/footstep/hardbarefoot5.ogg',
+		'sound/effects/mob/footstep/carpetbarefoot1.ogg',
+		'sound/effects/mob/footstep/carpetbarefoot2.ogg',
+		'sound/effects/mob/footstep/carpetbarefoot3.ogg',
+		'sound/effects/mob/footstep/carpetbarefoot4.ogg',
+		'sound/effects/mob/footstep/carpetbarefoot5.ogg',
+		'sound/effects/mob/footstep/woodclaw1.ogg',
+		'sound/effects/mob/footstep/woodclaw2.ogg',
+		'sound/effects/mob/footstep/woodclaw3.ogg',
+		'sound/effects/mob/footstep/hardclaw1.ogg',
+		'sound/effects/mob/footstep/hardclaw2.ogg',
+		'sound/effects/mob/footstep/hardclaw3.ogg',
+		'sound/effects/mob/footstep/heavy1.ogg',
+		'sound/effects/mob/footstep/heavy2.ogg')
 
 var/global/list/footstep = list(
 	FOOTSTEP_WOOD = list(list(

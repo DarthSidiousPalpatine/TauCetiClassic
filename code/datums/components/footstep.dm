@@ -51,14 +51,20 @@
 		var/mob/living/carbon/human/H = LM
 		if(!(H.bodyparts_by_name[BP_L_LEG] && H.bodyparts_by_name[BP_L_LEG].is_usable()) && !(H.bodyparts_by_name[BP_R_LEG] && H.bodyparts_by_name[BP_R_LEG].is_usable()))
 			return
-		if(H.m_intent == MOVE_INTENT_WALK)
-			return// stealth
+//		if(H.m_intent == MOVE_INTENT_WALK)
+//			return// stealth  //NO STEALTH SPECIAL FOR BLIND PEOPLE
 	steps++
 
 	if(steps >= 6)
 		steps = 0
 
-	if(steps % 2)
+	if(ishuman(LM))
+		var/mob/living/carbon/human/H = LM
+		if(H.m_intent == MOVE_INTENT_WALK && steps % 2)
+			return
+		else if(steps % 1)
+			return
+	else if(steps % 2)
 		return
 
 	if(steps != 0 && !has_gravity(LM, T)) // don't need to step as often when you hop around

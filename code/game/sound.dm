@@ -43,38 +43,61 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 
 /mob/proc/hear_object(atom/A, soundin)
 	var/atom/source = A
-	if(soundin in SOUNDIN_FOOTSTEPS)
-		source = get_turf(A)
-	var/image/heared_object
-	heared_object = image(icon = source.icon, icon_state = source.icon_state, loc = get_turf(source))
-	if(soundin in SOUNDIN_FOOTSTEPS)
-		heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(get_footprints(A)))
-	if(soundin == 'sound/effects/mob/footstep/crawl1.ogg')
-		heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(icon('icons/effects/footprints.dmi', icon_state = "footsteps_crawl")))
+	var/icon/mask = icon('icons/effects/footprints.dmi', icon_state = "mask_full")
+	switch(soundin)
+		if('sound/effects/mob/footstep/crawl1.ogg')//If sound is crawling
+			source = get_turf(A)
+			mask = icon('icons/effects/footprints.dmi', icon_state = "footsteps_crawl")
+		if('sound/effects/mob/footstep/slime1.ogg')
+			source = get_turf(A)
+			mask = icon('icons/effects/footprints.dmi', icon_state = "footsteps_slime")
+		else if(soundin in FOOTSTEPS_ALL)//If sound is footsteps
+			source = get_turf(A)
+			mask = icon('icons/effects/effects.dmi', icon_state = "nothing")
+			var/icon/footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps")
+			var/icon/footprints_cane = icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane")
+			if(ishuman(A))
+				var/mob/living/carbon/human/H = A
+				footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_naked")
+				if(H.shoes)
+					mask = icon('icons/effects/footprints.dmi', icon_state = "footsteps_boots")
+				else
+					if(H.has_bodypart(BP_R_LEG))
+						var/icon/I = footprints
+						I.Crop(17, 1, 32, 32)
+						mask.Blend(I, ICON_OVERLAY, 17, 1)
+					if(H.has_bodypart(BP_L_LEG))
+						var/icon/I = footprints
+						I.Crop(1, 1, 16, 32)
+						mask.Blend(I, ICON_OVERLAY, 1, 1)
+				footprints = mask
+				if(istype(H.l_hand, /obj/item/weapon/cane))
+					var/icon/I = footprints_cane
+					I.Crop(1, 1, 16, 32)
+					mask.Blend(I, ICON_OVERLAY, 1, 1)
+					footprints = mask
+				if(istype(H.r_hand, /obj/item/weapon/cane))
+					var/icon/I = footprints_cane
+					I.Crop(17, 1, 32, 32)
+					mask.Blend(I, ICON_OVERLAY, 17, 1)
+					footprints = mask
+			mask = footprints
+
+	mask.Turn(dir2angle(A.dir))
+
+	var/image/heared_object = image(icon = icon(source.icon, icon_state = source.icon_state), loc = get_turf(source))
+
 	heared_object.plane = FULLSCREEN_PLANE
 	heared_object.layer = 10000 //OMG, THEY LIE TO US, BLINDNESS LAYER ISNT 2.2!
 	heared_object.dir = A.dir
 	heared_object.appearance_flags = RESET_COLOR | RESET_TRANSFORM
 	heared_object.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	flick_overlay(heared_object, list(client), 10)
 
-/mob/proc/get_footprints(A)
-	var/icon/footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps")
-	if(ishuman(A))
-		var/mob/living/carbon/human/H = A
-		footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_naked")
-		if(H.shoes)
-			footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_boots")
-		if(!H.has_bodypart(BP_R_LEG))
-			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_left"), ICON_AND)
-		if(!H.has_bodypart(BP_L_LEG))
-			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND)
-		if(istype(H.r_hand, /obj/item/weapon/cane))
-			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane").Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND), ICON_OVERLAY)
-		if(istype(H.l_hand, /obj/item/weapon/cane))
-			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane").Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_left"), ICON_AND), ICON_OVERLAY)
-	return footprints
+	heared_object.add_filter("Cut", 1, alpha_mask_filter(x = 0, y = 0, icon = mask))
 
+	var/sound/S = sound(soundin)
+	var/duration = S.len * 100
+	flick_overlay(heared_object, list(client), duration)
 
 //todo: inconsistent behaviour and meaning of first parameter in playsound/playsound_local
 /mob/proc/playsound_local(turf/turf_source, soundin, volume_channel = NONE, vol = 100, vary = TRUE, frequency = null, falloff, channel, repeat, wait, ignore_environment = FALSE, voluminosity = TRUE)
