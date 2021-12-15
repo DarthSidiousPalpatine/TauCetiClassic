@@ -70,7 +70,7 @@
 	if(!T)
 		return
 	if(isfile(footstep_sounds) || istext(footstep_sounds))
-		playsound(T, footstep_sounds, VOL_EFFECTS_MASTER, volume)
+		playsound(parent, footstep_sounds, VOL_EFFECTS_MASTER, volume)
 		return
 	var/turf_footstep
 	switch(footstep_type)

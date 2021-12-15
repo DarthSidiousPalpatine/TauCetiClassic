@@ -38,6 +38,39 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 
 			if(T && T.z == turf_source.z)
 				M.playsound_local(turf_source, soundin, volume_channel, vol, vary, frequency, falloff, channel, null, wait, ignore_environment, voluminosity)
+				if(HAS_TRAIT(M, TRAIT_BLIND) && !HAS_TRAIT(M, TRAIT_DEAF))
+					M.hear_object(source, soundin, source.dir)
+
+/mob/proc/hear_object(atom/A, soundin, direction)
+	var/image/heared_object
+	heared_object = image(icon = A.icon, icon_state = A.icon_state, loc = get_turf(A))
+	heared_object.plane = FULLSCREEN_PLANE
+	heared_object.layer = 10000 //OMG, THEY LIE TO US, BLINDNESS LAYER ISNT 2.2!
+	heared_object.dir = direction
+	heared_object.appearance_flags = RESET_COLOR | RESET_TRANSFORM
+	heared_object.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	for(var/list/X in footstep)
+		if(soundin in X)
+			heared_object.add_filter("Cut_Object", 1, alpha_mask_filter(get_footprints(), render_source, flags))
+	flick_overlay(heared_object, list(client), sound(soundin).len*10)
+
+/mob/proc/get_footprints()
+	var/icon/footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps")
+	if(ishuman(src))
+		var/mob/living/carbon/human/H = src
+		footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_naked")
+		if(H.shoes)
+			footprints = icon('icons/effects/footprints.dmi', icon_state = "footsteps_boots")
+		if(!H.has_bodypart(BP_R_LEG))
+			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND)
+		if(!H.has_bodypart(BP_L_LEG))
+			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_left"), ICON_AND)
+		if(istype(H.r_hand, /obj/item/weapon/cane))
+			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane").Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_right"), ICON_AND), ICON_OVERLAY)
+		if(istype(H.l_hand, /obj/item/weapon/cane))
+			footprints.Blend(icon('icons/effects/footprints.dmi', icon_state = "footsteps_cane").Blend(icon('icons/effects/footprints.dmi', icon_state = "mask_left"), ICON_AND), ICON_OVERLAY)
+	return footprints
+
 
 //todo: inconsistent behaviour and meaning of first parameter in playsound/playsound_local
 /mob/proc/playsound_local(turf/turf_source, soundin, volume_channel = NONE, vol = 100, vary = TRUE, frequency = null, falloff, channel, repeat, wait, ignore_environment = FALSE, voluminosity = TRUE)
@@ -56,7 +89,7 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 	S.volume = vol
 	S.environment = 2 // this is the default environment and should not ever be ignored or overwrited (this exact line).
 	S.frequency = 1
-	
+
 	if(frequency)
 		S.frequency = frequency
 	if(playsound_frequency_admin)
@@ -132,7 +165,7 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 	but still keep ability to resume admin music on the fly mid position
 	*/
 
-	if(!vol && volume_channel != VOL_ADMIN) 
+	if(!vol && volume_channel != VOL_ADMIN)
 		return
 
 	var/sound/S
