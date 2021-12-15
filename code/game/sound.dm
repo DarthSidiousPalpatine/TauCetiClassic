@@ -63,13 +63,13 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 					mask = icon('icons/effects/footprints.dmi', icon_state = "footsteps_boots")
 				else
 					if(H.has_bodypart(BP_R_LEG))
-						var/icon/I = footprints
+						var/icon/right_foot = footprints
 						I.Crop(17, 1, 32, 32)
-						mask.Blend(I, ICON_OVERLAY, 17, 1)
+						mask.Blend(right_foot, ICON_OVERLAY, 17, 1)
 					if(H.has_bodypart(BP_L_LEG))
-						var/icon/I = footprints
+						var/icon/left_foot = footprints
 						I.Crop(1, 1, 16, 32)
-						mask.Blend(I, ICON_OVERLAY, 1, 1)
+						mask.Blend(left_foot, ICON_OVERLAY, 1, 1)
 				footprints = mask
 				if(istype(H.l_hand, /obj/item/weapon/cane))
 					var/icon/I = footprints_cane
@@ -95,8 +95,7 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 
 	heared_object.add_filter("Cut", 1, alpha_mask_filter(x = 0, y = 0, icon = mask))
 
-	var/sound/S = sound(soundin)
-	var/duration = S.len * 100
+	var/duration = 25
 	flick_overlay(heared_object, list(client), duration)
 
 //todo: inconsistent behaviour and meaning of first parameter in playsound/playsound_local
