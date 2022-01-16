@@ -172,6 +172,10 @@
 
 	if(tree.tree_z_lvl != object.z)
 		Depopulate(object, TRUE)
+		for(var/datum/space_level/S in z_list)
+			if((S.z_value == object.z) && S.data_trees[tree.treename])
+				S.data_trees[tree.treename].Add_Object(object)
+				continue
 
 	var/datum/quad_tree_cell/cell = parent
 	while(!cell.check_inside(object)) //Finding a Parent that contains our orphan
