@@ -124,7 +124,7 @@
 	A?.Exited(src, null)
 
 	for(var/datum/quad_tree_cell/cell in data_cells)
-		cell.Handle_Movement(src)
+		cell.Depopulate(src)
 
 	return ..()
 

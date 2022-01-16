@@ -16,13 +16,14 @@
 	var/tree_y
 	var/tree_width
 	var/tree_height
+	var/tree_z_lvl
 
 	var/datum/quad_tree_cell/root = null
 	var/list/all_elements
 
 	var/max_objects = 4
 
-/datum/quad_tree/New(name, x, y, width, height)
+/datum/quad_tree/New(name, x, y, width, height, z_lvl)
 	..()
 	treename = name
 
@@ -30,17 +31,19 @@
 	tree_y = y
 	tree_width = width
 	tree_height = height
+	tree_z_lvl = z_lvl
 
 /datum/quad_tree/proc/Add_Object(atom/object) //Adding object to tree
 	if(!root)
 		root = new /datum/quad_tree_cell(src, null, tree_x, tree_y) //Setting the Root
 	var/datum/quad_tree_cell/cell = root
-	while(cell.children) //Going deep into children's children's childre...children
-		for(var/datum/quad_tree_cell/C in cell.children)
-			if(C.check_inside(object))
-				cell = C
-				continue
-	cell.Populate(object) //Adding object to cell
+	if(cell.check_inside(object))
+		while(cell.children) //Going deep into children's children's childre...children
+			for(var/datum/quad_tree_cell/C in cell.children)
+				if(C.check_inside(object))
+					cell = C
+					continue
+		cell.Populate(object) //Adding object to cell
 
 /datum/quad_tree/proc/Objects_in_Range(x, y, range) //Search from the surface deep into branches
 	var/list/objects
@@ -121,7 +124,7 @@
 	population = 0
 
 /datum/quad_tree_cell/proc/check_inside(atom/object) //Check if the object is within cell's boundaries
-	return (cell_x <= object.x && object.x < cell_x + cell_width) && (cell_y <= object.y && object.y < cell_y + cell_height)
+	return (cell_x <= object.x && object.x < cell_x + cell_width) && (cell_y <= object.y && object.y < cell_y + cell_height) && (tree.tree_z_lvl == object.z)
 
 /datum/quad_tree_cell/proc/check_intersects(x, y, range) //Check if a Circle of x,y,range is colliding with cell
 	return ((x - clamp(x, cell_x, cell_x + cell_width)) ** 2 + (y - clamp(y, cell_y, cell_y + cell_height)) ** 2) < range ** 2
@@ -167,15 +170,19 @@
 	if(check_inside(object))
 		return
 
+	if(tree.tree_z_lvl != object.z)
+		Depopulate(object, TRUE)
+
 	var/datum/quad_tree_cell/cell = parent
 	while(!cell.check_inside(object)) //Finding a Parent that contains our orphan
-		cell = parent
+		cell = cell.parent
 
-	while(cell.children) //Going deep into children's children's childre...children
-		for(var/datum/quad_tree_cell/C in cell.children)
-			if(C.check_inside(object))
-				cell = C
-				continue
+	if(cell.check_inside(object))
+		while(cell.children) //Going deep into children's children's childre...children
+			for(var/datum/quad_tree_cell/C in cell.children)
+				if(C.check_inside(object))
+					cell = C
+					continue
 
-	cell.Populate(object)
+		cell.Populate(object)
 	Depopulate(object, TRUE) //Making our object orphan
