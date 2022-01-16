@@ -172,6 +172,7 @@
 
 	if(tree.tree_z_lvl != object.z)
 		Depopulate(object, TRUE)
+		var/list/z_list = SSmapping.z_list
 		for(var/datum/space_level/S in z_list)
 			if((S.z_value == object.z) && S.data_trees[tree.treename])
 				S.data_trees[tree.treename].Add_Object(object)
