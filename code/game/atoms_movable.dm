@@ -135,6 +135,9 @@
 
 	update_parallax_contents()
 
+	for(var/datum/quad_tree_cell/cell in data_cells)
+		cell.Handle_Movement(src)
+
 	if (orbiters)
 		for (var/thing in orbiters)
 			var/datum/orbit/O = thing

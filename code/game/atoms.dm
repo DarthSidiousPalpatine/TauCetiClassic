@@ -49,6 +49,8 @@
 
 	var/in_use_action = FALSE // do_after sets this to TRUE and is_busy() can check for that to disallow multiple users to interact with this at the same time.
 
+	var/list/data_cells = list()
+
 /atom/New(loc, ...)
 	if(use_preloader && (src.type == _preloader.target_path))//in case the instanciated atom is creating other atoms in New()
 		_preloader.load(src)
@@ -120,6 +122,9 @@
 
 	var/area/A = get_area(src)
 	A?.Exited(src, null)
+
+	for(var/datum/quad_tree_cell/cell in data_cells)
+		cell.Handle_Movement(src)
 
 	return ..()
 
