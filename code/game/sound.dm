@@ -27,13 +27,22 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 	var/max_distance = (world.view + extrarange) * 3
 
 	// Looping through the player list has the added bonus of working for mobs inside containers
-	for (var/P in player_list)
-		var/mob/M = P
-		if(!M || !M.client)
-			continue
+//	for (var/P in player_list)
+	var/list/z_list = SSmapping.z_list
+	var/datum/space_level/L
+	for(var/datum/space_level/S in z_list)
+		if(S.z_value == source.z)
+			L = S
+			break
+	if(L)
+		var/list/players = L.data_trees["players"].Objects_in_Range(source.x, source.y, max_distance)
+		for (var/P in players)
+			var/mob/M = P
+			if(!M || !M.client)
+				continue
 
-		var/distance = get_dist(M, turf_source)
-		if(distance <= max_distance)
+//		var/distance = get_dist(M, turf_source)
+//		if(distance <= max_distance)
 			var/turf/T = get_turf(M)
 
 			if(T && T.z == turf_source.z)
@@ -56,7 +65,7 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 	S.volume = vol
 	S.environment = 2 // this is the default environment and should not ever be ignored or overwrited (this exact line).
 	S.frequency = 1
-	
+
 	if(frequency)
 		S.frequency = frequency
 	if(playsound_frequency_admin)
@@ -132,7 +141,7 @@ voluminosity = if FALSE, removes the difference between left and right ear.
 	but still keep ability to resume admin music on the fly mid position
 	*/
 
-	if(!vol && volume_channel != VOL_ADMIN) 
+	if(!vol && volume_channel != VOL_ADMIN)
 		return
 
 	var/sound/S

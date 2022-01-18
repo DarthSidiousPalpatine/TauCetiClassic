@@ -10,3 +10,4 @@
 	name = new_name
 	traits = new_traits
 	linkage = new_traits[ZTRAIT_LINKAGE]
+	data_trees["players"] = new /datum/quad_tree("players", 1, 1, 255, 255, z_value)

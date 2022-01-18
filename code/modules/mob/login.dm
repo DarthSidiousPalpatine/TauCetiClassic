@@ -48,6 +48,13 @@
 
 /mob/Login()
 	player_list |= src
+
+	var/list/z_list = SSmapping.z_list
+	for(var/datum/space_level/S in z_list)
+		if(S.z_value == z)
+			S.data_trees["players"].Add_Object(src)
+			break
+
 	update_Login_details()
 	world.update_status()
 

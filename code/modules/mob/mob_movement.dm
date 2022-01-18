@@ -245,7 +245,7 @@
 	var/obj/machinery/computer/security/console = machine
 	var/turf/T = get_turf(console.active_camera)
 	var/list/cameras = list()
-	
+
 	for(var/cam_tag in console.camera_cache)
 		var/obj/C = console.camera_cache[cam_tag]
 		if(C == console.active_camera)

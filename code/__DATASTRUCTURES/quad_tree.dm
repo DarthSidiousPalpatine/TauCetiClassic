@@ -19,7 +19,7 @@
 	var/tree_z_lvl
 
 	var/datum/quad_tree_cell/root = null
-	var/list/all_elements
+	var/list/all_elements = list()
 
 	var/max_objects = 4
 
@@ -42,11 +42,11 @@
 			for(var/datum/quad_tree_cell/C in cell.children)
 				if(C.check_inside(object))
 					cell = C
-					continue
+					break
 		cell.Populate(object) //Adding object to cell
 
 /datum/quad_tree/proc/Objects_in_Range(x, y, range) //Search from the surface deep into branches
-	var/list/objects
+	var/list/objects = list()
 	if(root)
 		var/datum/quad_tree_cell/cell = root
 		objects = cell.execute_recursive_search(x, y, range)
@@ -63,7 +63,7 @@
 	var/cell_width
 	var/cell_height
 
-	var/list/objects
+	var/list/objects = list()
 	var/population = 0
 
 /datum/quad_tree_cell/New(quad_tree, parent_cell, x, y)
@@ -90,7 +90,7 @@
 		Divide()
 
 /datum/quad_tree_cell/proc/Depopulate(atom/object, move = FALSE) //Removing object from cell
-	var/list/objs
+	var/list/objs = list()
 	var/parent_population = 0
 	objects -= object
 	tree.all_elements -= object
@@ -102,7 +102,7 @@
 		for(var/atom/obj in cell.objects)
 			objs  += obj
 			parent_population++
-	if(parent_population < tree.max_objects)
+	if(parent_population < tree.max_objects && parent != tree.root)
 		parent.Merge(objs)
 
 /datum/quad_tree_cell/proc/Merge(list/objs)
@@ -133,7 +133,7 @@
 	if(!check_intersects(x, y, range))
 		return objects
 
-	var/list/objs
+	var/list/objs = list()
 
 	if(!children)
 		for(var/atom/object in objects)
@@ -146,7 +146,7 @@
 	return objs
 
 /datum/quad_tree_cell/proc/execute_reverse_recursive_search(atom/object, range) //Recursive up to the surface search
-	var/list/objs
+	var/list/objs = list()
 	var/check_parent = FALSE
 	for(var/atom/obj in objects)
 		if(obj != object)
@@ -162,7 +162,7 @@
 	return objs
 
 /datum/quad_tree_cell/proc/Reverse_Objects_in_Range(atom/object, range) //Search from the ground object up to the surface
-	var/list/objs
+	var/list/objs = list()
 	objs = execute_reverse_recursive_search(object, range)
 	return objs
 
@@ -171,12 +171,12 @@
 		return
 
 	if(tree.tree_z_lvl != object.z)
-		Depopulate(object, TRUE)
+		Depopulate(object, FALSE)
 		var/list/z_list = SSmapping.z_list
 		for(var/datum/space_level/S in z_list)
 			if((S.z_value == object.z) && S.data_trees[tree.treename])
 				S.data_trees[tree.treename].Add_Object(object)
-				continue
+				return
 
 	var/datum/quad_tree_cell/cell = parent
 	while(!cell.check_inside(object)) //Finding a Parent that contains our orphan
@@ -187,7 +187,7 @@
 			for(var/datum/quad_tree_cell/C in cell.children)
 				if(C.check_inside(object))
 					cell = C
-					continue
+					break
 
 		cell.Populate(object)
 	Depopulate(object, TRUE) //Making our object orphan

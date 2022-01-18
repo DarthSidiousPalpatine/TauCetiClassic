@@ -110,6 +110,9 @@
 
 	last_move = Dir
 
+	for(var/datum/quad_tree_cell/cell in data_cells)
+		cell.Handle_Movement(src)
+
 	if(. && buckled_mob && !handle_buckled_mob_movement(loc,Dir)) //movement failed due to buckled mob
 		. = 0
 
@@ -134,9 +137,6 @@
 		newtonian_move(Dir)
 
 	update_parallax_contents()
-
-	for(var/datum/quad_tree_cell/cell in data_cells)
-		cell.Handle_Movement(src)
 
 	if (orbiters)
 		for (var/thing in orbiters)
