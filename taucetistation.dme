@@ -2285,4 +2285,5 @@
 #include "interface\skin.dmf"
 #include "maps\centcom\centcom.dmm"
 #include "maps\testmap\job_changes.dm"
+#include "maps\villagestation\villagestation.dmm"
 // END_INCLUDE
