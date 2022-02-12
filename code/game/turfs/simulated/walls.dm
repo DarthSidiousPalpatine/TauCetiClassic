@@ -30,6 +30,7 @@
 	canSmoothWith = list(
 		/turf/simulated/wall,
 		/turf/simulated/wall/r_wall,
+		/turf/simulated/wall/w_wall,
 		/obj/structure/falsewall,
 		/obj/structure/falsewall/reinforced,
 		/obj/structure/girder,
