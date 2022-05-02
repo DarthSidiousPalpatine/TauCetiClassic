@@ -362,6 +362,8 @@
 	ic.Blend(small_img,ICON_OVERLAY, 13, 13)
 	pc.Blend(tiny_img,ICON_OVERLAY, 12, 19)
 
+	temp.MapColors(1.438,-0.062,-0.062,-0.122,1.378,-0.122,-0.016,-0.016,1.483,-0.03,0.05,-0.02)
+
 	var/datum/picture/P = new()
 	P.fields["author"] = user
 	P.fields["icon"] = ic

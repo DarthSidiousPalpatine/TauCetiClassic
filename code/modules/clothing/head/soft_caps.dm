@@ -1,7 +1,7 @@
 /obj/item/clothing/head/soft
 	name = "cargo cap"
 	desc = "It's a baseball hat in a tasteless yellow color."
-	icon_state = "cargosoft"
+	icon_state = "redsoft"
 	flags = HEADCOVERSEYES
 	siemens_coefficient = 0.9
 	body_parts_covered = 0
@@ -13,9 +13,13 @@
 	var/flipped = FALSE
 	var/cap_color = "cargo"
 
+	var/hue = 309
+	var/brightness = 0.01
+	var/saturation = 0.82
+
 /obj/item/clothing/head/soft/atom_init()
 	. = ..()
-	icon_state = "[cap_color]soft"
+	color = transform_color(hue,saturation,brightness)
 
 /obj/item/clothing/head/soft/wash_act(w_color)
 	. = ..()
@@ -31,10 +35,10 @@
 /obj/item/clothing/head/soft/attack_self(mob/living/carbon/human/user)
 	flipped = !flipped
 	if(flipped)
-		icon_state = "[cap_color]soft_flipped"
+		icon_state = "redsoft_flipped"
 		to_chat(user, "You flip the hat backwards.")
 	else
-		icon_state = "[cap_color]soft"
+		icon_state = "redsoft"
 		to_chat(user, "You flip the hat back in normal position.")
 
 	update_inv_mob()
@@ -42,50 +46,66 @@
 /obj/item/clothing/head/soft/red
 	name = "red cap"
 	desc = "It's a baseball hat in a tasteless red color."
-	icon_state = "redsoft"
 	cap_color = "red"
+	hue = 3
+	brightness = 0.05
+	saturation = 0.80
 
 /obj/item/clothing/head/soft/blue
 	name = "blue cap"
 	desc = "It's a baseball hat in a tasteless blue color."
-	icon_state = "bluesoft"
 	cap_color = "blue"
+	hue = 131
+	brightness = 0.01
+	saturation = 0.82
 
 /obj/item/clothing/head/soft/green
 	name = "green cap"
 	desc = "It's a baseball hat in a tasteless green color."
-	icon_state = "greensoft"
 	cap_color = "green"
+	hue = 225
+	brightness = 0.01
+	saturation = 0.82
 
 /obj/item/clothing/head/soft/yellow
 	name = "yellow cap"
 	desc = "It's a baseball hat in a tasteless yellow color."
-	icon_state = "yellowsoft"
 	cap_color = "yellow"
+	hue = 323
+	brightness = 0.17
+	saturation = 0.96
 
 /obj/item/clothing/head/soft/grey
 	name = "grey cap"
 	desc = "It's a baseball hat in a tasteful grey color."
-	icon_state = "greysoft"
 	cap_color = "grey"
+	hue = 360
+	brightness = 0.06
+	saturation = 0.0
 
 /obj/item/clothing/head/soft/orange
 	name = "orange cap"
 	desc = "It's a baseball hat in a tasteless orange color."
-	icon_state = "orangesoft"
 	cap_color = "orange"
+	hue = 336
+	brightness = 0.01
+	saturation = 0.82
 
 /obj/item/clothing/head/soft/mime
 	name = "white cap"
 	desc = "It's a baseball hat in a tasteless white color."
-	icon_state = "mimesoft"
 	cap_color = "mime"
+	hue = 360
+	brightness = 0.66
+	saturation = 0.0
 
 /obj/item/clothing/head/soft/purple
 	name = "purple cap"
 	desc = "It's a baseball hat in a tasteless purple color."
-	icon_state = "purplesoft"
 	cap_color = "purple"
+	hue = 87
+	brightness = 0.05
+	saturation = 0.57
 
 /obj/item/clothing/head/soft/rainbow
 	name = "rainbow cap"
