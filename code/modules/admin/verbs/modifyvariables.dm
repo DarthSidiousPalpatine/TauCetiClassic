@@ -546,6 +546,27 @@
 						log_admin("[key_name(src)] modified [original_name]'s [variable] to [H.height]")
 						log_handled = TRUE
 						H.regenerate_icons()
+				if("hue")
+					var/obj/item/clothing/head/soft/Cap = O
+					var/var_new = input("Enter new number:", "Num", Cap.vars[variable]) as null|num
+					if(isnull(var_new))
+						return
+					Cap.vars[variable] = var_new
+					Cap.color = transform_color(Cap.hue,Cap.saturation,Cap.brightness)
+				if("brightness")
+					var/obj/item/clothing/head/soft/Cap = O
+					var/var_new = input("Enter new number:", "Num", Cap.vars[variable]) as null|num
+					if(isnull(var_new))
+						return
+					Cap.vars[variable] = var_new
+					Cap.color = transform_color(Cap.hue,Cap.saturation,Cap.brightness)
+				if("saturation")
+					var/obj/item/clothing/head/soft/Cap = O
+					var/var_new = input("Enter new number:", "Num", Cap.vars[variable]) as null|num
+					if(isnull(var_new))
+						return
+					Cap.vars[variable] = var_new
+					Cap.color = transform_color(Cap.hue,Cap.saturation,Cap.brightness)
 				else
 					var/var_new = input("Enter new number:", "Num", O.vars[variable]) as null|num
 					if(isnull(var_new))
