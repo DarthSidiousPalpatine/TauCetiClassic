@@ -32,6 +32,14 @@
 
 	appearance_flags = TILE_BOUND|PIXEL_SCALE|KEEP_TOGETHER
 
+	var/atom/movable/fatness_effect/fatness
+
+
+/atom/movable/fatness_effect
+	icon = 'icons/effects/cut.dmi'
+	icon_state = "test"
+	render_target = "*TESTING"
+
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
 
@@ -53,6 +61,9 @@
 	var/datum/reagents/R = new/datum/reagents(1000)
 	reagents = R
 	R.my_atom = src
+
+	fatness = new(src)
+	add_overlay(fatness)
 
 	. = ..()
 
