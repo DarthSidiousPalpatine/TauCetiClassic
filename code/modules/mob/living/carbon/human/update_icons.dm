@@ -878,8 +878,8 @@ Please contact me on #coderbus IRC. ~Carn x
 //Cutting any human's overlay that we dont want to offset.
 /mob/living/carbon/human/proc/update_height(image/I)
 
-	if(src.morph)
-		I.add_filter("Morph_Body", 1, displacement_map_filter(render_source = src.morph.render_target, x = 0, y = 0, size = 1))
+	if(Body_Morph)
+		I.add_filter("Morph_Body", 1, displacement_map_filter(render_source = Body_Morph.render_target, x = 0, y = 0, size = 1))
 
 	var/static/icon/cut_torso_mask = icon('icons/effects/cut.dmi',"Cut1")
 	var/static/icon/cut_legs_mask = icon('icons/effects/cut.dmi',"Cut2")

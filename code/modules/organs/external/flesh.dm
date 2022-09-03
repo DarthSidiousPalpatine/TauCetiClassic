@@ -37,9 +37,9 @@
 	BP.pumped = min(BP.pumped + value, cap)
 
 	if(BP.pumped < BP.max_pumped)
-		BP.owner.morph.add_overlay(BP.morph)
+		BP.owner.Body_Morph.add_overlay(BP.morph)
 	else
-		BP.owner.morph.cut_overlay(BP.morph)
+		BP.owner.Body_Morph.cut_overlay(BP.morph)
 
 	BP.update_sprite()
 

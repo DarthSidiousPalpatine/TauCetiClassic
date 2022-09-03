@@ -32,13 +32,7 @@
 
 	appearance_flags = TILE_BOUND|PIXEL_SCALE|KEEP_TOGETHER
 
-	var/atom/movable/body_morph/morph
-
-/atom/movable/body_morph
-	icon = 'icons/mob/human_races/masks/body_morphs.dmi'
-	icon_state = "pumped_chest"
-	render_target = "*FUCK"
-	appearance_flags = KEEP_TOGETHER
+	var/image/Body_Morph
 
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
@@ -74,8 +68,8 @@
 
 	handcrafting = new()
 
-	morph = new(src)
-	add_overlay(morph)
+	Body_Morph = image('icons/effects/32x32.dmi', "blank")
+	Body_Morph.render_target = "*[real_name]"
 
 	prev_gender = gender // Debug for plural genders
 	make_blood()
