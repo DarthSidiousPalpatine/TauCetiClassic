@@ -222,11 +222,12 @@ Please contact me on #coderbus IRC. ~Carn x
 	for(var/obj/item/organ/external/BP in bodyparts)
 		if(BP.is_stump)
 			continue
-		if(BP.name == "chest")
+
+		if(BP.name == "head")
+			standing += BP.get_icon(BODY_LAYER)
+		else
 			var/image/I = BP.get_icon(BODY_LAYER)
 			standing += adjust_fatness(I)
-		else
-			standing += BP.get_icon(BODY_LAYER)
 
 	if(species.name == VOX)
 		var/mutable_appearance/tatoo = mutable_appearance('icons/mob/human.dmi', "[vox_rank]_s", -BODY_LAYER)
@@ -908,7 +909,7 @@ Please contact me on #coderbus IRC. ~Carn x
 	return I
 
 /mob/living/carbon/human/proc/adjust_fatness(image/I)
-	I.add_filter("Testing", 1, displacement_map_filter(render_source = "*TESTING", x = 0, y = 0, size = 2))
+	I.add_filter("Testing", 1, displacement_map_filter(render_source = "*TESTING", x = 0, y = 0, size = 1))
 	return I
 
 //Human Overlays Indexes/////////
