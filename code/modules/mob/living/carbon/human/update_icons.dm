@@ -222,12 +222,7 @@ Please contact me on #coderbus IRC. ~Carn x
 	for(var/obj/item/organ/external/BP in bodyparts)
 		if(BP.is_stump)
 			continue
-
-		if(BP.name == "head")
-			standing += BP.get_icon(BODY_LAYER)
-		else
-			var/image/I = BP.get_icon(BODY_LAYER)
-			standing += adjust_fatness(I)
+		standing += BP.get_icon(BODY_LAYER)
 
 	if(species.name == VOX)
 		var/mutable_appearance/tatoo = mutable_appearance('icons/mob/human.dmi', "[vox_rank]_s", -BODY_LAYER)
@@ -237,12 +232,12 @@ Please contact me on #coderbus IRC. ~Carn x
 	if((underwear > 0) && (underwear < 12) && species.flags[HAS_UNDERWEAR])
 		if(!fat)
 			var/mutable_appearance/fatunder = mutable_appearance('icons/mob/human.dmi', "underwear[underwear]_[g]_s", -BODY_LAYER)
-			standing += adjust_fatness(fatunder)
+			standing += fatunder
 
 	if((undershirt > 0) && (undershirt < undershirt_t.len) && species.flags[HAS_UNDERWEAR])
 		if(!fat)
 			var/mutable_appearance/fatover = mutable_appearance('icons/mob/human_undershirt.dmi', "undershirt[undershirt]_s", -BODY_LAYER)
-			standing += adjust_fatness(fatover)
+			standing += fatover
 
 	if(!fat && socks > 0 && socks < socks_t.len && species.flags[HAS_UNDERWEAR])
 		var/obj/item/organ/external/r_foot = bodyparts_by_name[BP_R_LEG]
@@ -441,7 +436,6 @@ Please contact me on #coderbus IRC. ~Carn x
 				drop_from_inventory(U)
 				return
 		var/image/standing = U.get_standing_overlay(src, default_path, uniform_sheet, -UNIFORM_LAYER, "uniformblood")
-		standing = adjust_fatness(standing)
 		standing = update_height(standing)
 		overlays_standing[UNIFORM_LAYER] = standing
 
@@ -615,7 +609,6 @@ Please contact me on #coderbus IRC. ~Carn x
 			client.screen += belt
 
 		var/image/standing = belt.get_standing_overlay(src, 'icons/mob/belt.dmi', SPRITE_SHEET_BELT, -BELT_LAYER)
-		standing = adjust_fatness(standing)
 		standing = human_update_offset(standing, FALSE)
 		overlays_standing[BELT_LAYER] = standing
 
@@ -644,7 +637,6 @@ Please contact me on #coderbus IRC. ~Carn x
 				return
 
 		var/image/standing = S.get_standing_overlay(src, default_path, suit_sheet, -SUIT_LAYER, "[S.blood_overlay_type]blood")
-		standing = adjust_fatness(standing)
 		standing = update_height(standing)
 		overlays_standing[SUIT_LAYER] = standing
 
@@ -657,7 +649,6 @@ Please contact me on #coderbus IRC. ~Carn x
 				tie = image("icon" = 'icons/mob/accessory.dmi', "icon_state" = "[tie_color]", "layer" = -SUIT_LAYER + A.layer_priority)
 			tie.color = A.color
 			tie = human_update_offset(tie, TRUE)
-			tie = adjust_fatness(tie)
 			standing.add_overlay(tie)
 
 		if(istype(wear_suit, /obj/item/clothing/suit/straight_jacket))
@@ -886,6 +877,10 @@ Please contact me on #coderbus IRC. ~Carn x
 
 //Cutting any human's overlay that we dont want to offset.
 /mob/living/carbon/human/proc/update_height(image/I)
+
+	if(src.morph)
+		I.add_filter("Morph_Body", 1, displacement_map_filter(render_source = src.morph.render_target, x = 0, y = 0, size = 1))
+
 	var/static/icon/cut_torso_mask = icon('icons/effects/cut.dmi',"Cut1")
 	var/static/icon/cut_legs_mask = icon('icons/effects/cut.dmi',"Cut2")
 	var/static/icon/lenghten_torso_mask = icon('icons/effects/cut.dmi',"Cut3")
@@ -906,10 +901,6 @@ Please contact me on #coderbus IRC. ~Carn x
 	if(SMALLSIZE in mutations)
 		I.add_filter("Gnome_Cut_Torso", 1, displacement_map_filter(cut_torso_mask, x = 0, y = 0, size = 2))
 		I.add_filter("Gnome_Cut_Legs", 1, displacement_map_filter(cut_legs_mask, x = 0, y = 0, size = 3))
-	return I
-
-/mob/living/carbon/human/proc/adjust_fatness(image/I)
-	I.add_filter("Testing", 1, displacement_map_filter(render_source = "*TESTING", x = 0, y = 0, size = 1))
 	return I
 
 //Human Overlays Indexes/////////

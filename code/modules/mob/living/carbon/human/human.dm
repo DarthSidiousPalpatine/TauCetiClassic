@@ -32,13 +32,13 @@
 
 	appearance_flags = TILE_BOUND|PIXEL_SCALE|KEEP_TOGETHER
 
-	var/atom/movable/fatness_effect/fatness
+	var/atom/movable/body_morph/morph
 
-
-/atom/movable/fatness_effect
-	icon = 'icons/effects/cut.dmi'
-	icon_state = "test"
-	render_target = "*TESTING"
+/atom/movable/body_morph
+	icon = 'icons/mob/human_races/masks/body_morphs.dmi'
+	icon_state = "pumped_chest"
+	render_target = "*FUCK"
+	appearance_flags = KEEP_TOGETHER
 
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
@@ -62,9 +62,6 @@
 	reagents = R
 	R.my_atom = src
 
-	fatness = new(src)
-	add_overlay(fatness)
-
 	. = ..()
 
 	AddComponent(/datum/component/footstep, FOOTSTEP_MOB_HUMAN)
@@ -76,6 +73,9 @@
 		dna.real_name = real_name
 
 	handcrafting = new()
+
+	morph = new(src)
+	add_overlay(morph)
 
 	prev_gender = gender // Debug for plural genders
 	make_blood()

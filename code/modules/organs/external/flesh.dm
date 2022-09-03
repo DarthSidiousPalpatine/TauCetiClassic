@@ -35,6 +35,12 @@
 
 	var/old_pumped = BP.pumped
 	BP.pumped = min(BP.pumped + value, cap)
+
+	if(BP.pumped < BP.max_pumped)
+		BP.owner.morph.add_overlay(BP.morph)
+	else
+		BP.owner.morph.cut_overlay(BP.morph)
+
 	BP.update_sprite()
 
 	if(BP.pumped <= 0 && old_pumped > 0)
