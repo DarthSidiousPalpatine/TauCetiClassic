@@ -32,7 +32,11 @@
 
 	appearance_flags = TILE_BOUND|PIXEL_SCALE|KEEP_TOGETHER
 
-	var/image/Body_Morph
+	var/atom/movable/bodymorph/Body_Morph
+
+/atom/movable/bodymorph
+	icon = 'icons/effects/32x32.dmi'
+	icon_state = "blank"
 
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
@@ -68,8 +72,7 @@
 
 	handcrafting = new()
 
-	Body_Morph = image('icons/effects/32x32.dmi', "blank")
-	Body_Morph.render_target = "*[real_name]"
+	Body_Morph = new(src)
 
 	prev_gender = gender // Debug for plural genders
 	make_blood()
