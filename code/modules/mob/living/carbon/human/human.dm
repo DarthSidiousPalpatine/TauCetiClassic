@@ -35,9 +35,12 @@
 	var/atom/movable/bodymorph/Body_Morph
 
 /atom/movable/bodymorph
-	icon = 'icons/effects/32x32.dmi'
-	icon_state = "blank"
-	render_target = "*BODYMORPH"
+	//icon = 'icons/effects/32x32.dmi'
+	//icon_state = "blank"
+	icon = 'icons/mob/human_races/masks/body_morphs.dmi'
+	icon_state = "pumped_chest"
+	appearance_flags = KEEP_TOGETHER
+	render_target = "*"
 
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
@@ -75,7 +78,6 @@
 
 	Body_Morph = new(src)
 	add_overlay(Body_Morph)
-	Body_Morph.render_target = "*" + uppertext(real_name)
 
 	prev_gender = gender // Debug for plural genders
 	make_blood()
