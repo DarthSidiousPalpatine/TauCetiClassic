@@ -37,6 +37,7 @@
 /atom/movable/bodymorph
 	icon = 'icons/effects/32x32.dmi'
 	icon_state = "blank"
+	render_target = "*BODYMORPH"
 
 /mob/living/carbon/human/atom_init(mapload, new_species)
 	AddComponent(/datum/component/mood)
@@ -73,6 +74,8 @@
 	handcrafting = new()
 
 	Body_Morph = new(src)
+	add_overlay(Body_Morph)
+	Body_Morph.render_target = "*" + uppertext(real_name)
 
 	prev_gender = gender // Debug for plural genders
 	make_blood()

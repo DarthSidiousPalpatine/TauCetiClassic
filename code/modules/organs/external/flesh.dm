@@ -37,9 +37,9 @@
 	BP.pumped = min(BP.pumped + value, cap)
 
 	if(BP.pumped < BP.max_pumped)
-		BP.owner.Body_Morph.icon = BP.morph
+		BP.owner.Body_Morph.vis_contents += BP.Limb_Morph
 	else
-		BP.owner.Body_Morph.icon = initial(BP.owner.Body_Morph.icon)
+		BP.owner.Body_Morph.vis_contents -= BP.Limb_Morph
 
 	BP.update_sprite()
 

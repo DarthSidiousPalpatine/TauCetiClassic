@@ -70,11 +70,17 @@
 
 	var/regen_bodypart_penalty = 0 // This variable determines how much time it would take to regenerate a bodypart, and the cost of it's regeneration.
 
-	var/icon/morph
+	var/atom/movable/limbmorph/Limb_Morph
+
+/atom/movable/limbmorph
+	icon = 'icons/mob/human_races/masks/body_morphs.dmi'
+	icon_state = "pumped_chest"
+	vis_flags = VIS_INHERIT_DIR
 
 /obj/item/organ/external/atom_init()
 	. = ..()
-	morph = icon('icons/mob/human_races/masks/body_morphs.dmi', "pumped_[src.name]")
+	Limb_Morph = new(src)
+	Limb_Morph.icon_state = "pumped_[src.name]"
 
 /obj/item/organ/external/Destroy()
 	if(parent)

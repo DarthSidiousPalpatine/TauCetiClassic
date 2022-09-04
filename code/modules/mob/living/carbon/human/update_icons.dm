@@ -879,7 +879,7 @@ Please contact me on #coderbus IRC. ~Carn x
 /mob/living/carbon/human/proc/update_height(image/I)
 
 	if(Body_Morph)
-		I.add_filter("Morph_Body", 1, displacement_map_filter(Body_Morph.icon, x = 0, y = 0, size = 1))
+		I.add_filter("Morph_Body", 1, displacement_map_filter(render_source = Body_Morph.render_target, x = 0, y = 0, size = 1))
 
 	var/static/icon/cut_torso_mask = icon('icons/effects/cut.dmi',"Cut1")
 	var/static/icon/cut_legs_mask = icon('icons/effects/cut.dmi',"Cut2")
