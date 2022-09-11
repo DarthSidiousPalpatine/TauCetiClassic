@@ -149,7 +149,6 @@ var/global/loopModeNames = list(
 	popup.set_content(t)
 	popup.open()
 
-
 /obj/machinery/media/jukebox/attackby(obj/item/W, mob/user, params)
 	user.SetNextMove(CLICK_CD_INTERACT)
 	if(iswrench(W))
@@ -163,7 +162,7 @@ var/global/loopModeNames = list(
 			playing = emagged
 			update_music()
 			update_icon()
-			if(!anchored)
+			if(!anchored && !emagged)
 				disconnect_media_source()
 				disconnect_frequency()
 	else
@@ -220,6 +219,7 @@ var/global/loopModeNames = list(
 		if(!check_reload())
 			to_chat(usr, "<span class='warning'>You must wait 60 seconds between playlist reloads.</span>")
 			return FALSE
+		addtimer(CALLBACK(src, .proc/updateUsrDialog), JUKEBOX_RELOAD_COOLDOWN, TIMER_UNIQUE)
 		playlist_id = href_list["playlist"]
 		last_reload = world.time
 		playlist = null
@@ -260,8 +260,9 @@ var/global/loopModeNames = list(
 				return
 			visible_message("<span class='notice'>[bicon(src)] \The [src] beeps, and the menu on its front fills with [playlist.len] items.</span>","<em>You hear a beep.</em>")
 			if(autoplay)
-				playing = 1
-				autoplay = 0
+				playing=1
+				autoplay=0
+			updateUsrDialog()
 		else
 			//testing("[src] failed to update playlist: Response null.")
 			stat &= BROKEN
@@ -428,6 +429,26 @@ var/global/loopModeNames = list(
 	use_power = NO_POWER_USE
 	invisibility = 101
 	autoplay = 1
+
+/obj/machinery/media/jukebox/syndi
+
+/obj/machinery/media/jukebox/syndi/atom_init()
+	. = ..()
+	current_song = 0
+	playlist_id = "emagged"
+	last_reload=world.time
+	playlist=null
+	loop_mode = JUKEMODE_SHUFFLE
+	emagged = 1
+	playing = 1
+	update_icon()
+	update_music()
+
+/obj/machinery/media/jukebox/syndi/attackby(obj/item/W, mob/user, params)
+	if(iswrench(W))
+		return
+	else
+		..()
 
 /obj/machinery/media/speaker
 	name = "Speaker"
