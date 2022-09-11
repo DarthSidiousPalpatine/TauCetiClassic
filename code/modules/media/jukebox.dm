@@ -208,7 +208,7 @@ var/global/loopModeNames = list(
 		if(newfreq)
 			if(!IS_INTEGER(newfreq))
 				newfreq *= 10 // shift the decimal one place
-			if(newfreq > 900 && newfreq < 2000) // Between (90.0 and 100.0)
+			if(newfreq > 900 && newfreq < 2000) // Between (90.0 and 200.0)
 				disconnect_frequency()
 				media_frequency = newfreq
 				connect_frequency()
@@ -450,6 +450,142 @@ var/global/loopModeNames = list(
 	else
 		..()
 
+/obj/machinery/media/jukebox/radio
+	name = "Radio Station"
+	desc = "A radio station with integrated music player."
+	icon = 'icons/obj/jukebox.dmi'
+	icon_state = "radio-nopower"
+	density = TRUE
+
+	anchored = TRUE
+	playing = 0
+	transmitting = TRUE
+
+	state_base = "radio"
+	media_frequency = 1441
+
+	var/obj/item/device/radio/intercom/Radio_Intercom
+
+/obj/machinery/media/jukebox/radio/atom_init()
+	. = ..()
+	Radio_Intercom = new(src)
+	Radio_Intercom.broadcasting = 1
+	Radio_Intercom.listening = 0
+	Radio_Intercom.frequency = media_frequency
+
+	playlist_id = "bar"
+	current_song = 0
+	last_reload=world.time
+	playlist=null
+	update_icon()
+	update_music()
+
+/obj/machinery/media/jukebox/radio/attackby(obj/item/W, mob/user, params)
+	if(iswrench(W))
+		return
+	else
+		..()
+
+/obj/machinery/media/jukebox/radio/ui_interact(mob/user)
+	user.SetNextMove(CLICK_CD_INTERACT)
+	if(stat & NOPOWER)
+		to_chat(usr, "<span class='warning'>You don't see anything to mess with.</span>")
+		return
+	if(stat & BROKEN && playlist!=null)
+		user.visible_message("<span class='warning'><b>[user.name] smacks the side of \the [src.name].</b></span>","<span class='warning'>You hammer the side of \the [src.name].</span>")
+		stat &= ~BROKEN
+		playlist=null
+		playing=emagged
+		update_icon()
+		return
+	var/t = "<h1>Jukebox Interface</h1>"
+	t += "<b>Power:</b> <a href='?src=\ref[src];power=1'>[playing?"On":"Off"]</a><br />"
+	t += "<b>Play Mode:</b> <a href='?src=\ref[src];mode=1'>[loopModeNames[loop_mode]]</a><br />"
+	t += "<b>Transmitter:</b> <a href='?src=\ref[src];transmit=1'>[transmitting?"On":"Off"]</a><BR>"
+	if(playlist == null)
+		t += "\[DOWNLOADING PLAYLIST, PLEASE WAIT\]"
+	else
+		if(check_reload())
+			t += "<b>Playlist:</b> "
+			for(var/plid in playlists)
+				t += "<a href='?src=\ref[src];playlist=[plid]'>[playlists[plid]]</a>"
+		else
+			t += "<i>Please wait before changing playlists.</i>"
+		t += "<br />"
+		if(current_song && current_song < playlist.len)
+			var/datum/song_info/song = playlist[current_song]
+			t += "<b>Current song:</b> [song.artist] - [song.title]<br />"
+		t += "<table class='prettytable'><tr><th colspan='2'>Artist - Title</th><th>Album</th></tr>"
+		var/i
+		for(i = 1,i <= playlist.len,i++)
+			var/datum/song_info/song=playlist[i]
+			t += "<tr><th>#[i]</th><td><A href='?src=\ref[src];song=[i]' class='nobg'>[song.displaytitle()]</A></td><td>[song.album]</td></tr>"
+		t += "</table>"
+
+	var/datum/browser/popup = new (user,"jukebox",name,420,700)
+	popup.set_content(t)
+	popup.open()
+
+/obj/machinery/media/jukebox/radio/process()
+	if(!playlist)
+		var/url = "[config.media_base_url]/index.php?playlist=[playlist_id]"
+		//testing("[src] - Updating playlist from [url]...")
+		var/response = world.Export(url)
+		playlist = list()
+		if(response)
+			var/json = file2text(response["CONTENT"])
+			if("/>" in json)
+				visible_message("<span class='warning'>[bicon(src)] \The [src] buzzes, unable to update its playlist.</span>","<em>You hear a buzz.</em>")
+				stat &= BROKEN
+				update_icon()
+				return
+			var/songdata = json_decode(json)
+			for(var/list/record in songdata)
+				playlist += new /datum/song_info(record)
+			if(playlist.len == 0)
+				visible_message("<span class='warning'>[bicon(src)] \The [src] buzzes, unable to update its playlist.</span>","<em>You hear a buzz.</em>")
+				stat &= BROKEN
+				update_icon()
+				return
+			visible_message("<span class='notice'>[bicon(src)] \The [src] beeps, and the menu on its front fills with [playlist.len] items.</span>","<em>You hear a beep.</em>")
+			if(autoplay)
+				playing=1
+				autoplay=0
+			updateUsrDialog()
+		else
+			//testing("[src] failed to update playlist: Response null.")
+			stat &= BROKEN
+			update_icon()
+			return
+	if(playing)
+		var/datum/song_info/song
+		if(current_song && current_song <= playlist.len)
+			song = playlist[current_song]
+		if(!current_song || (song && world.time >= media_start_time + song.length))
+			current_song = 1
+			switch(loop_mode)
+				if(JUKEMODE_SHUFFLE)
+					current_song = rand(1,playlist.len)
+				if(JUKEMODE_REPEAT_SONG)
+					current_song = current_song
+				if(JUKEMODE_PLAY_ONCE)
+					playing = 0
+					update_icon()
+					return
+			update_music()
+		if(transmitting)
+			Radio_Intercom.broadcasting = 1
+			Radio_Intercom.frequency = media_frequency
+			var/freq = num2text(media_frequency)
+			if(!(freq in media_transmitters))
+				connect_frequency()
+			if(freq in media_receivers)
+				for(var/obj/machinery/media/speaker/Speaker in media_receivers[freq])
+					Speaker.receive_broadcast(media_url,media_start_time)
+		else
+			Radio_Intercom.broadcasting = 0
+			disconnect_frequency()
+
 /obj/machinery/media/speaker
 	name = "Speaker"
 	desc = "Stay tuned!"
@@ -462,7 +598,16 @@ var/global/loopModeNames = list(
 
 	playing = 0
 	var/on = FALSE
-	var/media_frequency = 1984
+	var/media_frequency = 1441
+
+	var/obj/item/device/radio/intercom/Speaker_Intercom
+
+/obj/machinery/media/speaker/atom_init()
+	. = ..()
+	Speaker_Intercom = new(src)
+	Speaker_Intercom.broadcasting = 0
+	Speaker_Intercom.listening = 1
+	Speaker_Intercom.frequency = media_frequency
 
 /obj/machinery/media/speaker/ui_interact(mob/user)
 	var/dat = "<TT>"
@@ -506,6 +651,7 @@ var/global/loopModeNames = list(
 			if(newfreq > 900 && newfreq < 2000) // Between (90.0 and 100.0)
 				disconnect_frequency()
 				media_frequency = newfreq
+				Speaker_Intercom.frequency = media_frequency
 				connect_frequency()
 			else
 				to_chat(usr, "<span class='warning'>Invalid FM frequency. (90.0, 200.0)</span>")
