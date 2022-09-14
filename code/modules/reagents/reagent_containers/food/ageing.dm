@@ -16,14 +16,21 @@
     var/image/jar
     var/list/previous_contents = list()
     var/memory_saved = FALSE
+    var/list/name_to_type = list("tomato" = /obj/item/weapon/reagent_containers/food/snacks/grown/tomato, "cucumber" = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber)
 
 /obj/structure/ageing_shelf/atom_init()
-    . = ..()
-    jar = image('icons/obj/cond_shelf.dmi', icon_state = "jar")
-    Read_Memory()
-    for(var/obj/item/weapon/reagent_containers/item_liquid_container/jar/O in previous_contents)
-        contents += O
-    START_PROCESSING(SSobj, src)
+	. = ..()
+	jar = image('icons/obj/cond_shelf.dmi', icon_state = "jar")
+	Read_Memory()
+	for(var/i in previous_contents)
+		var/obj/item/weapon/reagent_containers/item_liquid_container/jar/can = new /obj/item/weapon/reagent_containers/item_liquid_container/jar()
+		for(1 to rand(1,4))
+			var/food = new name_to_type[i]()
+			can.handle_item_insertion(food)
+		contents += can
+		jars += 1
+	update_icon()
+	START_PROCESSING(SSobj, src)
 
 /obj/structure/ageing_shelf/update_icon()
     cut_overlays()
@@ -47,9 +54,6 @@
 
 /obj/structure/ageing_shelf/process()
     if(SSticker.current_state == GAME_STATE_FINISHED && !memory_saved)
-        for(var/obj/item/weapon/reagent_containers/item_liquid_container/jar/O in contents)
-            for(var/datum/reagent/consumable/R in O.reagents.reagent_list)
-                R.age += 1
         Write_Memory()
         STOP_PROCESSING(SSobj, src)
 
@@ -72,9 +76,12 @@
     S["contents"] 			>> previous_contents
 
     if(isnull(previous_contents))
-        previous_contents = list(/obj/item/weapon/reagent_containers/item_liquid_container/jar)
+        previous_contents = list("cucumber", "tomato", "cucumber")
 
 /obj/structure/ageing_shelf/proc/Write_Memory()
-    var/savefile/S = new /savefile("data/obj_saves/Ageing.sav")
-    S["contents"] 			<< contents
-    memory_saved = TRUE
+	var/savefile/S = new /savefile("data/obj_saves/Ageing.sav")
+	var/list/contents_names = list()
+	for(var/obj/item/weapon/reagent_containers/food/snacks/grown/Food in contents)
+		contents_names += Food.name
+	S["contents"] 			<< contents_names
+	memory_saved = TRUE

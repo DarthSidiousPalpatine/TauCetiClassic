@@ -32048,6 +32048,10 @@
 /obj/structure/window/reinforced{
 	dir = 4
 	},
+/obj/structure/ageing_shelf{
+	dir = 4;
+	pixel_x = -32
+	},
 /turf/simulated/floor{
 	dir = 8;
 	icon_state = "barber"
@@ -47236,18 +47240,17 @@
 /turf/simulated/floor/plating,
 /area/station/bridge/teleporter)
 "bGv" = (
-/obj/structure/closet/crate,
-/obj/item/toy/prize/honk,
-/obj/item/weapon/coin/bananium,
-/obj/item/weapon/coin/bananium{
-	pixel_x = -3
+/obj/structure/ageing_shelf{
+	dir = 4;
+	pixel_x = -32
 	},
-/obj/item/weapon/coin/bananium{
-	pixel_x = 7;
-	pixel_y = 5
+/obj/machinery/light/small{
+	dir = 1
 	},
-/turf/simulated/floor/plating,
-/area/station/maintenance/cargo)
+/turf/simulated/floor{
+	icon_state = "cult"
+	},
+/area/station/civilian/cold_room)
 "bGw" = (
 /obj/machinery/disposal,
 /obj/machinery/light{
@@ -48007,6 +48010,7 @@
 	dir = 4;
 	pixel_x = 12
 	},
+/obj/structure/closet/crate/freezer,
 /turf/simulated/floor{
 	icon_state = "showroomfloor"
 	},
@@ -48588,6 +48592,10 @@
 /obj/machinery/chem_master/condimaster{
 	name = "CondiMaster Neo";
 	pixel_x = -5
+	},
+/obj/machinery/firealarm{
+	dir = 8;
+	pixel_x = -24
 	},
 /turf/simulated/floor{
 	icon_state = "showroomfloor"
@@ -49208,13 +49216,8 @@
 /turf/simulated/floor/plating,
 /area/station/maintenance/disposal)
 "bJX" = (
-/obj/structure/closet/crate/freezer,
 /obj/machinery/atmospherics/components/unary/vent_pump/on{
 	dir = 4
-	},
-/obj/machinery/firealarm{
-	dir = 8;
-	pixel_x = -24
 	},
 /turf/simulated/floor{
 	dir = 1;
@@ -69706,6 +69709,13 @@
 	icon_state = "panelscorched"
 	},
 /area/station/storage/emergency)
+"dsO" = (
+/obj/structure/mineral_door/wood,
+/turf/simulated/floor{
+	dir = 8;
+	icon_state = "darkstairs_alone"
+	},
+/area/station/civilian/cold_room)
 "dtb" = (
 /obj/structure/cable{
 	d1 = 1;
@@ -77469,6 +77479,15 @@
 /obj/effect/decal/cleanable/dirt,
 /turf/simulated/floor/wood,
 /area/station/civilian/library)
+"mtf" = (
+/obj/structure/ageing_shelf{
+	dir = 4;
+	pixel_x = -32
+	},
+/turf/simulated/floor{
+	icon_state = "cult"
+	},
+/area/station/civilian/cold_room)
 "mty" = (
 /obj/structure/window/reinforced{
 	dir = 8
@@ -105198,11 +105217,11 @@ qex
 aMQ
 bEI
 bEW
-aSM
-aSM
-aSM
-bEW
-moP
+bDp
+bDp
+bDp
+bDp
+bDp
 wuI
 bDk
 bNk
@@ -105455,11 +105474,11 @@ aFf
 byP
 bEL
 bEW
-aSM
+bDp
 bGv
-aSM
-bEW
-aSM
+mtf
+mtf
+bDp
 qcd
 bDk
 bNk
@@ -105714,7 +105733,7 @@ bDp
 bDp
 bDp
 bDp
-bDp
+dsO
 bDp
 bDp
 qcd

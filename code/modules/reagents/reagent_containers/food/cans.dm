@@ -227,7 +227,7 @@
 	name = "Jar"
 	desc = "A jar for food preservation"
 	icon = 'icons/obj/drinks.dmi'
-	icon_state = "jar"
+	icon_state = "real_jar"
 	w_class = SIZE_TINY
 
 	//Liquid_vars
@@ -255,19 +255,20 @@
 	var/item_name = null
 	var/image/filling
 
-/obj/item/weapon/reagent_containers/item_liquid_container/jar/atom_init()
+/obj/item/weapon/reagent_containers/item_liquid_container/jar/atom_init(mapload)
 	. = ..()
-	if(prob(50))
-		item = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
-		can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled)
-		item_name = "pickled cucumber"
-	else
-		item = /obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled
-		can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled)
-		item_name = "pickled tomato"
-	for(var/i = 1 to rand(1, 7))
-		new item(src)
-		items += 1
+	if(mapload)
+		if(prob(50))
+			item = /obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled
+			can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/cucumber/pickled)
+			item_name = "pickled cucumber"
+		else
+			item = /obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled
+			can_hold = list(/obj/item/weapon/reagent_containers/food/snacks/grown/tomato/pickled)
+			item_name = "pickled tomato"
+		for(var/i = 1 to rand(1, 7))
+			new item(src)
+			items += 1
 	update_icon()
 
 	verbs += /obj/item/weapon/reagent_containers/item_liquid_container/proc/gulp_whole
