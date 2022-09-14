@@ -55,7 +55,7 @@
 
 /datum/modesbundle/mix
 	name = "Mix"
-	votable = TRUE
+	votable = FALSE
 
 /datum/modesbundle/mix/New()
 	for(var/type in subtypesof(/datum/game_mode/mix))
@@ -87,7 +87,7 @@
 	votable = TRUE
 
 /datum/modesbundle/all/secret/New()
-	black_types = subtypesof(/datum/game_mode/mix) + list(/datum/game_mode/extended)
+	black_types = subtypesof(/datum/game_mode/mix) + list(/datum/game_mode/extended, /datum/game_mode/malfunction)
 	..()
 
 /datum/modesbundle/run_anyway
