@@ -5242,13 +5242,6 @@
 	icon_state = "vault"
 	},
 /area/station/bridge/hop_office)
-"aWJ" = (
-/obj/random/vending/snack,
-/turf/simulated/floor{
-	dir = 5;
-	icon_state = "vault"
-	},
-/area/station/rnd/brainstorm_center)
 "aWP" = (
 /obj/structure/grille,
 /obj/machinery/door/firedoor,
@@ -20460,7 +20453,6 @@
 	},
 /area/station/hallway/primary/aft)
 "eKW" = (
-/obj/random/vending/snack,
 /obj/machinery/computer/security/telescreen{
 	desc = "Used for watching the Engineering Department.";
 	dir = 4;
@@ -33153,13 +33145,13 @@
 	},
 /area/station/maintenance/medbay)
 "hFZ" = (
-/obj/machinery/vending/cigarette,
 /obj/structure/noticeboard{
 	pixel_y = 28
 	},
 /obj/machinery/light{
 	dir = 1
 	},
+/obj/item/weapon/flora/random,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "vault"
@@ -37063,7 +37055,6 @@
 /turf/simulated/floor/carpet/green,
 /area/station/civilian/theatre)
 "iFP" = (
-/obj/random/vending/cola,
 /obj/machinery/requests_console/security{
 	pixel_x = -28
 	},
@@ -46868,8 +46859,6 @@
 	},
 /area/station/maintenance/brig)
 "lhj" = (
-/obj/structure/table,
-/obj/structure/bedsheetbin,
 /obj/machinery/light/small{
 	dir = 4
 	},
@@ -62768,7 +62757,6 @@
 	},
 /area/station/civilian/gym)
 "pfu" = (
-/obj/random/vending/snack,
 /obj/machinery/light{
 	dir = 8
 	},
@@ -63997,10 +63985,14 @@
 /turf/simulated/wall,
 /area/space)
 "pxK" = (
-/obj/random/vending/cola,
 /obj/machinery/firealarm{
 	pixel_y = 22
 	},
+/obj/machinery/light/small{
+	dir = 4
+	},
+/obj/structure/bedsheetbin,
+/obj/structure/table,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "cafeteria"
@@ -64803,8 +64795,6 @@
 	},
 /area/station/engineering/break_room)
 "pIG" = (
-/obj/structure/table,
-/obj/item/weapon/storage/fancy/donut_box,
 /obj/structure/cable{
 	d2 = 4;
 	icon_state = "0-4"
@@ -66779,10 +66769,10 @@
 /turf/simulated/floor/whitegreed,
 /area/station/aisat/ai_chamber)
 "qhY" = (
-/obj/random/vending/snack,
 /obj/structure/extinguisher_cabinet{
 	pixel_y = 29
 	},
+/obj/structure/bookcase/manuals/medical,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "cafeteria"
@@ -68197,7 +68187,6 @@
 /obj/structure/sign/warning/smoking{
 	pixel_x = 32
 	},
-/obj/machinery/vending/cigarette,
 /obj/machinery/light/small{
 	dir = 4
 	},
@@ -70601,7 +70590,6 @@
 /turf/simulated/floor/plating,
 /area/station/maintenance/auxsolarport)
 "rhW" = (
-/obj/random/vending/cola,
 /obj/machinery/status_display{
 	pixel_y = -32
 	},
@@ -84633,7 +84621,6 @@
 	},
 /area/station/cargo/office)
 "uKk" = (
-/obj/item/weapon/flora/random,
 /turf/simulated/floor{
 	icon_state = "dark"
 	},
@@ -90591,7 +90578,6 @@
 /turf/simulated/floor,
 /area/station/engineering/atmos)
 "wfl" = (
-/obj/structure/bookcase/manuals/medical,
 /obj/machinery/light_switch{
 	pixel_y = -28
 	},
@@ -94801,7 +94787,8 @@
 /turf/simulated/floor/plating,
 /area/station/maintenance/dormitory)
 "xiP" = (
-/obj/machinery/vending/cigarette,
+/obj/structure/table,
+/obj/item/weapon/storage/fancy/donut_box,
 /turf/simulated/floor{
 	dir = 9;
 	icon_state = "darkred"
@@ -124304,7 +124291,7 @@ dpu
 jIA
 fVn
 jNG
-aWJ
+gEB
 kXn
 pOV
 pOV

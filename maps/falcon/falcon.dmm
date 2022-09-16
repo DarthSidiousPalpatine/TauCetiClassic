@@ -3467,14 +3467,14 @@
 /obj/machinery/light{
 	dir = 1
 	},
-/obj/random/vending/cola,
+/obj/structure/stool/bed/chair/metal/black,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "vault"
 	},
 /area/station/hallway/primary/central)
 "afX" = (
-/obj/random/vending/snack,
+/obj/structure/stool/bed/chair/metal/black,
 /turf/simulated/floor{
 	icon_state = "dark"
 	},
@@ -24617,11 +24617,13 @@
 	},
 /area/station/maintenance/science)
 "oQx" = (
-/obj/random/vending/snack,
 /obj/machinery/light,
 /obj/machinery/firealarm{
 	dir = 1;
 	pixel_y = -22
+	},
+/obj/structure/stool/bed/chair/metal/black{
+	dir = 1
 	},
 /turf/simulated/floor{
 	dir = 4;
@@ -25420,7 +25422,9 @@
 	},
 /area/station/medical/surgeryobs)
 "pBw" = (
-/obj/random/vending/cola,
+/obj/structure/stool/bed/chair/metal/black{
+	dir = 1
+	},
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "vault"

@@ -2387,7 +2387,7 @@
 /obj/structure/reagent_dispensers/peppertank{
 	pixel_x = 30
 	},
-/obj/random/vending/cola,
+/obj/structure/table,
 /turf/simulated/floor{
 	icon_state = "redcorner"
 	},
@@ -10893,17 +10893,17 @@
 	},
 /area/station/civilian/library)
 "asr" = (
-/obj/random/vending/cola,
+/obj/machinery/vending/cigarette,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "red"
 	},
 /area/station/hallway/primary/fore)
 "ass" = (
-/obj/machinery/vending/coffee,
 /obj/structure/sign/nanotrasen{
 	pixel_y = 32
 	},
+/obj/structure/table,
 /turf/simulated/floor{
 	dir = 4;
 	icon_state = "redcorner"
@@ -12521,6 +12521,7 @@
 /obj/machinery/light/small{
 	dir = 4
 	},
+/obj/machinery/vending/coffee,
 /turf/simulated/floor/wood{
 	icon_state = "wood-broken6"
 	},
@@ -16701,7 +16702,6 @@
 	},
 /area/station/hallway/primary/fore)
 "aDt" = (
-/obj/structure/table,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "redcorner"
@@ -16994,7 +16994,7 @@
 	},
 /area/station/rnd/xenobiology)
 "aDZ" = (
-/obj/machinery/vending/cigarette,
+/obj/machinery/vending/coffee,
 /turf/simulated/floor{
 	dir = 4;
 	icon_state = "redcorner"
@@ -17068,7 +17068,6 @@
 	network = list("Security");
 	pixel_y = 30
 	},
-/obj/random/vending/snack,
 /turf/simulated/floor{
 	dir = 9;
 	icon_state = "red"
@@ -21769,7 +21768,9 @@
 /turf/simulated/wall,
 /area/station/hallway/primary/central)
 "aMS" = (
-/obj/random/vending/cola,
+/obj/structure/stool/bed/chair/metal/black{
+	dir = 4
+	},
 /turf/simulated/floor{
 	icon_state = "dark"
 	},
@@ -22407,12 +22408,6 @@
 	},
 /turf/simulated/floor/plating,
 /area/station/bridge)
-"aOe" = (
-/obj/random/vending/snack,
-/turf/simulated/floor{
-	icon_state = "dark"
-	},
-/area/station/hallway/primary/central)
 "aOf" = (
 /obj/structure/rack,
 /obj/item/weapon/wrench,
@@ -25742,12 +25737,12 @@
 /turf/simulated/floor/engine/vacuum,
 /area/station/rnd/mixing)
 "aUf" = (
-/obj/random/vending/snack,
 /obj/machinery/camera{
 	c_tag = "Research Break";
 	dir = 4;
 	network = list("SS13","Research")
 	},
+/obj/machinery/vending/coffee,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "whitehall"
@@ -25757,14 +25752,18 @@
 /obj/machinery/newscaster{
 	pixel_y = 32
 	},
-/obj/random/vending/cola,
+/obj/structure/table,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "whitehall"
 	},
 /area/station/rnd/scibreak)
 "aUh" = (
-/obj/machinery/vending/coffee,
+/obj/structure/table,
+/obj/machinery/kitchen_machine/microwave{
+	pixel_x = -3;
+	pixel_y = 6
+	},
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "whitehall"
@@ -30273,11 +30272,6 @@
 	},
 /area/station/rnd/scibreak)
 "bbV" = (
-/obj/structure/table,
-/obj/machinery/kitchen_machine/microwave{
-	pixel_x = -3;
-	pixel_y = 6
-	},
 /obj/machinery/light_switch{
 	pixel_y = -28
 	},
@@ -43825,9 +43819,11 @@
 /turf/environment/space/shuttle,
 /area/shuttle/escape_pod2/station)
 "bAo" = (
-/obj/random/vending/snack,
 /obj/machinery/camera{
 	c_tag = "Central Hallway South-East";
+	dir = 8
+	},
+/obj/structure/stool/bed/chair/metal/black{
 	dir = 8
 	},
 /turf/simulated/floor{
@@ -48006,7 +48002,6 @@
 	name = "Break Room APC";
 	pixel_x = 28
 	},
-/obj/structure/reagent_dispensers/water_cooler,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "cafeteria"
@@ -50619,13 +50614,6 @@
 	icon_state = "neutral"
 	},
 /area/station/civilian/dormitories)
-"bMH" = (
-/obj/machinery/vending/coffee,
-/turf/simulated/floor{
-	dir = 5;
-	icon_state = "cafeteria"
-	},
-/area/station/medical/medbreak)
 "bMI" = (
 /obj/structure/table/reinforced,
 /obj/machinery/ignition_switch{
@@ -52137,12 +52125,12 @@
 /turf/simulated/floor,
 /area/station/hallway/primary/starboard)
 "bPv" = (
-/obj/random/vending/snack,
 /obj/item/device/radio/intercom{
 	frequency = 1485;
 	name = "Station Intercom (Medbay)";
 	pixel_x = 28
 	},
+/obj/machinery/vending/coffee,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "cafeteria"
@@ -53227,7 +53215,7 @@
 	dir = 8;
 	pixel_x = 24
 	},
-/obj/random/vending/cola,
+/obj/structure/reagent_dispensers/water_cooler,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "cafeteria"
@@ -54979,10 +54967,10 @@
 /turf/simulated/floor,
 /area/station/construction/assembly_line)
 "bWF" = (
-/obj/random/vending/cola,
 /obj/machinery/alarm{
 	pixel_y = 28
 	},
+/obj/machinery/vending/coffee,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -55147,13 +55135,6 @@
 	},
 /obj/effect/landmark/start/atmospheric_technician,
 /turf/simulated/floor,
-/area/station/engineering/break_room)
-"bXd" = (
-/obj/structure/closet/wardrobe/engineering_yellow,
-/turf/simulated/floor{
-	dir = 4;
-	icon_state = "yellow"
-	},
 /area/station/engineering/break_room)
 "bXl" = (
 /obj/structure/grille,
@@ -69725,7 +69706,12 @@
 /obj/machinery/newscaster{
 	pixel_y = 30
 	},
-/obj/machinery/vending/cigarette,
+/obj/structure/table/glass,
+/obj/item/weapon/storage/firstaid/regular{
+	pixel_x = -2;
+	pixel_y = 4
+	},
+/obj/item/bodybag/cryobag,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "yellow"
@@ -70850,7 +70836,11 @@
 /obj/structure/sign/warning/enginesafety{
 	pixel_y = 32
 	},
-/obj/machinery/vending/coffee,
+/obj/structure/rack,
+/obj/item/weapon/airlock_electronics,
+/obj/item/weapon/airlock_electronics,
+/obj/item/stack/cable_coil/red,
+/obj/item/stack/cable_coil/red,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -71916,16 +71906,6 @@
 	icon_state = "dark"
 	},
 /area/station/medical/morgue)
-"ghX" = (
-/obj/structure/rack,
-/obj/item/weapon/storage/box,
-/obj/item/weapon/storage/box,
-/obj/item/weapon/storage/belt/utility,
-/turf/simulated/floor{
-	dir = 4;
-	icon_state = "yellow"
-	},
-/area/station/engineering/break_room)
 "gib" = (
 /obj/structure/closet/secure_closet/recycler,
 /obj/machinery/status_display{
@@ -72795,12 +72775,6 @@
 /turf/simulated/floor/plating,
 /area/station/hallway/secondary/exit)
 "hga" = (
-/obj/structure/table/glass,
-/obj/item/weapon/storage/firstaid/regular{
-	pixel_x = -2;
-	pixel_y = 4
-	},
-/obj/item/bodybag/cryobag,
 /obj/machinery/computer/security/telescreen{
 	desc = "Used for watching the Engineering Department.";
 	dir = 8;
@@ -72808,6 +72782,7 @@
 	network = list("Engineering");
 	pixel_x = 28
 	},
+/obj/structure/closet/wardrobe/engineering_yellow,
 /turf/simulated/floor{
 	dir = 4;
 	icon_state = "yellow"
@@ -78138,17 +78113,6 @@
 /obj/structure/disposalpipe/segment,
 /turf/simulated/floor,
 /area/station/cargo/office)
-"nrb" = (
-/obj/structure/rack,
-/obj/item/weapon/airlock_electronics,
-/obj/item/weapon/airlock_electronics,
-/obj/item/stack/cable_coil/red,
-/obj/item/stack/cable_coil/red,
-/turf/simulated/floor{
-	dir = 4;
-	icon_state = "yellow"
-	},
-/area/station/engineering/break_room)
 "nrz" = (
 /obj/structure/cable{
 	d1 = 4;
@@ -79232,7 +79196,9 @@
 	},
 /area/station/civilian/kitchen)
 "oHi" = (
-/obj/machinery/vending/donut,
+/obj/structure/stool/bed/chair/metal/black{
+	dir = 8
+	},
 /turf/simulated/floor{
 	icon_state = "dark"
 	},
@@ -84195,7 +84161,10 @@
 	},
 /area/station/civilian/hydroponics)
 "vVm" = (
-/obj/random/vending/snack,
+/obj/structure/table/glass,
+/obj/item/weapon/storage/box,
+/obj/item/weapon/storage/box,
+/obj/item/weapon/storage/belt/utility,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -111106,8 +111075,8 @@ bHu
 bIv
 bJr
 bFW
-oHi
-aOe
+aMS
+aMS
 bCX
 rCb
 bIZ
@@ -117758,7 +117727,7 @@ awT
 awT
 asM
 aef
-aOe
+aMS
 aMS
 aPE
 aKx
@@ -118326,9 +118295,9 @@ bSV
 dul
 kLc
 bVc
-bXd
-ghX
-nrb
+bVc
+bVc
+bVc
 hga
 cie
 bSP
@@ -120357,7 +120326,7 @@ fwb
 bjO
 bxi
 aRD
-aMS
+oHi
 bAo
 bAf
 bIS
@@ -128594,7 +128563,7 @@ bLE
 bNR
 bIw
 bCm
-chb
+bKN
 bHY
 bgd
 bgg
@@ -129365,7 +129334,7 @@ aSj
 bNU
 bPv
 bRN
-bMH
+chb
 bHY
 bHY
 bHY
