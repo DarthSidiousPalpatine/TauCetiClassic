@@ -5,8 +5,9 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
  -->
 
 {{if data.owner}}
-	<div class="item">
-		<div class="itemLabelNarrow">
+	<div class="Statusbar">
+	<div class="floatLeft">
+		<div class="itemLabelWide">
 			 <b>Горячие клавиши</b>:
         </div>
         <div class="itemContent">
@@ -16,14 +17,8 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 			{{if data.mode != 0}} {{:helper.link('Назад', 'arrowreturn-1-w', {'choice' : "Return"}, null, 'fixedLeft')}} {{/if}}
 		</div>
 	</div>
-	<br>
-	<div class="item">
-		<div class="itemLabelNarrow">
-			<b>Время</b>:
-		</div>
-		<div class="itemContent">
-			<span class="average">{{:data.stationTime}}&emsp;[{{:data.securityLevel}}]</span>
-		</div>
+	<div class="floatRight">
+		<span class="average">{{:data.stationTime}}&emsp;[{{:data.securityLevel}}]</span>
 	</div>
     {{if data.shuttle_eta}}
         <div class="item">
@@ -35,22 +30,24 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
             </div>
         </div>
     {{/if}}
-    <br>
+	</div>
+    
 
 
 	{{if data.mode == 0}} <!-- Main Menu -->
-        <div class="item">
+		<div class="Main_header">
+		<br>
+        <div class="floatLeft">
             <div class="itemLabelNarrow">
-                Аккаунт:
+                <b>Аккаунт</b>:
             </div>
             <div class="itemContent">
                 <span class="average">{{:data.owner}}, {{:data.ownjob}}</span>
             </div>
         </div>
-        <br>
-        <div class="item">
+        <div class="floatRight">
             <div class="itemLabelNarrow">
-                ИН:
+                <b>ИН</b>:
             </div>
             <div class="itemContent">
                 {{:helper.link(data.idLink, 'eject', {'choice' : "Authenticate"}, data.idInserted ? null : 'disabled', data.idInserted ? 'floatright' : 'fixedLeft')}}
@@ -69,6 +66,7 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                 {{/if}}
             </div>
         </div>
+		</div>
         <div class="item">
             <H2>Приложения</H2>
         </div>
@@ -194,27 +192,20 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 
 
 	{{else data.mode == 1}} <!-- Notekeeper -->
-        <div class="item">
-            <div class="itemLabel">
-                <b>Записи</b>:
-            </div>
+		<div class="Note_header">
+            <center><H3><b>Блокнот</b>:</span></H3></center>
         </div>
-        <div class="statusDisplayRecords">
-            <div class="item">
-                <div class="itemContent" style="width: 100%;">
-                        <span class="average">{{:data.note}}</span>
-                </div>
-            </div>
-        </div>
-        <div class="item">
-            <div class="itemLabel">
-                {{:helper.link('Редактировать', 'gear', {'choice' : "Edit"}, null, 'fixedLeftWide')}}
-            </div>
+        <div class="Note">
+			{{:data.note}}<br>
+			{{:helper.link('Редактировать', 'pencil', {'choice' : "Edit"}, null, 'floatRight')}}<br>
         </div>
 
 
     {{else data.mode == 2}} <!-- Messenger -->
-        <H2>Почта</H2>
+		<div class="Chat_header" style="overflow: hidden;">
+			<div class="Chat_logo">
+				<center><H2>Почта</H2></center>
+			</div>
         <div class="item">
             <div class="itemLabelNarrow">
                 <b>Параметры</b>:
@@ -223,11 +214,10 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                 {{:helper.link(data.message_silent==1 ? 'Режим: Звук' : 'Режим: Без звука', data.message_silent==1 ? 'volume-off' : 'volume-on', {'choice' : "Toggle Ringer"}, null, 'fixedLeftWide')}}
                 {{:helper.link(data.toff==1 ? 'Статус: Не в сети' : 'Статус: В сети',data.toff==1 ? 'close':'check', {'choice' : "Toggle Messenger"}, null, 'fixedLeftWide')}}
                 {{:helper.link('Изменить рингтон', 'comment', {'choice' : "Ringtone"}, null, 'fixedLeftWide')}}
-                {{:helper.link('Удалить все чаты', 'trash', {'choice' : "Clear", 'option' : "All"}, null, 'fixedLeftWider')}}
+                {{:helper.link('Удалить все чаты', 'trash', {'choice' : "Clear", 'option' : "All"}, null, 'fixedLeftWide')}}
             </div>
         </div>
         {{if data.toff == 0}}
-            <br><br>
             {{if data.cartridge}}
                 {{if data.cartridge.charges}}
                     <div class="item">
@@ -235,7 +225,6 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                         {{if data.cartridge.access.access_detonate_pda}} зарядов осталось. {{/if}}
                         {{if data.cartridge.access.access_clown || data.cartridge.access.access_mime}} троянов осталось. {{/if}}
                         </b>
-                        <br><br>
                     </div>
                 {{/if}}
             {{/if}}
@@ -243,8 +232,9 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
             {{if data.pda_count == 0}}
                 <b>Нет других КПК</b>
             {{else}}
-                <H3>Активные чаты</H3>
+                <center><H3>Активные чаты</H3></center>
                 {{for data.convopdas}}
+					<div class="Chat" style="overflow: auto;">
                     <div class="item">
                         {{:helper.link(value.Name, 'circle-arrow-s', {'choice' : "Select Conversation", 'convo' : value.Reference } , null, value.fixedLeftWider)}}
                         {{if data.cartridge}}
@@ -259,9 +249,11 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                             {{/if}}
                         {{/if}}
                     </div>
+					</div>
                 {{/for}}
-                <H3>Создать новый чат</H3>
+                <center><H3>Создать новый чат</H3><center>
                 {{for data.pdas}}
+					<div class="Chat" style="overflow: auto;">
                     <div class="item">
                         {{:helper.link(value.Name, 'circle-arrow-s', {'choice' : "Message", 'target' : value.Reference}, null, value.fixedLeftWider)}}
                         {{if data.cartridge}}
@@ -270,40 +262,35 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                             {{if data.cartridge.access.access_mime}}  {{:helper.link('*Отправить вирус*', 'circle-arrow-s', {'choice' : "Send Silence", 'target' : value.Reference}, null, 'fixedLeft')}}  {{/if}}
                         {{/if}}
                     </div>
+					</div>
                 {{/for}}
             {{/if}}
         {{/if}}
+		</div>
 
 
 	{{else data.mode == 21}} <!-- Messenger -->
-	    <H2>Почта</H2>
-        <div class="item">
-            <div class="itemLabel">
-                <b>Параметры переписки</b>:
-            </div>
-            <div class ="itemContent">
-                {{:helper.link('Очистить историю сообщений', 'trash', {'choice' : "Clear", 'option' : "Convo"}, null, 'fixedLeftWide')}}
-            </div>
-        </div>
-        <br>
-        <br>
-        <H3>Чат с:&nbsp;<span class="average">{{:data.convo_name}}&nbsp;({{:data.convo_job}})</span></H3>
-        <div class="Chat" style="overflow: auto;">
-            <div class="item">
-                <div class="itemContent" style="width: 100%;">
-                    {{for data.messages}}
-                        {{if data.active_conversation == value.target}}
-                            {{if value.sent==0}}
-                                <span class="message_left"><left><small><span class="average">{{:value.reciever}}</span></small></left><br>{{:value.message}}</span><br>
-                            {{else}}
-                                <span class="message_right">{{:value.message}}</span><br>
-                            {{/if}}
-                        {{/if}}
-                    {{/for}}
-                </div>
-            </div>
-        </div>
-        {{:helper.link('Ответить', 'comment', {'choice' : "Message", 'target': data.active_conversation}, null, 'fixedLeft')}}
+	    <div class="Chat_header" style="overflow: hidden;">
+			<div class="Chat_logo">
+				<center><H2>Почта</H2></center>
+			</div>
+			<H3><span class="floatLeft">Чат с:&nbsp;<span class="average">{{:data.convo_name}}&nbsp;({{:data.convo_job}})</span></span>
+			<small>{{:helper.link('Очистить историю сообщений', 'trash', {'choice' : "Clear", 'option' : "Convo"}, null, 'floatRight')}}</small></H3><br>
+			<div class="Chat" style="overflow: auto;">
+				<div class="itemContent" style="width: 100%;">
+					{{for data.messages}}
+						{{if data.active_conversation == value.target}}
+							{{if value.sent==0}}
+								<span class="message_left"><small><span class="average">{{:value.reciever}}</span></small><br>{{:value.message}}</span><br>
+							{{else}}
+								<span class="message_right">{{:value.message}}</span><br>
+							{{/if}}
+						{{/if}}
+					{{/for}}
+				</div>
+			</div>
+			<center>{{:helper.link('Ответить', 'comment', {'choice' : "Message", 'target': data.active_conversation}, null, 'new_message')}}</center>
+		</div>
 
 
 	{{else data.mode== 41}} <!-- Manifest uses cached data so we only use nanowriter when shit changes.-->
@@ -1024,21 +1011,23 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
         </div> -->
 
     {{else data.mode == 7}} <!-- Finance Management -->
-        <div class="item">
-            <H2>Кошелёк</H2>
-        </div>
-        <div class="item">
-            <div class="itemLabelWide">
-                <b>Баланс:</b> <span class="good">{{:data.money}}$</span><br>
-                <b>Зарплата:</b> <span class="good">{{:data.salary}}$</span><br>
-                <b>Следующее получение:</b> <span class="average">{{:data.time_to_next_pay}}</span>
-            </div>
-            <div class="itemContentSmall">
-                {{:helper.link('Перевод', null, {'choice' : "Transaction Menu"}, null, null)}}
-                {{:helper.link('История переводов', null, {'choice' : "Transaction Log"}, null, null)}}
-                {{if data.boss}} {{:helper.link('Зарплаты подчинённых', null, {'choice' : "Staff Salary"}, null, null)}} {{/if}}
-            </div>
-        </div>
+		<div class="Finance">
+			<div class="Finance_header">
+				<center><H2>Кошелёк</H2></center>
+			</div>
+			<div class="item">
+				<div class="fixedLeftWider">
+					<center><b>Баланс:</b> <H3><span class="good">{{:data.money}}$</span></H3><br>
+					<b>Зарплата:</b> <H3><span class="good">{{:data.salary}}$</span></H3>
+					<small><b>Следующее получение:</b> <span class="average">{{:data.time_to_next_pay}}</span></small></center>
+				</div>
+				<div class="fixedRightWider">
+					{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_buttons')}}
+					{{:helper.link('<b>История переводов</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_buttons')}}
+					{{if data.boss}} {{:helper.link('<b>Зарплаты подчинённых</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_buttons')}} {{/if}}
+				</div>
+			</div>
+		</div>
     {{else data.mode == 71}} <!-- Show Transaction Menu -->
         <div class="item">
             <div class="statusDisplayRecords">

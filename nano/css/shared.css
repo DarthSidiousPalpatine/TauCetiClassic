@@ -148,6 +148,32 @@ h4 {
     font-size: 12px;
 }
 
+.Statusbar {
+	background: #212121;
+	width: 100%;
+	height: 25px;
+	float: left;
+}
+
+.Main_header {
+    background: #272727;
+    color: #ffffff;
+	width: 100%;
+	height: 75px;
+}
+
+.Chat_logo {
+    background: #5B575F;
+    color: #ffffff;
+	width: 100%;
+}
+
+.Chat_header {
+    background: #4B474F;
+    color: #ffffff;
+    border: 3px solid #5B575F;
+}
+
 .Chat {
     background: #312C35;
     color: #ffffff;
@@ -157,25 +183,75 @@ h4 {
 }
 
 .message_left {
-	width: 60%;
+	max-width: 60%;
     color: #ffffff;
     font-weight: bold;
 	float: left;
 	text-align: left;
 	background: #1E1D20;
-	padding: 3px;
+	padding: 7px;
 	border: 1px solid #312C35;
+	border-radius: 100px;
+	border-top-right-radius: 30px;
+	clear: both;
 }
 
 .message_right {
-	width: 60%;
+	max-width: 60%;
     color: #ffffff;
     font-weight: bold;
 	float: right;
 	text-align: left;
 	background: #4B474F;
-	padding: 3px;
+	padding: 7px;
 	border: 1px solid #312C35;
+	border-radius: 100px;
+	border-top-right-radius: 30px;
+	clear: both;
+}
+
+.new_message {
+    color: #e9c183;
+	background: #312C35;
+	margin: 8px;
+}
+
+.Note_header {
+    color: #171717;
+	background: #c5c4bc;
+	padding: 8px;
+}
+
+.Note {
+    color: #171717;
+	background: #f2f0e6;
+	border: 4px solid #c5c4bc;
+	text-decoration: underline;
+	text-decoration-style: dashed;
+	padding: 8px;
+}
+
+.Finance {
+    color: #171717;
+	background: #f2f0e6;
+	border: 5px solid #2f8d12;
+}
+
+.Finance_header {
+    color: #e9c183;
+	background: #2f8d12;
+	padding: 8px;
+}
+
+.Finance_buttons {
+	color: #FFFFFF;
+    width: 165px;
+	height: 30px;
+    float: right;
+	text-align: center;
+	padding: 8px;
+	background: #297b10;
+	border: 2px solid #f2f0e6;
 }
 
 .white {
@@ -438,6 +514,10 @@ div.notice {
     border-color: #666666;
 }
 
+.floatLeft {
+    float: left;
+}
+
 .fixedLeft {
     width: 110px;
     float: left;
@@ -466,6 +546,27 @@ div.notice {
 
 .floatRight {
     float: right;
+}
+
+.fixedRightWide {
+    width: 165px;
+    float: right;
+}
+
+.fixedRightWider {
+    width: 220px;
+    float: right;
+}
+
+.fixedRightWidest {
+    width: 250px;
+    float: right;
+}
+
+.fixedRightWiderRed {
+    width: 220px;
+    float: right;
+	background: #ee0000;
 }
 
 /* Used in PDA */
