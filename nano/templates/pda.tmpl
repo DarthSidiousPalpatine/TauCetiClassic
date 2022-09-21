@@ -1,4 +1,4 @@
-
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 <!--
 Title: PDA UI
 Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
@@ -11,32 +11,27 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 			 <b>Горячие клавиши</b>:
         </div>
         <div class="itemContent">
-			<!--{{:helper.link('Refresh', 'refresh', {'choice' : "Refresh"}, null, 'fixedLeft')}}-->
-			{{:helper.link('Выйти', 'gear', {'choice' : "Close"}, null, 'fixedLeft')}}
-			{{if data.idInserted}} {{:helper.link('Перезагрузить', 'eject', {'choice' : "UpdateInfo"}, null, 'fixedLeftWide')}} {{/if}}
-			{{if data.mode != 0}} {{:helper.link('Назад', 'arrowreturn-1-w', {'choice' : "Return"}, null, 'fixedLeft')}} {{/if}}
+			<!--{{:helper.link('Refresh', 'refresh', {'choice' : "Refresh"}, null, 'floatLeft')}}-->
+			{{:helper.link('Выйти', 'gear', {'choice' : "Close"}, null, 'floatLeft')}}
+			{{if data.idInserted}} {{:helper.link('Перезагрузить', 'eject', {'choice' : "UpdateInfo"}, null, 'floatLeft')}} {{/if}}
+			{{if data.mode != 0}} {{:helper.link('Назад', 'arrowreturn-1-w', {'choice' : "Return"}, null, 'floatLeft')}} {{/if}}
 		</div>
 	</div>
 	<div class="floatRight">
+		{{if data.shuttle_eta}}
+            <div class="itemLabelNarrow">
+                <b>Шаттл</b>:
+            </div>
+            <span class="average">({{:data.shuttle_eta}})  </span>
+		{{/if}}
 		<span class="average">{{:data.stationTime}}&emsp;[{{:data.securityLevel}}]</span>
 	</div>
-    {{if data.shuttle_eta}}
-        <div class="item">
-            <div class="itemLabelNarrow">
-                <b>Прибытие шаттла</b>:
-            </div>
-            <div class="itemContent">
-                <span class="average">{{:data.shuttle_eta}}</span>
-            </div>
-        </div>
-    {{/if}}
 	</div>
     
 
 
 	{{if data.mode == 0}} <!-- Main Menu -->
 		<div class="Main_header">
-		<br>
         <div class="floatLeft">
             <div class="itemLabelNarrow">
                 <b>Аккаунт</b>:
@@ -1013,11 +1008,11 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
     {{else data.mode == 7}} <!-- Finance Management -->
 		<div class="Finance">
 			<div class="Finance_header">
-				<center><H2>Кошелёк</H2></center>
+				<center><H1>Счета</H1></center>
 			</div>
 			<div class="item">
 				<div class="Finance_box">
-					<H2><span class="dark"><b>Счёт</b></span></H2>
+					<H2><span class="dark"><b>Основной счёт</b></span></H2>
 					<b>Баланс:</b> <H3><span class="good">{{:data.money}}$</span></H3><br>
 				</div>
 				<div class="Finance_box" style="position: relative; left: 2%;">
@@ -1025,15 +1020,19 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 					<b>Зарплата:</b> <H3><span class="good">{{:data.salary}}$</span></H3>
 					<small><b>Следующее получение:</b> <span class="average">{{:data.time_to_next_pay}}</span></small>
 				</div>
-				<div class="floatRight" style="position: relative; right: 1%;">
-					{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_buttons')}}
-					{{:helper.link('<b>История переводов</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_buttons')}}
-					{{if data.boss}} {{:helper.link('<b>Зарплаты подчинённых</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_buttons')}} {{/if}}
-				</div>
+				<div class="Finance_buttons">
+					<div class="Finance_button_pressed"><b>Счета</b></div>
+					{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_button')}}
+					{{:helper.link('<b>Детализация</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_button')}}
+					{{if data.boss}} {{:helper.link('<b>Зарплаты</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_button')}} {{/if}}
+				<div>
 			</div>
 		</div>
     {{else data.mode == 71}} <!-- Show Transaction Menu -->
-        <div class="item">
+        <div class="Finance">
+			<div class="Finance_header">
+				<center><H1>Перевод на счёт</H1></center>
+			</div>
             <div class="statusDisplayRecords">
                 <table>
                     <tr><td><span class="good">Целевой номер счёта:</span></td>
@@ -1049,29 +1048,49 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                 </table>
                 <div class="itemContent">{{:helper.link('Перевести', 'transferthick-e-w', {'choice' : "make_transfer"}, data.ready_to_send ? null : 'Откл.', null)}}</div>
             </div>
+			<div class="Finance_buttons">
+				{{:helper.link('<b>Счета</b>', null, {'choice' : "Finance"}, null, 'Finance_button')}}
+				<div class="Finance_button_pressed"><b>Перевод</b></div>
+				{{:helper.link('<b>Детализация</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_button')}}
+				{{if data.boss}} {{:helper.link('<b>Зарплаты</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_button')}} {{/if}}
+			<div>
         </div>
     {{else data.mode == 72}} <!-- Show Transaction Log -->
-        <div class="item">
-            <div class="statusDisplayRecords">
-                <center><table class="pmon">
-                    <tr><th>Date</th><th>Время</th><th>Цель</th><th>Комментарий</th><th>Перевод</th><th>Источник</th></tr>
-                    {{for data.trans_log}}
-                        <tr><td>{{:value.data}}</td><td>{{:value.time}}</td><td>{{:value.name}}</td><td>{{:value.purpose}}</td><td>{{:value.amount}}</td><td>{{:value.source}}</td></tr>
-                    {{/for}}
-                </table></center>
-            </div>
+        <div class="Finance">
+			<div class="Finance_header">
+				<center><H1>История счетов</H1></center>
+			</div>
+            <center><table class="finance">
+                <tr><th>Дата</th><th>Время</th><th>Номер счёта</th><th>Комментарий</th><th>Перевод</th><th>Источник</th></tr>
+                {{for data.trans_log}}
+                    <tr><td>{{:value.data}}</td><td>{{:value.time}}</td><td>{{:value.name}}</td><td>{{:value.purpose}}</td><td>{{:value.amount}}</td><td>{{:value.source}}</td></tr>
+                {{/for}}
+            </table></center>
+			<div class="Finance_buttons">
+				{{:helper.link('<b>Счета</b>', null, {'choice' : "Finance"}, null, 'Finance_button')}}
+				{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_button')}}
+				<div class="Finance_button_pressed"><b>Детализация</b></div>
+				{{if data.boss}} {{:helper.link('<b>Зарплаты</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_button')}} {{/if}}
+			<div>
         </div>
     {{else data.mode == 73}}   <!-- Change Staff Salary -->
-        <div class="item">
-            <div class="statusDisplayRecords">
-                <center><table class="pmon">
-                    <tr><th>Имя</th><th>Должность</th><th>Зарплата</th></tr>
-                    {{for data.subordinate_staff}}
-                        <tr><td>{{:value.name}}</td><td>{{:value.rank}}</td><td>{{:value.salary}}</td>
-                        <td>{{:helper.link('Изменить', null, {'choice' : "Change Salary", 'account' : value.acc_number}, null, null)}}</td></tr>
-                    {{/for}}
-                </table></center>
-            </div>
+        <div class="Finance">
+			<div class="Finance_header">
+				<center><H1>Менеджмент зарплат</H1></center>
+			</div>
+            <center><table class="finance" style="width: 80%;">
+                <tr><th>Имя</th><th>Должность</th><th>Зарплата</th></tr>
+                {{for data.subordinate_staff}}
+                    <tr><td>{{:value.name}}</td><td>{{:value.rank}}</td><td>{{:value.salary}}</td>
+                    <td>{{:helper.link('Изменить', null, {'choice' : "Change Salary", 'account' : value.acc_number}, null, null)}}</td></tr>
+                {{/for}}
+            </table></center>
+			<div class="Finance_buttons">
+				{{:helper.link('<b>Счета</b>', null, {'choice' : "Finance"}, null, 'Finance_button')}}
+				{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_button')}}
+				{{:helper.link('<b>Детализация</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_button')}}
+				{{if data.boss}}<div class="Finance_button_pressed"><b>Зарплаты</b></div>{{/if}}
+			<div>
         </div>
     {{/if}}
 {{else}}
