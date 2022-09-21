@@ -192,13 +192,13 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 
 
 	{{else data.mode == 1}} <!-- Notekeeper -->
-		<div class="Note_header">
-            <center><H3><b>Блокнот</b>:</span></H3></center>
-        </div>
-        <div class="Note">
+		<div class="Note">
+			<div class="Note_header">
+				<center><H3><span class="dark"><b>Блокнот</b>:</span></H3></center>
+			</div>
 			{{:data.note}}<br>
 			{{:helper.link('Редактировать', 'pencil', {'choice' : "Edit"}, null, 'floatRight')}}<br>
-        </div>
+		</div>
 
 
     {{else data.mode == 2}} <!-- Messenger -->
@@ -208,9 +208,9 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 			</div>
         <div class="item">
             <div class="itemLabelNarrow">
-                <b>Параметры</b>:
+                <center><b>Параметры</b>:</center>
             </div>
-            <div class ="itemContent">
+            <div class ="itemContent" style="position: relative; left: 50px;">
                 {{:helper.link(data.message_silent==1 ? 'Режим: Звук' : 'Режим: Без звука', data.message_silent==1 ? 'volume-off' : 'volume-on', {'choice' : "Toggle Ringer"}, null, 'fixedLeftWide')}}
                 {{:helper.link(data.toff==1 ? 'Статус: Не в сети' : 'Статус: В сети',data.toff==1 ? 'close':'check', {'choice' : "Toggle Messenger"}, null, 'fixedLeftWide')}}
                 {{:helper.link('Изменить рингтон', 'comment', {'choice' : "Ringtone"}, null, 'fixedLeftWide')}}
@@ -274,8 +274,8 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 			<div class="Chat_logo">
 				<center><H2>Почта</H2></center>
 			</div>
-			<H3><span class="floatLeft">Чат с:&nbsp;<span class="average">{{:data.convo_name}}&nbsp;({{:data.convo_job}})</span></span>
-			<small>{{:helper.link('Очистить историю сообщений', 'trash', {'choice' : "Clear", 'option' : "Convo"}, null, 'floatRight')}}</small></H3><br>
+			<div class="item"><H3><span class="Chat_header_buttons_chatname">Чат с:&nbsp;<span class="average">{{:data.convo_name}}&nbsp;({{:data.convo_job}})</span></span>
+			<small>{{:helper.link('Очистить историю сообщений', 'trash', {'choice' : "Clear", 'option' : "Convo"}, null, 'Chat_header_buttons_clear')}}</small></H3></div>
 			<div class="Chat" style="overflow: auto;">
 				<div class="itemContent" style="width: 100%;">
 					{{for data.messages}}
@@ -1016,12 +1016,16 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 				<center><H2>Кошелёк</H2></center>
 			</div>
 			<div class="item">
-				<div class="fixedLeftWider">
-					<center><b>Баланс:</b> <H3><span class="good">{{:data.money}}$</span></H3><br>
-					<b>Зарплата:</b> <H3><span class="good">{{:data.salary}}$</span></H3>
-					<small><b>Следующее получение:</b> <span class="average">{{:data.time_to_next_pay}}</span></small></center>
+				<div class="Finance_box">
+					<H2><span class="dark"><b>Счёт</b></span></H2>
+					<b>Баланс:</b> <H3><span class="good">{{:data.money}}$</span></H3><br>
 				</div>
-				<div class="fixedRightWider">
+				<div class="Finance_box" style="position: relative; left: 2%;">
+					<H2><span class="dark"><b>Зарплатный Счёт</b></span></H2>
+					<b>Зарплата:</b> <H3><span class="good">{{:data.salary}}$</span></H3>
+					<small><b>Следующее получение:</b> <span class="average">{{:data.time_to_next_pay}}</span></small>
+				</div>
+				<div class="floatRight" style="position: relative; right: 1%;">
 					{{:helper.link('<b>Перевод</b>', null, {'choice' : "Transaction Menu"}, null, 'Finance_buttons')}}
 					{{:helper.link('<b>История переводов</b>', null, {'choice' : "Transaction Log"}, null, 'Finance_buttons')}}
 					{{if data.boss}} {{:helper.link('<b>Зарплаты подчинённых</b>', null, {'choice' : "Staff Salary"}, null, 'Finance_buttons')}} {{/if}}
