@@ -199,37 +199,38 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
     {{else data.mode == 2}} <!-- Messenger -->
 		<div class="Chat_header" style="overflow: hidden;">
 			<div class="Chat_logo">
-				<center><H2>Почта</H2></center>
+				<center><H1>Почта</H1></center>
 			</div>
-        <div class="item">
+        <div class="item" style="position: relative; left: -10px; top: 30px; z-index: 3;">
             <div class="itemLabelNarrow">
                 <center><b>Параметры</b>:</center>
             </div>
-            <div class ="itemContent" style="position: relative; left: 50px;">
-                {{:helper.link(data.message_silent==1 ? 'Режим: Звук' : 'Режим: Без звука', data.message_silent==1 ? 'volume-off' : 'volume-on', {'choice' : "Toggle Ringer"}, null, 'fixedLeftWide')}}
-                {{:helper.link(data.toff==1 ? 'Статус: Не в сети' : 'Статус: В сети',data.toff==1 ? 'close':'check', {'choice' : "Toggle Messenger"}, null, 'fixedLeftWide')}}
-                {{:helper.link('Изменить рингтон', 'comment', {'choice' : "Ringtone"}, null, 'fixedLeftWide')}}
-                {{:helper.link('Удалить все чаты', 'trash', {'choice' : "Clear", 'option' : "All"}, null, 'fixedLeftWide')}}
+            <div class ="itemContent" style="position: relative; left: -10px; width: auto;">
+                {{:helper.link(data.message_silent==1 ? 'Режим: Звук' : 'Режим: Без звука', data.message_silent==1 ? 'volume-off' : 'volume-on', {'choice' : "Toggle Ringer"}, null, 'fixedLeftMedium')}}
+                {{:helper.link(data.toff==1 ? 'Статус: Не в сети' : 'Статус: В сети',data.toff==1 ? 'close':'check', {'choice' : "Toggle Messenger"}, null, 'fixedLeftMedium')}}
+                {{:helper.link('Изменить рингтон', 'comment', {'choice' : "Ringtone"}, null, 'fixedLeftMedium')}}
+                {{:helper.link('Удалить все чаты', 'trash', {'choice' : "Clear", 'option' : "All"}, null, 'fixedLeftMedium')}}
+				{{if data.cartridge}}
+					{{if data.cartridge.charges}}
+						<div class="fixedLeftMedium">
+							<b><span class="bad">{{:data.cartridge.charges}}
+							{{if data.cartridge.access.access_detonate_pda}} зарядов осталось. {{/if}}
+							{{if data.cartridge.access.access_clown || data.cartridge.access.access_mime}} троянов осталось. {{/if}}
+							</b></span>
+						</div>
+					{{/if}}
+				{{/if}}
             </div>
         </div>
         {{if data.toff == 0}}
-            {{if data.cartridge}}
-                {{if data.cartridge.charges}}
-                    <div class="item">
-                        <b>{{:data.cartridge.charges}}
-                        {{if data.cartridge.access.access_detonate_pda}} зарядов осталось. {{/if}}
-                        {{if data.cartridge.access.access_clown || data.cartridge.access.access_mime}} троянов осталось. {{/if}}
-                        </b>
-                    </div>
-                {{/if}}
-            {{/if}}
-
             {{if data.pda_count == 0}}
                 <b>Нет других КПК</b>
             {{else}}
-                <center><H3>Активные чаты</H3></center>
+				<div class="item" style="position: relative; bottom: -20px; z-index: 3;">
+					<center><H3>Активные чаты</H3></center>
+				</div>
+				<div class="Chat" style=" position: relative; top: -55px; height: auto;">
                 {{for data.convopdas}}
-					<div class="Chat" style="overflow: auto;">
                     <div class="item">
                         {{:helper.link(value.Name, 'circle-arrow-s', {'choice' : "Select Conversation", 'convo' : value.Reference } , null, value.fixedLeftWider)}}
                         {{if data.cartridge}}
@@ -244,11 +245,13 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                             {{/if}}
                         {{/if}}
                     </div>
-					</div>
                 {{/for}}
-                <center><H3>Создать новый чат</H3><center>
+				</div>
+				<div class="item" style="position: relative; bottom: 60px; z-index: 3;">
+					<center><H3>Создать новый чат</H3></center>
+				</div>
+				<div class="Chat" style="overflow: hidden; position: relative; top: -100px; bottom: 0px; height: auto; border-top: 40px solid;">
                 {{for data.pdas}}
-					<div class="Chat" style="overflow: auto;">
                     <div class="item">
                         {{:helper.link(value.Name, 'circle-arrow-s', {'choice' : "Message", 'target' : value.Reference}, null, value.fixedLeftWider)}}
                         {{if data.cartridge}}
@@ -257,8 +260,8 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
                             {{if data.cartridge.access.access_mime}}  {{:helper.link('*Отправить вирус*', 'circle-arrow-s', {'choice' : "Send Silence", 'target' : value.Reference}, null, 'fixedLeft')}}  {{/if}}
                         {{/if}}
                     </div>
-					</div>
                 {{/for}}
+				</div>
             {{/if}}
         {{/if}}
 		</div>
@@ -267,7 +270,7 @@ Used In File(s): \code\game\objects\items\devices\PDA\PDA.dm
 	{{else data.mode == 21}} <!-- Messenger -->
 	    <div class="Chat_header" style="overflow: hidden;">
 			<div class="Chat_logo">
-				<center><H2>Почта</H2></center>
+				<center><H1>Почта</H1></center>
 			</div>
 			<div class="item"><H3><span class="Chat_header_buttons_chatname">Чат с:&nbsp;<span class="average">{{:data.convo_name}}&nbsp;({{:data.convo_job}})</span></span>
 			<small>{{:helper.link('Очистить историю сообщений', 'trash', {'choice' : "Clear", 'option' : "Convo"}, null, 'Chat_header_buttons_clear')}}</small></H3></div>

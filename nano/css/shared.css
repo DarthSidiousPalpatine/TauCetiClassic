@@ -171,54 +171,62 @@ h4 {
 	position: relative;
 }
 
-.Chat_logo {
-    background: #5B575F;
+.Chat_header {
+    background: #4B474F transparent;
     color: #ffffff;
-	width: 100%;
+    border: 10px solid #2a2c34;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 30px;
+	bottom: 0px;
+	width: auto;
+	min-height: 100%;
 }
 
-.Chat_header {
-    background: #4B474F;
+.Chat_logo {
+    background: #2a2c34;
     color: #ffffff;
-    border: 3px solid #5B575F;
+	height: 35px;
+	width: 100%;
+	position: absolute;
 }
 
 .Chat_header_buttons_clear {
-	width: 42%;
-	height: 20px;
-	bottom: 4px;
-	right: 9px;
-	position: relative;
-    background: #5B575F;
+	width: 45%;
+	height: 15px;
+	top: 57px;
+	right: 18px;
+	position: absolute;
+    background: #424551;
     color: #ffffff;
-    border-right: 5px solid #3a383d;
-	border-bottom: 5px solid #3a383d;
-	border-left: -5px solid #3a383d;
-	float: right;
+    border-right: 5px solid #353741;
+	border-bottom: 5px solid #353741;
 	clear: both;
 	text-align: center;
 	overflow: hidden;
 }
 
 .Chat_header_buttons_chatname {
-	width: 35%;
-	height: 20px;
+	width: 50%;
+	height: 21px;
 	left: 9px;
-	position: relative;
-    background: #312C35;
+	position: absolute;
+    background: #353741;
     color: #ffffff;
-    border: 3px inset #312C35;
-	float: left;
+	left: 18px;
+	top: 60px;
 	text-align: center;
 	overflow: hidden;
 }
 
 .Chat {
-    background: #312C35;
+	min-height: 100%;
+    background: #312C35 transparent;
     color: #ffffff;
-    border: 1px solid #4B474F;
-    padding: 12px;
-    margin: 8px;
+    border: 10px solid #424551;
+	border-top: 75px solid;
+    padding: 5px;
 }
 
 .message_left {
@@ -227,15 +235,15 @@ h4 {
     font-weight: bold;
 	float: left;
 	text-align: left;
-	background: #1E1D20;
+	background: #2a2c34;
 	padding: 7px;
-	border-color: #18171a;
+	border-color: #22232a;
 	border-left: 7px solid transparent;
 	border-bottom: 7px solid;
 	border-radius: 100px;
 	border-top-right-radius: 30px;
 	clear: both;
-	position: relative;
+	margin: 5px;
 }
 
 .message_right {
@@ -244,26 +252,27 @@ h4 {
     font-weight: bold;
 	float: right;
 	text-align: left;
-	background: #4B474F;
+	background: #424551;
 	padding: 7px;
-	border-color: #3c393f;
+	border-color: #353741;
 	border-right: 7px solid transparent;
 	border-bottom: 7px solid;
 	border-radius: 100px;
 	border-top-right-radius: 30px;
 	clear: both;
+	margin: 5px;
 }
 
 .new_message {
 	width: auto;
     color: #e9c183;
-	background: #1E1D20;
-	border: 5px solid #5B575F;
+	background: #2a2c34;
+	border: 10px solid #424551;
 	margin: 8px;
 	position: fixed;
 	bottom: -10px;
-	left: 0px;
-	right: 0px;
+	left: 2px;
+	right: 2px;
 }
 
 .Note_header {
@@ -627,6 +636,11 @@ div.notice {
 
 .fixedLeft {
     width: 110px;
+    float: left;
+}
+
+.fixedLeftMedium {
+    width: 140px;
     float: left;
 }
 
