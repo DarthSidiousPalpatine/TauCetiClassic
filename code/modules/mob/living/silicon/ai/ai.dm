@@ -133,6 +133,9 @@ var/global/list/ai_verbs_default = list(
 		"Hal 9000" = "ai-hal",
 	)
 
+	var/list/sudoku_grid
+	var/sudoku_known = 0
+
 	var/datum/announcement/station/command/ai/announcement = new
 
 /mob/living/silicon/ai/proc/add_ai_verbs()
@@ -223,6 +226,26 @@ var/global/list/ai_verbs_default = list(
 	if(mind)
 		mind.skills.add_available_skillset(/datum/skillset/max)
 		mind.skills.maximize_active_skills()
+
+	sudoku_grid = new/list(9,9)
+	var/i = 1
+	for(var/list/L in sudoku_grid)
+		for(var/list/L2 in L)
+			L2 = list("number" = "", "realnumber" = i, "locked" = FALSE)
+			i++
+			if(i > 9)
+				i = 1
+		i += 3
+	sudoku_known = rand(40-60)
+	for(sudoku_known)
+		while(TRUE)
+			var/list/L = sudoku_grid[rand(9),rand(9)]
+			if(L["locked"])
+				continue
+			else
+				L["number"] = L["realnumber"]
+				L["locked"] = TRUE
+				break
 
 /mob/living/silicon/ai/proc/announce_role()
 	to_chat(src, "<B>You are playing the station's AI. The AI cannot move, but can interact with many objects while viewing them (through cameras).</B>")
@@ -887,6 +910,8 @@ var/global/list/ai_verbs_default = list(
 
 /mob/living/silicon/ai/CanObtainCentcommMessage()
 	return TRUE
+
+/mob/living/silicon/ai/proc/sudoku()
 
 #undef AI_CHECK_WIRELESS
 #undef AI_CHECK_RADIO
