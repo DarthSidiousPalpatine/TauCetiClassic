@@ -1,6 +1,5 @@
 #define STATE_EMPTY "empty"
 #define STATE_BLANK "blank"
-#define STATE_FLAG "flag"
 #define STATE_MINE "mine"
 
 /obj/structure/closet/crate/secure/loot
