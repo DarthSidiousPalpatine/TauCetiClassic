@@ -1,0 +1,35 @@
+$bg-color: #5f5f5f;
+$bg-color-disabled: #4b4b4b;
+$border-color-bottom: #404040;
+$border-color-top: #808080;
+$border-color-disabled: #2f2f2f;
+
+.Minesweeper__Button {
+  background-color: $bg-color;
+  border: 5px solid $border-color-bottom;
+  border-left-color: $border-color-top;
+  border-top-color: $border-color-top;
+  border-radius: 0px;
+  margin: 0px;
+  vertical-align: top;
+  width: 30px;
+  height: 30px;
+  padding-left: 6px;
+
+  &:hover,
+  &:focus {
+    background-color: lighten($bg-color, 20%);
+  }
+
+  .Minesweeper__Button-Content {
+    position: relative;
+    top: -3px;
+  }
+}
+
+.Minesweeper__Button.Button--disabled {
+  font-size: 20px;
+  font-weight: bold;
+  background-color: $bg-color-disabled !important;
+  border: 2px solid $border-color-disabled;
+}

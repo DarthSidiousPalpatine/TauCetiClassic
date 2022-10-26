@@ -1,3 +1,8 @@
+#define STATE_EMPTY "empty"
+#define STATE_BLANK "blank"
+#define STATE_FLAG "flag"
+#define STATE_MINE "mine"
+
 /obj/structure/closet/crate/secure/loot
 	name = "заброшенный ящик"
 	desc = "Что же может оказаться внутри?"
@@ -12,9 +17,9 @@
 	var/grid_blanks = 0
 	var/grid_pressed = 0
 	var/list/nearest_mask = list(
-							  list(-1, -1), list(0, -1), list(1, -1),
-							  list(-1, 0),               list(1, 0),
-							  list(-1, 1),  list(0, 1),  list(1, 1)
+							  list(-1,-1),	list(0,-1),		list(1,-1),
+							  list(-1, 0),					list(1, 0),
+							  list(-1, 1),	list(0, 1),		list(1, 1)
 							)
 
 /obj/structure/closet/crate/secure/loot/atom_init()
@@ -30,7 +35,7 @@
 	for(var/i = 1 to grid_y)
 		var/list/Line = grid[i]
 		for(var/j = 1 to grid_x)
-			Line[j] = list("state" = "blank", "x" = j, "y" = i, "nearest" = "")
+			Line[j] = list("state" = STATE_BLANK, "x" = j, "y" = i, "nearest" = "", flag = FALSE)
 			grid_blanks++
 
 	for(var/i = 1 to grid_mines)
@@ -38,10 +43,10 @@
 			var/y = rand(1,grid_y)
 			var/x = rand(1,grid_x)
 			var/list/L = grid[y][x]
-			if(L["state"] == "mine")
+			if(L["state"] == STATE_MINE)
 				continue
 			else
-				L["state"] = "mine"
+				L["state"] = STATE_MINE
 				grid_blanks--
 				break
 
@@ -65,9 +70,13 @@
 	. = ..()
 	if(.)
 		return
-	if(action == "button_press")
-		press_button(params["choice_x"], params["choice_y"])
 	update_icon()
+	if(action == "button_press")
+		press_button(params["choice_x"], params["choice_y"], FALSE)
+		return TRUE
+	if(action == "mark_flag")
+		press_button(params["choice_x"], params["choice_y"], TRUE)
+		return TRUE
 
 /obj/structure/closet/crate/secure/loot/attack_hand(mob/user)
 	if(!locked)
@@ -77,24 +86,38 @@
 /obj/structure/closet/crate/secure/loot/proc/check_in_grid(x, y)
 	return x >= 1 && x <= grid_x && y >= 1 && y <= grid_y
 
-/obj/structure/closet/crate/secure/loot/proc/press_button(x, y)
-	if(grid[text2num(y)][text2num(x)]["state"] == "mine")
+/obj/structure/closet/crate/secure/loot/proc/press_button(x, y, flag)
+	x = text2num(x)
+	y = text2num(y)
+	var/list/cell = grid[y][x]
+
+	if(cell["state"] == STATE_EMPTY)
+		return
+
+	if(flag)
+		mark_flag(x, y, cell["flag"])
+		return
+
+	if(cell["state"] == STATE_MINE)
 		SpawnDeathLoot()
 		return
-	reveal_button(text2num(x),text2num(y))
-	nanomanager.update_uis(src)
 
-/obj/structure/closet/crate/secure/loot/proc/reveal_button(x,y)
-	if(!check_in_grid(x, y) || grid[y][x]["state"] == "empty")
+	reveal_button(x, y)
+
+/obj/structure/closet/crate/secure/loot/proc/mark_flag(x, y, remove)
+	grid[y][x]["flag"] = !remove
+
+/obj/structure/closet/crate/secure/loot/proc/reveal_button(x, y)
+	if(!check_in_grid(x, y) || grid[y][x]["state"] == STATE_EMPTY || grid[y][x]["flag"])
 		return
-	grid[y][x]["state"] = "empty"
+	grid[y][x]["state"] = STATE_EMPTY
 	grid_pressed++
 	check_complete()
-	var/mi = check_mines(x,y)
-	if(mi)
-		if(mi == 0)
-			mi = " "
-		grid[y][x]["nearest"] = num2text(mi)
+	var/mines = check_mines(x,y)
+	if(mines)
+		if(mines == 0)
+			mines = " " //! careful, invisible non-whitespace
+		grid[y][x]["nearest"] = num2text(mines)
 		return
 	for(var/list/mask in nearest_mask)
 		reveal_button(x + mask[1], y + mask[2])
@@ -103,7 +126,7 @@
 	var/mins = 0
 
 	for(var/list/mask in nearest_mask)
-		if(check_in_grid(x + mask[1], y + mask[2]) && grid[y + mask[2]][x + mask[1]]["state"] == "mine")
+		if(check_in_grid(x + mask[1], y + mask[2]) && grid[y + mask[2]][x + mask[1]]["state"] == STATE_MINE)
 			mins++
 
 	return mins
@@ -197,3 +220,8 @@
 	if(locked)
 		return
 	..()
+
+#undef STATE_EMPTY
+#undef STATE_BLANK
+#undef STATE_FLAG
+#undef STATE_MINE
