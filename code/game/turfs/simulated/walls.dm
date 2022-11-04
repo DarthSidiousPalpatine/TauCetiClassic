@@ -30,6 +30,8 @@
 	var/sheet_type = /obj/item/stack/sheet/metal
 
 	canSmoothWith = list(
+		/obj/structure/window/basic,
+		/obj/structure/window/reinforced,
 		/turf/simulated/wall,
 		/turf/simulated/wall/r_wall,
 		/obj/structure/falsewall,

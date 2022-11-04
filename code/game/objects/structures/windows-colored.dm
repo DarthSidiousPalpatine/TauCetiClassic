@@ -5,12 +5,12 @@
 		wcCommon = pick(list("#379963", "#0d8395", "#58b5c3", "#49e46e", "#8fcf44", "#cc99ff", "#ff6600", "#3399ff", "#969696", "#ffffff"))
 	return wcCommon
 
-/proc/painting_objects(list/possible_areas, color)
+/*/proc/painting_objects(list/possible_areas, color)
 	for(var/type in possible_areas)
 		for(var/obj/structure/window/W in get_area_by_type(type))
 			W.color = color
 		for(var/obj/machinery/door/window/D in get_area_by_type(type))
-			D.color = color
+			D.color = color*/
 
 //replaces color in some area
 /proc/color_windows_init()
@@ -44,4 +44,4 @@
 	)
 
 	for(var/color in color_by_types)
-		painting_objects(color_by_types[color], color)
+		//painting_objects(color_by_types[color], color)

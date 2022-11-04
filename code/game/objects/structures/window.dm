@@ -1,7 +1,8 @@
 /obj/structure/window
 	name = "window"
 	desc = "A window."
-	icon = 'icons/obj/window.dmi'
+	icon = 'icons/obj/smooth_structures/windows/window.dmi'
+	icon_state = "box"
 	density = TRUE
 	layer = 3.2//Just above doors
 	anchored = TRUE
@@ -11,6 +12,46 @@
 	max_integrity = 14
 	integrity_failure = 0.75
 	resistance_flags = CAN_BE_HIT
+
+	smooth = SMOOTH_TRUE
+
+	canSmoothWith = list(
+		/obj/structure/window/basic,
+		/obj/structure/window/reinforced,
+		/turf/simulated/wall,
+		/turf/simulated/wall/r_wall,
+		/obj/structure/falsewall,
+		/obj/structure/falsewall/reinforced,
+		/obj/structure/girder,
+		/obj/structure/girder/reinforced,
+		/obj/machinery/door/airlock,
+		/obj/machinery/door/airlock/command,
+		/obj/machinery/door/airlock/security,
+		/obj/machinery/door/airlock/engineering,
+		/obj/machinery/door/airlock/medical,
+		/obj/machinery/door/airlock/virology,
+		/obj/machinery/door/airlock/maintenance,
+		/obj/machinery/door/airlock/freezer,
+		/obj/machinery/door/airlock/mining,
+		/obj/machinery/door/airlock/atmos,
+		/obj/machinery/door/airlock/research,
+		/obj/machinery/door/airlock/science,
+		/obj/machinery/door/airlock/neutral,
+		/obj/machinery/door/airlock/highsecurity,
+		/obj/machinery/door/airlock/vault,
+		/obj/machinery/door/airlock/external,
+		/obj/machinery/door/airlock/glass,
+		/obj/machinery/door/airlock/command/glass,
+		/obj/machinery/door/airlock/engineering/glass,
+		/obj/machinery/door/airlock/security/glass,
+		/obj/machinery/door/airlock/medical/glass,
+		/obj/machinery/door/airlock/virology/glass,
+		/obj/machinery/door/airlock/research/glass,
+		/obj/machinery/door/airlock/mining/glass,
+		/obj/machinery/door/airlock/atmos/glass,
+		/obj/machinery/door/airlock/science/glass,
+		/obj/machinery/door/airlock/science/neutral,
+		)
 
 	var/ini_dir = null
 	var/state = 2
@@ -341,7 +382,7 @@
 	. = ..()
 
 	ini_dir = dir
-	color = color_windows()
+	//color = color_windows()
 
 	update_nearby_tiles(need_rebuild = 1)
 	update_nearby_icons()
@@ -382,20 +423,6 @@
 	//this way it will only update full-tile ones
 	//This spawn is here so windows get properly updated when one gets deleted.
 	spawn(2)
-		if(!src)
-			return
-		if(!is_fulltile())
-			icon_state = "[basestate]"
-			return
-
-		var/junction = 0 //will be used to determine from which side the window is connected to other windows
-		if(anchored)
-			for(var/obj/structure/window/W in orange(src,1))
-				if(W.anchored && W.density && W.is_fulltile() && W.can_merge) //Only counts anchored, not-destroyed fill-tile windows.
-					if(abs(x-W.x)-abs(y-W.y) ) 		//doesn't count windows, placed diagonally to src
-						junction |= get_dir(src,W)
-		icon_state = "[basestate][junction]"
-
 		var/ratio = get_integrity() / max_integrity
 		ratio = CEIL(ratio * 4) * 25
 
@@ -412,14 +439,11 @@
 
 /obj/structure/window/basic
 	desc = "It looks thin and flimsy. A few knocks with... anything, really should shatter it."
-	icon_state = "window"
-	basestate = "window"
 
 /obj/structure/window/phoronbasic
 	name = "phoron window"
 	desc = "A phoron-glass alloy window. It looks insanely tough to break. It appears it's also insanely tough to burn through."
-	basestate = "phoronwindow"
-	icon_state = "phoronwindow"
+	icon = 'icons/obj/smooth_structures/windows/phoronwindow.dmi'
 	shardtype = /obj/item/weapon/shard/phoron
 	max_integrity = 120
 
@@ -430,8 +454,7 @@
 /obj/structure/window/phoronreinforced
 	name = "reinforced phoron window"
 	desc = "A phoron-glass alloy window, with rods supporting it. It looks hopelessly tough to break. It also looks completely fireproof, considering how basic phoron windows are insanely fireproof."
-	basestate = "phoronrwindow"
-	icon_state = "phoronrwindow"
+	icon = 'icons/obj/smooth_structures/windows/phoronrwindow.dmi'
 	shardtype = /obj/item/weapon/shard/phoron
 	reinf = 1
 	max_integrity = 160
@@ -442,8 +465,7 @@
 /obj/structure/window/reinforced
 	name = "reinforced window"
 	desc = "It looks rather strong. Might take a few good hits to shatter it."
-	icon_state = "rwindow"
-	basestate = "rwindow"
+	icon = 'icons/obj/smooth_structures/windows/rwindow.dmi'
 	max_integrity = 100
 	reinf = 1
 	damage_threshold = 15
@@ -455,28 +477,19 @@
 /obj/structure/window/reinforced/tinted
 	name = "tinted window"
 	desc = "It looks rather strong and opaque. Might take a few good hits to shatter it."
-	icon_state = "twindow"
-	basestate = "twindow"
+	icon = 'icons/obj/smooth_structures/windows/twindow.dmi'
 	opacity = 1
-
-/obj/structure/window/reinforced/tinted/frosted //Actually, there is no icon for this!!
-	name = "frosted window"
-	desc = "It looks rather strong and frosted over. Looks like it might take a few less hits then a normal reinforced window."
-	icon_state = "fwindow"
-	basestate = "fwindow"
-	max_integrity = 30
-	damage_threshold = 0
 
 /obj/structure/window/shuttle
 	name = "shuttle window"
 	desc = "It looks rather strong. Might take a few good hits to shatter it."
 	icon = 'icons/obj/podwindows.dmi'
-	icon_state = "window"
-	basestate = "window"
 	max_integrity = 150
 	reinf = 1
 	dir = 5
 	damage_threshold = 30
+
+	smooth = SMOOTH_FALSE
 
 /obj/structure/window/shuttle/update_icon() //icon_state has to be set manually
 	return
@@ -484,19 +497,16 @@
 /obj/structure/window/reinforced/polarized
 	name = "electrochromic window"
 	desc = "Adjusts its tint with voltage. Might take a few good hits to shatter it."
-	icon_state = "fwindow"
-	basestate = "fwindow"
+	icon = 'icons/obj/smooth_structures/windows/twindow.dmi'
 	var/id
 
 /obj/structure/window/reinforced/polarized/proc/toggle()
 	if(opacity)
-		icon_state = "fwindow"
-		basestate = "fwindow"
 		set_opacity(0)
+		icon = 'icons/obj/smooth_structures/windows/twindow.dmi'
 	else
-		icon_state = "twindowold"
-		basestate = "twindowold"
 		set_opacity(1)
+		icon = 'icons/obj/smooth_structures/windows/window.dmi'
 
 /obj/structure/window/reinforced/polarized/fastened_change()
 	if(opacity && !anchored)
