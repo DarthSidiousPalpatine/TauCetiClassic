@@ -57,6 +57,7 @@
 	light_color = "#f1f8ff"
 	icon_deny = "sec-deny"
 	req_access = list(1)
+	crate_type = /obj/structure/closet/crate/secure/weapon
 	products = list(
 		/obj/item/weapon/handcuffs = 8,
 		/obj/item/weapon/grenade/flashbang = 4,
@@ -267,7 +268,7 @@
 		"Heavy hybrid suit" = /obj/item/weapon/storage/box/syndie_kit/heavy_rig,
 		"Assault Armor" = /obj/item/weapon/storage/box/syndie_kit/armor,
 	)
-	
+
 	var/static/list/selections_armor
 
 /obj/machinery/vending/syndi/attackby(obj/item/I, mob/user)

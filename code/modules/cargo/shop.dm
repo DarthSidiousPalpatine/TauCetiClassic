@@ -43,3 +43,21 @@ var/global/orders_and_offers_number = 0
 
 /datum/shop_lot/proc/to_list(account = "Unknown", postpayment = 0)
 	return list("name" = src.name, "description" = src.description, "price" = src.price, "number" = src.number, "account" = account, "delivered" = src.delivered, "postpayment" = postpayment, "icon" = src.item_icon)
+
+/proc/get_lot_category(obj/target)
+	if(istype(target, /obj/item/weapon/reagent_containers/food))
+		return "Еда"
+	else if(istype(target, /obj/item/weapon/storage/food))
+		return "Еда"
+	else if(istype(target, /obj/item/weapon/storage))
+		return "Наборы"
+	else if(istype(target, /obj/item/weapon))
+		return "Инструменты"
+	else if(istype(target, /obj/item/clothing))
+		return "Одежда"
+	else if(istype(target, /obj/item/device))
+		return "Устройства"
+	else if(istype(target, /obj/item/stack))
+		return "Ресурсы"
+	else
+		return "Разное"

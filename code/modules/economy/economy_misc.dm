@@ -75,6 +75,8 @@ var/global/list/all_money_accounts = list()
 var/global/economy_init = FALSE
 var/global/initial_station_money = 7500
 
+var/global/list/vendomats = list()
+
 /proc/setup_economy()
 	if(economy_init)
 		return 2
@@ -107,6 +109,9 @@ var/global/initial_station_money = 7500
 	cargo_account = department_accounts["Cargo"]
 
 	current_date_string = "[num2text(rand(1,31))] [pick("January","February","March","April","May","June","July","August","September","October","November","December")], [game_year]"
+
+	for(var/obj/machinery/vending/Vend in global.vendomats)
+		Vend.setup_inventory()
 
 	economy_init = TRUE
 	return 1

@@ -5,6 +5,7 @@
 	var/max_amount = 0
 	var/price = 0
 
+ADD_TO_GLOBAL_LIST(/obj/machinery/vending, vendomats)
 /obj/machinery/vending
 	name = "Vendomat"
 	desc = "A generic vending machine."
@@ -18,7 +19,7 @@
 	allowed_checks = ALLOWED_CHECK_NONE
 	var/vend_ready = 1 //Are we ready to vend?? Is it time??
 	var/vend_delay = 10 //How long does it take to vend?
-	var/datum/data/vending_product/currently_vending = null // A /datum/data/vending_product instance of what we're paying for right now.
+	var/obj/item/currently_vending = null // A /datum/data/vending_product instance of what we're paying for right now.
 
 	// To be filled out at compile time
 	var/list/products	= list() // For each, use the following pattern:
@@ -55,6 +56,10 @@
 	var/datum/wires/vending/wires = null
 	var/scan_id = TRUE
 
+	var/obj/structure/closet/crate/Stock
+	var/crate_type = /obj/structure/closet/crate
+	var/list/stock_hashed = list()
+
 
 /obj/machinery/vending/atom_init()
 	. = ..()
@@ -70,13 +75,17 @@
 	// so if slogantime is 10 minutes, it will say it at somewhere between 10 and 20 minutes after the machine is crated.
 	last_slogan = world.time + rand(0, slogan_delay)
 
-	build_inventory(products)
-	 //Add hidden inventory
-	build_inventory(contraband, 1)
-	build_inventory(premium, 0, 1)
-	build_inventory(syndie, 0, 0, 1)
 	power_change()
 	update_wires_check()
+
+/obj/machinery/vending/proc/setup_inventory()
+	Stock = new crate_type(src)
+
+	build_inventory(products)
+	 //Add hidden inventory
+	//build_inventory(contraband, 1)
+	//build_inventory(premium, 0, 1)
+	//build_inventory(syndie, 0, 0, 1)
 
 /obj/machinery/vending/Destroy()
 	QDEL_NULL(wires)
@@ -103,7 +112,24 @@
 	if(.)
 		malfunction()
 
-/obj/machinery/vending/proc/build_inventory(list/productlist,hidden=0,req_coin=0,req_emag=0)
+/obj/machinery/vending/proc/build_inventory(list/productlist)
+	for(var/typepath in productlist)
+		for(var/i = 1, i < productlist[typepath], i++)
+			var/obj/item/Item = new typepath(Stock)
+			Item.price_tag = list("description" = Item.desc, "price" = prices[typepath], "category" = get_lot_category(Item), "account" = global.cargo_account.account_number)
+			Item.verbs += /obj/verb/remove_price_tag
+			Item.underlays += icon(icon = 'icons/obj/device.dmi', icon_state = "tag")
+
+	hash_inventory()
+
+/obj/machinery/vending/proc/hash_inventory()
+	for(var/obj/item/Item in Stock.contents)
+		var/list/Tag = Item.price_tag
+		if(!Tag)
+			continue
+		LAZYADDASSOCLIST(stock_hashed, "[Item.name]-[Tag["price"]]", Item)
+
+/*/obj/machinery/vending/proc/build_inventory(list/productlist,hidden=0,req_coin=0,req_emag=0)
 	for(var/typepath in productlist)
 		var/amount = productlist[typepath]
 		var/price = prices[typepath]
@@ -127,9 +153,9 @@
 
 		var/atom/temp = typepath
 		R.product_name = initial(temp.name)
-	return
+	return */
 
-/obj/machinery/vending/proc/refill_inventory(obj/item/weapon/vending_refill/refill, mob/user)  //Restocking from TG
+/*/obj/machinery/vending/proc/refill_inventory(obj/item/weapon/vending_refill/refill, mob/user)  //Restocking from TG
 	var/total = 0
 
 	var/to_restock = 0
@@ -156,7 +182,7 @@
 				to_chat(usr, "<span class='notice'>[restock] of [machine_content.product_name]</span>")
 			if(refill.charges == 0) //due to rounding, we ran out of refill charges, exit.
 				break
-	return total
+	return total */
 
 /obj/machinery/vending/attackby(obj/item/weapon/W, mob/user)
 	if(panel_open)
@@ -213,7 +239,7 @@
 		var/obj/item/weapon/card/I = W
 		scan_card(I)
 
-	else if(istype(W, refill_canister) && refill_canister != null)
+	/*else if(istype(W, refill_canister) && refill_canister != null)
 		if(stat & (BROKEN|NOPOWER))
 			to_chat(user, "<span class='notice'>It does nothing.</span>")
 		else if(panel_open)
@@ -229,7 +255,7 @@
 					to_chat(user, "<span class='notice'>The [name] is fully stocked.</span>")
 			return;
 		else
-			to_chat(user, "<span class='notice'>You should probably unscrew the service panel first.</span>")
+			to_chat(user, "<span class='notice'>You should probably unscrew the service panel first.</span>")*/
 
 	else if (istype(W, /obj/item/weapon/spacecash/ewallet))
 		user.drop_from_inventory(W, src)
@@ -275,6 +301,7 @@
 /obj/machinery/vending/proc/scan_card(obj/item/weapon/card/I)
 	if(!currently_vending)
 		return
+	var/list/Tag = currently_vending.price_tag
 	if (istype(I, /obj/item/weapon/card/id))
 		var/obj/item/weapon/card/id/C = I
 		visible_message("<span class='info'>[usr] swipes a card through [src].</span>")
@@ -291,7 +318,7 @@
 						D = attempt_account_access(C.associated_account_number, attempt_pin, 2)
 
 					if(D)
-						var/transaction_amount = currently_vending.price
+						var/transaction_amount = Tag ? Tag["price"] : 0
 						if(transaction_amount <= D.money)
 
 							//transfer the money
@@ -301,7 +328,7 @@
 							//create entries in the two account transaction logs
 							var/datum/transaction/T = new()
 							T.target_name = "[vendor_account.owner_name] (via [src.name])"
-							T.purpose = "Purchase of [currently_vending.product_name]"
+							T.purpose = "Purchase of [currently_vending.name]"
 							if(transaction_amount > 0)
 								T.amount = "([transaction_amount])"
 							else
@@ -313,7 +340,7 @@
 							//
 							T = new()
 							T.target_name = D.owner_name
-							T.purpose = "Purchase of [currently_vending.product_name]"
+							T.purpose = "Purchase of [currently_vending.name]"
 							T.amount = "[transaction_amount]"
 							T.source_terminal = src.name
 							T.date = current_date_string
@@ -354,7 +381,7 @@
 
 	if(currently_vending)
 		var/dat
-		dat += "<b>You have selected [currently_vending.product_name].<br>Please swipe your ID to pay for the article.</b><br>"
+		dat += "<b>You have selected [currently_vending.name].<br>Please swipe your ID to pay for the article.</b><br>"
 		dat += "<a href='byond://?src=\ref[src];cancel_buying=1'>Cancel</a>"
 		var/datum/browser/popup = new(user, "window=vending", "[vendorname]", 450, 600)
 		popup.set_content(dat)
@@ -365,18 +392,15 @@
 	dat += "<div class='Section__title'>Products</div>"
 	dat += "<div class='Section'>"
 
-	if (product_records.len == 0)
-		dat += "<span class='red'>No product loaded!</span>"
-	else
-		dat += "<table>"
-		dat += print_recors(product_records)
-		if(extended_inventory)
+	dat += "<table>"
+	dat += print_records()
+		/*if(extended_inventory)
 			dat += print_recors(hidden_records)
 		if(coin)
 			dat += print_recors(coin_records)
 		if(emagged)
-			dat += print_recors(emag_records)
-		dat += "</table>"
+			dat += print_recors(emag_records)*/
+	dat += "</table>"
 	dat += "</div>"
 
 	if (premium.len > 0)
@@ -390,7 +414,22 @@
 	popup.set_content(dat)
 	popup.open()
 
-/obj/machinery/vending/proc/print_recors(list/record)
+/obj/machinery/vending/proc/print_records()
+	var/dat
+	for(var/index in stock_hashed)
+		var/obj/item/Item = stock_hashed[index][1]
+		var/list/Tag = Item.price_tag
+		var/amount = stock_hashed[index].len
+
+		dat += "<tr>"
+		dat += "<td class='collapsing'><span class='vending32x32 [replacetext(replacetext("[Item.type]", "[/obj/item]/", ""), "/", "-")]'></span></td>"
+		dat += "<td><B>[Item.name]</B></td>"
+		dat += "<td class='collapsing' align='center'><span class='[1 < amount ? "good" : amount == 1 ? "average" : "bad"]'>[amount] in stock</span></td>"
+		dat += "<td class='collapsing' align='center'><a class='fluid' href='byond://?src=\ref[src];vend=\ref[Item]'>[Tag["price"] ? "[Tag["price"]]$" : "Беспл."]</A></td>"
+		dat += "</tr>"
+	return dat
+
+/*/obj/machinery/vending/proc/print_recors(list/record)
 	var/dat
 	for (var/datum/data/vending_product/R in record)
 		dat += "<tr>"
@@ -402,7 +441,7 @@
 		else
 			dat += "<td class='collapsing' align='center'><div class='disabled fluid'>[R.price ? "[R.price] cr." : "FREE"]</div></td>"
 		dat += "</tr>"
-	return dat
+	return dat */
 
 /obj/machinery/vending/Topic(href, href_list)
 	. = ..()
@@ -446,23 +485,25 @@
 			flick(src.icon_deny, src)
 			return FALSE
 
-		var/datum/data/vending_product/R = locate(href_list["vend"])
-		if (!R || !istype(R) || !R.product_path || R.amount <= 0)
+		var/obj/item/Item = locate(href_list["vend"])
+		if (!Item)
 			return FALSE
 
-		if(R.price == null || isobserver(usr)) //Centcomm buys somethin at himself? Nope, because they can just take this
-			vend(R, usr)
+		var/list/Tag = Item.price_tag
+
+		if(!Tag || !Tag["price"] || isobserver(usr)) //Centcomm buys somethin at himself? Nope, because they can just take this
+			vend(Item, usr)
 		else
 			if (ewallet)
-				if (R.price <= ewallet.worth)
-					ewallet.worth -= R.price
-					vend(R, usr)
+				if (Tag["price"] <= ewallet.worth)
+					ewallet.worth -= Tag["price"]
+					vend(Item, usr)
 				else
 					to_chat(usr, "<span class='warning'>The ewallet doesn't have enough money to pay for that.</span>")
-					src.currently_vending = R
+					src.currently_vending = Item
 					updateUsrDialog()
 			else
-				src.currently_vending = R
+				src.currently_vending = Item
 				updateUsrDialog()
 		return
 
@@ -473,7 +514,37 @@
 
 	updateUsrDialog()
 
-/obj/machinery/vending/proc/vend(datum/data/vending_product/R, mob/user)
+/obj/machinery/vending/proc/vend(obj/item/Item, mob/user)
+	if (!allowed(user) && !emagged && scan_id) //For SECURE VENDING MACHINES YEAH
+		to_chat(user, "<span class='warning'>Access denied.</span>")//Unless emagged of course
+		flick(src.icon_deny,src)
+		return
+	src.vend_ready = 0 //One thing at a time!!
+
+	if(((src.last_reply + (src.vend_delay + 200)) <= world.time) && src.vend_reply)
+		spawn(0)
+			speak(src.vend_reply)
+			src.last_reply = world.time
+
+	use_power(5)
+	if (src.icon_vend) //Show the vending animation if needed
+		flick(src.icon_vend,src)
+	spawn(src.vend_delay)
+		Item.forceMove(src.loc)
+		var/list/Tag = Item.price_tag
+		LAZYREMOVEASSOC(stock_hashed, "[Item.name]-[Tag["price"]]", Item)
+		hash_inventory()
+
+		Item.price_tag = null
+		Item.underlays -= icon(icon = 'icons/obj/device.dmi', icon_state = "tag")
+		Item.verbs -= /obj/verb/remove_price_tag
+
+		playsound(src, 'sound/items/vending.ogg', VOL_EFFECTS_MASTER)
+		src.vend_ready = 1
+		src.currently_vending = null
+		updateUsrDialog()
+
+/*/obj/machinery/vending/proc/vend(datum/data/vending_product/R, mob/user)
 	if (!allowed(user) && !emagged && scan_id) //For SECURE VENDING MACHINES YEAH
 		to_chat(user, "<span class='warning'>Access denied.</span>")//Unless emagged of course
 		flick(src.icon_deny,src)
@@ -508,7 +579,7 @@
 		playsound(src, 'sound/items/vending.ogg', VOL_EFFECTS_MASTER)
 		src.vend_ready = 1
 		src.currently_vending = null
-		updateUsrDialog()
+		updateUsrDialog() */
 
 /obj/machinery/vending/proc/stock(datum/data/vending_product/R, mob/user)
 	if(src.panel_open)

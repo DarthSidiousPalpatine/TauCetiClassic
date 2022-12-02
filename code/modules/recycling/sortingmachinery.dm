@@ -365,7 +365,7 @@
 		lot_description = target.desc
 
 	if(autocategory)
-		lot_category = get_category(target)
+		lot_category = get_lot_category(target)
 
 	target.price_tag = list("description" = lot_description, "price" = lot_price, "category" = lot_category, "account" = lot_account_number)
 	target.verbs += /obj/verb/remove_price_tag
@@ -392,25 +392,6 @@
 	user.visible_message("<span class='notice'>[user] labels [target] as [label].</span>", \
 						 "<span class='notice'>You label [target] as [label].</span>")
 	target.name = "[target.name] ([label])"
-
-/obj/item/device/tagger/proc/get_category(obj/target)
-	if(istype(target, /obj/item/weapon/reagent_containers/food))
-		return "Еда"
-	else if(istype(target, /obj/item/weapon/storage/food))
-		return "Еда"
-	else if(istype(target, /obj/item/weapon/storage))
-		return "Наборы"
-	else if(istype(target, /obj/item/weapon))
-		return "Инструменты"
-	else if(istype(target, /obj/item/clothing))
-		return "Одежда"
-	else if(istype(target, /obj/item/device))
-		return "Устройства"
-	else if(istype(target, /obj/item/stack))
-		return "Ресурсы"
-	else
-		return "Разное"
-
 
 /obj/machinery/disposal/deliveryChute
 	name = "Delivery chute"
