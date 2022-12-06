@@ -22,6 +22,40 @@ By design, d1 is the smallest direction and d2 is the highest
 */
 
 // the power cable object
+/obj/structure/powerpole
+	name = "power pole"
+	desc = "Столб электропередач."
+	icon = 'icons/obj/powerpole.dmi'
+	icon_state = "Pole"
+
+	density = TRUE
+	anchored = TRUE
+	layer = 9.1
+
+/obj/structure/powerpole/atom_init()
+	. = ..()
+	if(prob(30))
+		add_overlay(icon('icons/obj/powerpole.dmi', "detail_1"))
+	if(prob(30))
+		add_overlay(icon('icons/obj/powerpole.dmi', "detail_2"))
+	if(prob(30))
+		add_overlay(icon('icons/obj/powerpole.dmi', "detail_3"))
+
+/obj/structure/powerpole/lamp
+	name = "lamp post"
+	desc = "Столб электропередач с фонарём."
+	icon_state = "Pole_lamp"
+
+	var/on = TRUE
+
+/obj/structure/powerpole/lamp/update_icon()
+	icon_state = "[icon_state][on]"
+
+/obj/structure/powerpole/lamp/atom_init()
+	. = ..()
+	set_light(12, 2, "#da0205")
+	update_icon()
+
 /obj/structure/cable
 	level = 1 //is underfloor
 	anchored =1

@@ -262,6 +262,18 @@
 		return
 	..()
 
+/obj/structure/mineral_door/wood/secure
+	name = "secure wooden door"
+	icon_state = "wood_secure"
+	sheetType = /obj/item/stack/sheet/wood
+	operating_sound = 'sound/effects/doorcreaky.ogg'
+
+/obj/structure/mineral_door/wood/secure/attack_hand(mob/user)
+	if(!allowed(user))
+		flick("[icon_state]_denied", src)
+		return
+	..()
+
 /obj/structure/mineral_door/resin
 	icon = 'icons/mob/alien.dmi'
 	operating_sound = 'sound/effects/attackblob.ogg'

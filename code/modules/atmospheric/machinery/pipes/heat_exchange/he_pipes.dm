@@ -1,3 +1,19 @@
+/obj/machinery/atmospherics/components/binary/radiator
+	icon = 'icons/atmos/heat.dmi'
+	icon_state = "radiator"
+
+/obj/machinery/atmospherics/components/binary/radiator/atom_init()
+	. = ..()
+	switch(src.dir)
+		if(NORTH)
+			pixel_y = -14
+		if(SOUTH)
+			pixel_y = 14
+		if(EAST)
+			pixel_x = -14
+		if(WEST)
+			pixel_x = 14
+
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging
 	icon = 'icons/atmos/heat.dmi'
 	icon_state = "intact"
