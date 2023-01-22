@@ -601,6 +601,11 @@
 	desc = "This informational poster teaches the viewer what carbon dioxide is."
 	icon_state = "poster35_legit"
 
+/obj/structure/sign/poster/official/missingtaj
+	name = "Missing Tajara"
+	desc = "Have you seen this Tajara?"
+	icon_state = "poster36_legit"
+
 /obj/structure/sign/poster/revolution
 	poster_item_name = "revolution poster"
 	poster_item_desc = "Some weird poster shaming Nanotrasen for things they never did... or did they?"

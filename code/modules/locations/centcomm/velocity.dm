@@ -142,11 +142,31 @@
 	icon = 'icons/locations/centcomm/soda_ad.dmi'
 	icon_state = "soda"
 
+/obj/structure/sign/velocity_overlay/reklama/soda_ad/atom_init()
+	switch(rand(1,3))
+		if(1)
+			icon_state = "soda"
+		if(2)
+			icon_state = "milk"
+		if(3)
+			icon_state = "burger"
+	. = ..()
+
 /obj/structure/sign/velocity_overlay/reklama/pda_x
-	name = "PDA X Advertisement"
-	desc = "Buy your brand new PDA X today!"
+	name = "PDA Advertisement"
+	desc = "Buy your brand new PDA today!"
 	icon = 'icons/locations/centcomm/monitor.dmi'
-	icon_state = "PDA_X_on"
+	icon_state = "PDA_X_1"
+
+/obj/structure/sign/velocity_overlay/reklama/pda_x/atom_init()
+	icon_state = "PDA_X_[rand(1,2)]"
+	. = ..()
+
+/obj/structure/sign/velocity_overlay/reklama/honk
+	name = "Honk Advertisement"
+	desc = "Honk it harder!"
+	icon = 'icons/locations/centcomm/monitor.dmi'
+	icon_state = "honk"
 
 /obj/item/clothing/suit/storage/det_suit/velocity
 	name = "velocity officer's coat"
