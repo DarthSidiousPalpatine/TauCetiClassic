@@ -58163,7 +58163,7 @@
 	d2 = 2;
 	icon_state = "0-2"
 	},
-/obj/machinery/portable_atmospherics/canister/oxygen,
+/obj/structure/dispenser,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellowcorner"
@@ -70400,6 +70400,7 @@
 /obj/machinery/atmospherics/pipe/simple/hidden/supply{
 	dir = 4
 	},
+/obj/machinery/atmospherics/pipe/simple/visible,
 /turf/simulated/floor,
 /area/station/engineering/engine)
 "enu" = (
@@ -71488,14 +71489,12 @@
 	pixel_y = -20;
 	req_access = list(10,13)
 	},
-/obj/machinery/atmospherics/pipe/manifold/visible{
-	dir = 4
-	},
 /obj/structure/cable{
 	d1 = 1;
 	d2 = 2;
 	icon_state = "1-2"
 	},
+/obj/machinery/atmospherics/pipe/manifold4w/visible,
 /turf/simulated/floor{
 	icon_state = "warning"
 	},
@@ -77201,6 +77200,14 @@
 	icon_state = "neutralcorner"
 	},
 /area/station/hallway/secondary/entry)
+"lUh" = (
+/obj/machinery/atmospherics/pipe/simple/visible{
+	dir = 9
+	},
+/turf/simulated/floor{
+	icon_state = "warning"
+	},
+/area/station/engineering/engine)
 "lVb" = (
 /obj/structure/sign/warning/nosmoking{
 	pixel_x = -28
@@ -83079,6 +83086,21 @@
 	icon_state = "whitehall"
 	},
 /area/station/medical/surgery2)
+"sWp" = (
+/obj/structure/cable/yellow{
+	d1 = 4;
+	d2 = 8;
+	icon_state = "4-8"
+	},
+/obj/machinery/atmospherics/pipe/simple/hidden/scrubbers{
+	dir = 4
+	},
+/obj/machinery/atmospherics/pipe/simple/hidden/supply{
+	dir = 4
+	},
+/obj/machinery/atmospherics/pipe/simple/visible,
+/turf/simulated/floor,
+/area/station/engineering/engine)
 "sWE" = (
 /obj/structure/cable{
 	d1 = 1;
@@ -84304,6 +84326,10 @@
 	icon_state = "dark"
 	},
 /area/station/civilian/bar)
+"vun" = (
+/obj/machinery/atmospherics/pipe/simple/visible,
+/turf/simulated/floor,
+/area/station/engineering/engine)
 "vvH" = (
 /obj/machinery/atmospherics/pipe/simple/visible/red{
 	dir = 4
@@ -85377,7 +85403,7 @@
 /obj/machinery/firealarm{
 	pixel_y = 24
 	},
-/obj/structure/dispenser,
+/obj/machinery/atmospherics/components/unary/suit_kiosk,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -113755,9 +113781,9 @@ cfN
 crH
 xOo
 emk
-cuf
-czN
-wHd
+vun
+sWp
+lUh
 crH
 crH
 crH
