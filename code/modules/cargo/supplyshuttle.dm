@@ -85,3 +85,21 @@ var/global/list/mechtoys = list(
 /obj/structure/plasticflaps/mining
 	name = "Airtight plastic flaps"
 	desc = "Heavy duty, airtight, plastic flaps."
+
+
+/obj/structure/sokoban_wall //HOW DO YOU CALL THOSE THINGS ANYWAY
+	name = "Shuttle cargo"
+	desc = "DO NOT TOUCH!"
+	icon = 'icons/obj/structures/sokoban.dmi' //Change this.
+	icon_state = "wall_3"
+	density = TRUE
+	opacity = FALSE
+	anchored = TRUE
+	can_block_air = FALSE
+
+	resistance_flags = INDESTRUCTIBLE
+
+/obj/structure/sokoban_wall/atom_init()
+	. = ..()
+	icon_state = "wall_[rand(1,10)]"
+	dir = pick(global.cardinal)
