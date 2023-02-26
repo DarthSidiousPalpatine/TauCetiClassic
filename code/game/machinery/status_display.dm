@@ -48,7 +48,54 @@
 	status_display_list += src
 	radio_controller.add_object(src, frequency)
 	update()
+	addtimer(CALLBACK(src, .proc/show_ad), 5 SECONDS, TIMER_UNIQUE)
 
+/obj/machinery/status_display/proc/show_ad()
+	var/image/background = image("icons/obj/status_display.dmi", "gryztorg_preview_background")
+	var/image/foreground = image("icons/obj/status_display.dmi", "gryztorg_blank")
+
+	add_overlay(background)
+	add_overlay(foreground)
+
+	animate_ad(background, foreground)
+
+	background.cut_overlays()
+	cut_overlay(background)
+	cut_overlay(foreground)
+
+	addtimer(CALLBACK(src, .proc/show_ad), 10 SECONDS, TIMER_UNIQUE)
+
+/obj/machinery/status_display/proc/animate_ad(image/background, image/foreground)
+	var/image/item = image("icons/obj/status_display.dmi", "gryztorg_blank")
+	var/image/discount = image("icons/obj/status_display.dmi", "gryztorg_blank")
+	var/image/price = image("icons/obj/status_display.dmi", "gryztorg_blank")
+
+	background.add_overlay(item)
+	background.add_overlay(discount)
+	background.add_overlay(price)
+
+	animate(foreground, icon_state = "gryztorg_intro", 0)
+
+	var/iterations = 0
+
+	for(var/i = 0, i < 3, i++)
+		if(!online_shop_lots.len)
+			break
+		var/datum/shop_lot/Lot = online_shop_lots[pick(online_shop_lots)]
+		if(Lot)
+			item = image(Lot.raw_icon.icon, Lot.raw_icon.icon_state)
+			var/matrix/M = matrix()
+			M.Scale(0.5)
+			item.transform = M
+			discount = image("icons/obj/status_display.dmi", "gryztorg_discount_bar_1")
+			price = image("icons/obj/status_display.dmi", "gryztorg_price_bar_1")
+			animate(foreground, icon_state = "gryztorg_middletro", 0, delay = i * 30 + 31.9)
+			animate(foreground, icon_state = "gryztorg_blank", 0, delay = i * 30 + 7.8 + 31.9)
+
+			iterations++
+
+	animate(background, alpha = 0, 1.5, flags = ANIMATION_PARALLEL, delay = iterations * 60)
+	animate(foreground, alpha = 0, 1.5, flags = ANIMATION_PARALLEL, delay = iterations * 60)
 
 /obj/machinery/status_display/Destroy()
 	status_display_list -= src

@@ -1050,6 +1050,7 @@
 	var/lot_price = Item.price_tag["price"]
 	var/lot_category = Item.price_tag["category"]
 	var/lot_account = Item.price_tag["account"]
+	var/lot_icon = image(Item.icon, Item.icon_state)
 	var/item_icon = bicon(Item)
 
 	if (isitem(Item))
@@ -1110,7 +1111,7 @@
 	else
 		return
 
-	var/datum/shop_lot/Lot = new /datum/shop_lot(lot_name, lot_desc, lot_price, lot_category, lot_account, item_icon)
+	var/datum/shop_lot/Lot = new /datum/shop_lot(lot_name, lot_desc, lot_price, lot_category, lot_account, item_icon, lot_icon)
 
 	global.shop_categories[lot_category]++
 
