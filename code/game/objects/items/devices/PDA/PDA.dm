@@ -67,6 +67,7 @@
 	var/boss_PDA = 0	//the PDA belongs to the heads or not	(can I change the salary?)
 	var/list/subordinate_staff = list()
 	var/last_trans_tick = 0
+	var/chosen_stock = ""
 
 	var/category
 	var/list/shop_lots = list()
@@ -525,6 +526,9 @@
 	data["boss"] = boss_PDA
 	data["subordinate_staff"] = subordinate_staff
 	data["ready_to_send"] = (last_trans_tick > world.time) ? 0 : 1
+	data["stocks_available"] = MA.stocks.len ? TRUE : FALSE
+	data["chosen_stock"] = chosen_stock ? chosen_stock : "No Stock"
+	data["chosen_stock_available"] = chosen_stock && MA.stocks.Find(chosen_stock) ? TRUE : FALSE
 
 	data["mode"] = mode					// The current view
 	data["scanmode"] = scanmode				// Scanners
@@ -1068,6 +1072,32 @@
 			target_account = 0
 			funds_amount = 0
 			last_trans_tick = world.time + TRANSCATION_COOLDOWN
+
+		if("Chose Stock")
+			var/datum/money_account/MA = get_account(owner_account)
+			if(!MA)
+				to_chat(U, "[bicon(src)]<span class='warning'>Your PDA is not tied to any account!</span>")
+				return
+			if(MA.suspended)
+				to_chat(U, "[bicon(src)]<span class='warning'>Your account is suspended!</span>")
+				return
+
+			var/list/stock = input(usr, "Please select a Stock") as null|anything in MA.stocks
+			if(stock)
+				chosen_stock = stock
+		if("Send Stock")
+			var/datum/money_account/MA = get_account(owner_account)
+			var/datum/money_account/TA = get_account(target_account)
+			if(!MA || !TA)
+				return
+			if(funds_amount <= 0)
+				return
+
+			if(MA.stocks[chosen_stock] < funds_amount)
+				return
+
+			MA.adjust_stocks(chosen_stock, -funds_amount)
+			TA.adjust_stocks(chosen_stock, funds_amount)
 
 		if("Staff Salary")
 			mode = 73
