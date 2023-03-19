@@ -17,7 +17,7 @@
 	name = "Cleanbot"
 	desc = "A little cleaning robot, he looks so excited!"
 	icon = 'icons/obj/aibots.dmi'
-	icon_state = "cleanbot0"
+	icon_state = "cleanbot"
 	density = FALSE
 	anchored = FALSE
 	//weight = 1.0E7
@@ -44,7 +44,7 @@
 /obj/machinery/bot/cleanbot/atom_init()
 	. = ..()
 	get_targets()
-	icon_state = "cleanbot[on]"
+	icon_state = "[initial(icon_state)][on]"
 
 	should_patrol = 1
 
@@ -64,7 +64,7 @@
 
 /obj/machinery/bot/cleanbot/turn_on()
 	. = ..()
-	icon_state = "cleanbot[on]"
+	icon_state = "[initial(icon_state)][on]"
 	updateUsrDialog()
 
 /obj/machinery/bot/cleanbot/turn_off()
@@ -74,7 +74,7 @@
 	target = null
 	oldtarget = null
 	oldloc = null
-	icon_state = "cleanbot[on]"
+	icon_state = "[initial(icon_state)][on]"
 	path = new()
 	updateUsrDialog()
 
@@ -321,7 +321,7 @@
 
 /obj/machinery/bot/cleanbot/proc/clean(obj/effect/decal/cleanable/target)
 	anchored = TRUE
-	icon_state = "cleanbot-c"
+	icon_state = "[initial(icon_state)]-c"
 	visible_message("<span class='warning'>[src] begins to clean up the [target]</span>")
 	cleaning = 1
 	var/cleantime = 50
@@ -333,7 +333,7 @@
 			f.dirt = 0
 		cleaning = 0
 		qdel(target)
-		icon_state = "cleanbot[on]"
+		icon_state = "[initial(icon_state)][on]"
 		anchored = FALSE
 		target = null
 
@@ -374,3 +374,17 @@
 
 	else
 		return ..()
+
+/obj/machinery/bot/cleanbot/corporate
+	name = "DustaGone"
+	desc = "Робот-швабра от 'Einstein Robotics'. Надёжное решение в сфере уборки."
+	icon = 'icons/obj/aibots.dmi'
+	icon_state = "corp_cleanbot"
+	density = FALSE
+	anchored = FALSE
+	max_integrity = 75
+	glide_size = 1.5
+
+/obj/machinery/bot/cleanbot/corporate/atom_init()
+	. = ..()
+	desc+=" Серийный номер: #[rand(1,9)]_[rand(111,999)]_[rand(111,999)]"

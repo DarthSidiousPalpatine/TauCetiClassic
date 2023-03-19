@@ -35,7 +35,7 @@
 	return ..()
 
 /obj/machinery/bot/proc/turn_on()
-	if(stat)	return 0
+	if(stat || open)	return 0
 	on = 1
 	set_light(initial(light_range))
 	return 1
@@ -98,7 +98,14 @@
 /obj/machinery/bot/attackby(obj/item/weapon/W, mob/user)
 	if(isscrewing(W))
 		if(!locked)
-			open = !open
+			if(open)
+				icon_state = "[initial(icon_state)]0"
+				open = FALSE
+				turn_on()
+			else
+				turn_off()
+				open = TRUE
+				icon_state = "[initial(icon_state)]-open"
 			to_chat(user, "<span class='notice'>Maintenance panel is now [src.open ? "opened" : "closed"].</span>")
 	else if(iswelding(W))
 		if(W.use(0, user))
