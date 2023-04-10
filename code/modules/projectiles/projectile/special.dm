@@ -533,3 +533,33 @@
 	if(istype(target, /obj/effect/portal/portalgun))
 		return
 	P.create_portal(src, get_turf(src))
+
+/obj/item/pojectile/bullet/syringe
+	name = "syringe"
+	icon_state = "syringeproj"
+	damage = 5
+	damage_type = BRUTE
+	flag = BULLET
+
+	var/datum/reagents
+
+/obj/item/projectile/bullet/syringe/on_hit(atom/target, def_zone = BP_CHEST, blocked = 0)
+	if (..())
+		var/mob/living/L = target
+		L.log_combat(user, "shot with a <b>syringegun</b>")
+		if(!M.check_pierce_protection(target_zone = user.get_targetzone()) && !M.isSynthetic(user.get_targetzone()))
+			if(reagents)
+				L.visible_message("<span class='danger'>[M] is hit by the syringe!</span>")
+				reagents.trans_to(L, reagents.total_volume)
+		else
+			L.visible_message("<span class='danger'>The syringe bounces off [M]!</span>")
+
+		var/obj/item/weapon/reagent_containers/syringe/S = new(loc)
+		S.mode = SYRINGE_BROKEN
+		S.update_icon()
+		qdel(src)
+
+
+/obj/item/projectile/bullet/syringe/on_impact(atom/A)
+	var/obj/item/weapon/reagent_containers/syringe/S = new(loc)
+	reagents.trans_to(S, reagents.total_volume)

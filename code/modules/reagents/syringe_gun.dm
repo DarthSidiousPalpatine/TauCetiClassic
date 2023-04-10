@@ -1,7 +1,7 @@
 
 
 
-/obj/item/weapon/gun/syringe
+/obj/item/weapon/gun/projectile/syringe
 	name = "syringe gun"
 	desc = "A spring loaded rifle designed to fit syringes, designed to incapacitate unruly patients from a distance."
 	icon = 'icons/obj/gun.dmi'
@@ -15,6 +15,12 @@
 	var/max_syringes = 1
 	m_amt = 2000
 	can_suicide_with = FALSE
+
+	initial_mag = null
+	list/suitable_mags = list()
+	has_cover = FALSE //does this gun has cover
+	cover_open = FALSE //does gun cover is open
+	obj/item/ammo_box/magazine/magazine
 
 /obj/item/weapon/gun/syringe/examine(mob/user)
 	..()
