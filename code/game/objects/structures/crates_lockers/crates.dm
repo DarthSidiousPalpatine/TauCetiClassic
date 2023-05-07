@@ -568,3 +568,23 @@
 							I.reagents.add_reagent(pick(contraband_reagents), reagents_to_add)
 						else if(length(danger_reagents))
 							I.reagents.add_reagent(pick(danger_reagents), reagents_to_add)
+
+/obj/structure/closet/crate/generate_rentgene(size = 96)
+	var/icon/rentgene = ..(size = size)
+
+	var/inside_item_size = round(RENTGENE_RECURSIVE_SIZE_SHANGE * size)
+	var/inside_item_offset = round((size - inside_item_size) * 0.25)
+
+	var/inside_mob_size = round(inside_item_size * 1.5)
+	var/inside_mob_offset = round((size - inside_mob_size) * 0.5)
+
+	for(var/atom/A in contents)
+		if(ismob(A))
+			var/icon/ItemIcon = A.generate_rentgene(size = inside_mob_size)
+			ItemIcon.Turn(90)
+			rentgene.Blend(ItemIcon, ICON_OVERLAY, inside_mob_offset/4, 0)
+		else
+			var/icon/ItemIcon = A.generate_rentgene(size = inside_item_size)
+			ItemIcon.Turn(90)
+			rentgene.Blend(ItemIcon, ICON_OVERLAY, rand(inside_item_offset, inside_item_offset + inside_item_size), 0)
+	return rentgene

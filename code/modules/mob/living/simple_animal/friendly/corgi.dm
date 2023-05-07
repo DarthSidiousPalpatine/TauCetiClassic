@@ -22,6 +22,8 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	rentgene_icon_state = "ian"
+
 	var/facehugger
 
 /obj/item/weapon/reagent_containers/food/snacks/meat/corgi
@@ -69,6 +71,8 @@
 	response_help  = "pets"
 	response_disarm = "bops"
 	response_harm   = "kicks"
+
+	rentgene_icon_state = "ian2"
 
 	default_emotes = list(
 		/datum/emote/dance,

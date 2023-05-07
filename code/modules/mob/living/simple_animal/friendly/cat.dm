@@ -27,6 +27,8 @@
 	has_head = TRUE
 	has_leg = TRUE
 
+	rentgene_icon_state = "cat"
+
 	var/obj/item/inventory_mouth
 
 /mob/living/simple_animal/cat/Life()

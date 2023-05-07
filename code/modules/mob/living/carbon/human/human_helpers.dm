@@ -40,3 +40,16 @@
 		busy_right_hand = FALSE
 	if(!busy_left_hand && !busy_right_hand)
 		busy_with_action = FALSE
+
+/mob/living/carbon/human/generate_rentgene(size = 96)
+	var/icon/rentgene
+	for(var/obj/item/organ/external/Bodypart in bodyparts)
+		var/rentgene_state = 0
+		if(Bodypart.is_stump)
+			rentgene_state = 2
+		else if(Bodypart.is_broken())
+			rentgene_state = 1
+		if(Bodypart.burn_dam < 100)
+			rentgene.Blend(icon('icons/obj/rentgene.dmi', "[species.name]_[Bodypart.name]_skin_[rentgene_state]"), ICON_OVERLAY, 1, 1)
+		rentgene.Blend(icon('icons/obj/rentgene.dmi', "[species.name]_[Bodypart.name]_bone_[rentgene_state]"), ICON_OVERLAY, 1, 1)
+	return rentgene

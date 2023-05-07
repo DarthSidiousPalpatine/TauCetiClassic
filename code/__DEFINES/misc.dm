@@ -375,3 +375,5 @@
 #define SMOOTH_ADAPTERS_WALLS_FOR_WALLS list( \
 		/obj/machinery/door/airlock = "wall", \
 )
+
+#define RENTGENE_RECURSIVE_SIZE_SHANGE 0.5

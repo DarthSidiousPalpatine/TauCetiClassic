@@ -37,6 +37,8 @@
 	var/icon/tiny
 	var/list/photographed_names = list() // For occult purposes.
 
+	var/browsersize = 200
+
 /obj/item/weapon/photo/atom_init()
 	. = ..()
 	RegisterSignal(src, COMSIG_PARENT_QDELETING, .proc/summon_ectoplasm)
@@ -91,8 +93,8 @@
 /obj/item/weapon/photo/proc/show(mob/user)
 	user << browse_rsc(img, "tmp_photo.png")
 
-	var/datum/browser/popup = new(user, "window=book [name]", "[sanitize(name)]", 224, (scribble ? 400 : 224), ntheme = CSS_THEME_LIGHT)
-	popup.set_content("<div style='overflow:hidden;text-align:center;'> <img src='tmp_photo.png' width = '192' style='-ms-interpolation-mode:nearest-neighbor'>[scribble ? "<br>Written on the back:<br><i>[scribble]</i>" : null]</div>")
+	var/datum/browser/popup = new(user, "window=book [name]", "[sanitize(name)]", browsersize * 1.25, (scribble ? browsersize * 1.25 + 180 : browsersize * 1.25), ntheme = CSS_THEME_LIGHT)
+	popup.set_content("<div style='overflow:hidden;text-align:center;'> <img src='tmp_photo.png' width = '[browsersize]' style='-ms-interpolation-mode:nearest-neighbor'>[scribble ? "<br>Written on the back:<br><i>[scribble]</i>" : null]</div>")
 	popup.open()
 
 	return

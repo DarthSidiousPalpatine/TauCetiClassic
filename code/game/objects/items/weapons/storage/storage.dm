@@ -530,3 +530,14 @@
 			qdel(A)
 		else
 			remove_from_storage(A, T)
+
+/obj/item/weapon/storage/generate_rentgene(size = 96)
+	var/icon/rentgene = ..(size = size)
+
+	var/inside_item_size = round(size * RENTGENE_RECURSIVE_SIZE_SHANGE)
+	var/inside_item_offset = round((size - inside_item_size) * 0.5)
+
+	for(var/obj/item/I in contents)
+		var/icon/ItemIcon = I.generate_rentgene(size = inside_item_size)
+		rentgene.Blend(ItemIcon, ICON_OVERLAY, inside_item_offset + rand(-4, 4), inside_item_offset + rand(-4, 4))
+	return rentgene

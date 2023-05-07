@@ -68,6 +68,8 @@
 
 	var/resistance_flags = FULL_INDESTRUCTIBLE // INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ON_FIRE | UNACIDABLE | ACID_PROOF
 
+	var/icon/rentgene_icon_state = null
+
 /atom/New(loc, ...)
 	if(use_preloader && (src.type == _preloader.target_path))//in case the instanciated atom is creating other atoms in New()
 		_preloader.load(src)
@@ -795,3 +797,32 @@
 	animate(visual, pixel_x = (tile.x - our_tile.x) * world.icon_size + pointed_atom.pixel_x, pixel_y = (tile.y - our_tile.y) * world.icon_size + pointed_atom.pixel_y, time = 1.7, easing = EASE_OUT)
 
 	return TRUE
+
+
+/atom/proc/generate_rentgene(size = 96)
+	var/icon/rentgene
+	if(rentgene_icon_state)
+		rentgene = new/icon('icons/obj/rentgene.dmi', rentgene_icon_state)
+	else
+		rentgene = new/icon(icon, icon_state, dir)
+		rentgene.MapColors(arglist(RENTGENE_FILTER))
+
+	rentgene.Scale(size, size)
+	return rentgene
+
+/obj/item/weapon/rentgene_creator
+	name = "rentgene creator"
+	desc = "dev test"
+	icon = 'icons/obj/weapons.dmi'
+	icon_state = "nullrod"
+
+/obj/item/weapon/rentgene_creator/afterattack(atom/target, mob/user, proximity, params)
+	var/icon/photo = new/icon('icons/obj/rentgene.dmi', "background")
+
+	photo.Blend(target.generate_rentgene(), ICON_OVERLAY, 1, 1)
+
+	var/obj/item/weapon/photo/Photo = new/obj/item/weapon/photo()
+	Photo.icon = icon('icons/obj/items.dmi',"photo")
+	Photo.img = photo
+	Photo.browsersize = 192 * 2
+	Photo.loc = get_turf(src)

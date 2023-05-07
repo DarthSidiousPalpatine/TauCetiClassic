@@ -53,6 +53,8 @@ ADD_TO_GLOBAL_LIST(/mob/living/carbon/ian, chief_animal_list)
 	var/pose_last = 0
 	var/ian_sit = 0
 
+	rentgene_icon_state = "ian"
+
 /mob/living/carbon/ian/atom_init()
 	reagents = new(1000)
 	reagents.my_atom = src

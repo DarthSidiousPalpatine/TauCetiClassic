@@ -21,6 +21,8 @@
 	has_head = TRUE
 	moveset_type = /datum/combat_moveset/slime
 
+	rentgene_icon_state = "slime_small"
+
 /mob/living/simple_animal/adultslime
 	name = "pet slime"
 	desc = "A lovable, domesticated slime."
@@ -42,6 +44,8 @@
 	has_head = TRUE
 	moveset_type = /datum/combat_moveset/slime
 
+	rentgene_icon_state = "slime_big"
+
 /mob/living/simple_animal/adultslime/atom_init()
 	. = ..()
 	add_overlay("aslime-:33")
@@ -54,11 +58,13 @@
 	S1.icon_living = "[src.colour] baby slime"
 	S1.icon_dead = "[src.colour] baby slime dead"
 	S1.colour = "[src.colour]"
+	S1.rentgene_icon_state = "slime_dead"
 	var/mob/living/simple_animal/slime/S2 = new /mob/living/simple_animal/slime (src.loc)
 	S2.icon_state = "[src.colour] baby slime"
 	S2.icon_living = "[src.colour] baby slime"
 	S2.icon_dead = "[src.colour] baby slime dead"
 	S2.colour = "[src.colour]"
+	S2.rentgene_icon_state = "slime_dead"
 	med_hud_set_health()
 	med_hud_set_status()
 	qdel(src)

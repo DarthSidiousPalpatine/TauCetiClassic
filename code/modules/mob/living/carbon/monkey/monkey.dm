@@ -25,6 +25,8 @@
 	pull_size_ratio = 1.5
 	w_class = SIZE_BIG
 
+	rentgene_icon_state = "monkey"
+
 	moveset_type = /datum/combat_moveset/human
 
 /mob/living/carbon/monkey/tajara
