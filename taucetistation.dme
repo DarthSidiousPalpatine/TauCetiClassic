@@ -870,6 +870,7 @@
 #include "code\game\machinery\embedded_controller\airlock_controllers.dm"
 #include "code\game\machinery\embedded_controller\airlock_program.dm"
 #include "code\game\machinery\embedded_controller\embedded_controller_base.dm"
+#include "code\game\machinery\kitchen\brazier.dm"
 #include "code\game\machinery\kitchen\deep_fryer.dm"
 #include "code\game\machinery\kitchen\gibber.dm"
 #include "code\game\machinery\kitchen\juicer.dm"
