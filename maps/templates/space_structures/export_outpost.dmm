@@ -11,7 +11,8 @@
 /area/space)
 "ad" = (
 /obj/structure/window/fulltile/reinforced{
-	grilled = 1
+	grilled = 1;
+	icon_state = "gr_window_reinforced"
 	},
 /obj/machinery/door/poddoor/shutters{
 	id = "export"
@@ -31,6 +32,11 @@
 /obj/structure/table,
 /obj/item/weapon/paper_bin,
 /obj/item/weapon/pen,
+/obj/item/device/cardpay{
+	dir = 1;
+	pixel_x = -10;
+	pixel_y = 6
+	},
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "yellowchecker"
@@ -47,9 +53,8 @@
 /obj/structure/sign/poster/contraband/syndicate_recruitment{
 	pixel_y = -32
 	},
-/turf/simulated/floor/plating{
-	icon_state = "platingdmg1"
-	},
+/obj/effect/decal/turf_decal/set_damaged,
+/turf/simulated/floor/plating,
 /area/space_structures/export_outpost)
 "ai" = (
 /obj/machinery/power/apc{
@@ -106,7 +111,8 @@
 /area/space_structures/export_outpost)
 "aq" = (
 /obj/structure/window/fulltile/reinforced{
-	grilled = 1
+	grilled = 1;
+	icon_state = "gr_window_reinforced"
 	},
 /turf/simulated/floor/plating,
 /area/space_structures/export_outpost)
@@ -248,9 +254,12 @@
 /obj/machinery/computer/export{
 	dir = 8
 	},
-/turf/simulated/floor{
+/obj/effect/decal/turf_decal{
 	dir = 9;
-	icon_state = "warnwhite"
+	icon_state = "warn"
+	},
+/turf/simulated/floor{
+	icon_state = "white"
 	},
 /area/space_structures/export_outpost)
 "aJ" = (
@@ -339,9 +348,12 @@
 /area/space_structures/export_outpost)
 "aS" = (
 /obj/machinery/export_pad,
-/turf/simulated/floor{
+/obj/effect/decal/turf_decal{
 	dir = 10;
-	icon_state = "warnwhite"
+	icon_state = "warn"
+	},
+/turf/simulated/floor{
+	icon_state = "white"
 	},
 /area/space_structures/export_outpost)
 "aT" = (
@@ -567,7 +579,6 @@
 "bz" = (
 /obj/structure/rack,
 /obj/item/weapon/handcuffs,
-/obj/item/device/eftpos,
 /turf/simulated/floor{
 	dir = 5;
 	icon_state = "redchecker"
@@ -603,9 +614,8 @@
 "bD" = (
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/machinery/atmospherics/pipe/simple/visible/universal,
-/turf/simulated/floor/plating{
-	icon_state = "platingdmg3"
-	},
+/obj/effect/decal/turf_decal/set_damaged,
+/turf/simulated/floor/plating,
 /area/space_structures/export_outpost)
 "bE" = (
 /obj/machinery/door/airlock/external{
