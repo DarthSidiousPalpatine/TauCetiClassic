@@ -50,6 +50,12 @@
 	fitting = LAMP_FITTING_BULB
 	light_mode = /datum/light_mode/default/bulb
 
+/obj/item/weapon/light/bulb/smart
+	name = "smart light bulb"
+	desc = "A replacement light bulb. Can be used with central lighting control systems!"
+	icon_state = "lbulb"
+	smart = TRUE
+
 /obj/item/weapon/light/bulb/emergency
 	name = "emergency light bulb"
 	desc = "A replacement emergency bulb."

@@ -56,8 +56,36 @@
 	lamp_icon_state = "bulb"
 	exposure_icon_state = "circle"
 
+/obj/machinery/light/armored
+	desc = "An armored lighting fixture."
+	icon_state = "armored"
+	base_icon_state = "armored"
+	fitting = LAMP_FITTING_BULB
+	inserted_bulb_type = /obj/item/weapon/light/bulb/smart
+
+	lamp_icon_state = "armored"
+	exposure_icon_state = "smallcone"
+	lamp_colored = TRUE
+
+/obj/machinery/light/round
+	desc = "A round lighting fixture."
+	icon_state = "round"
+	base_icon_state = "round"
+	fitting = LAMP_FITTING_BULB
+	inserted_bulb_type = /obj/item/weapon/light/bulb/smart
+
+	lamp_icon_state = "round"
+	exposure_icon_state = "smallcone"
+	lamp_colored = TRUE
+
 /obj/machinery/light/small/emergency
+	icon_state = "trapeze"
+	base_icon_state = "trapeze"
 	inserted_bulb_type = /obj/item/weapon/light/bulb/emergency
+
+	lamp_icon_state = "trapeze"
+	exposure_icon_state = "trapeze"
+	lamp_colored = TRUE
 
 /obj/machinery/light/spot // no way to construct, centcomm only item
 	name = "spotlight"
