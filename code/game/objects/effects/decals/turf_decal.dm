@@ -183,3 +183,52 @@
 		T.add_overlay(mutable_appearance(icon, icon_state))
 
 	return INITIALIZE_HINT_QDEL
+
+
+/obj/effect/decal/turf_decal/gostred
+	name = "GOST Red Turf Decals"
+	color = "#c1121c"
+
+/obj/effect/decal/turf_decal/alpha/gostred
+	name = "Transparent GOST Red Turf Decals"
+	color = "#c1121c"
+
+/obj/effect/decal/turf_decal/gostyellow
+	name = "GOST Yellow Turf Decals"
+	color = "#f0ca00"
+
+/obj/effect/decal/turf_decal/alpha/gostyellow
+	name = "Transparent GOST Yellow Turf Decals"
+	color = "#f0ca00"
+
+/obj/effect/decal/turf_decal/gostgreen
+	name = "GOST Green Turf Decals"
+	color = "#008754"
+
+/obj/effect/decal/turf_decal/alpha/gostgreen
+	name = "Transparent GOST Green Turf Decals"
+	color = "#008754"
+
+/obj/effect/decal/turf_decal/gostblue
+	name = "GOST Blue Turf Decals"
+	color = "#154889"
+
+/obj/effect/decal/turf_decal/alpha/gostblue
+	name = "Transparent GOST Blue Turf Decals"
+	color = "#154889"
+
+/obj/effect/decal/turf_decal/gostwhite
+	name = "GOST White Turf Decals"
+	color = "#f4f8f4"
+
+/obj/effect/decal/turf_decal/alpha/gostwhite
+	name = "Transparent GOST White Turf Decals"
+	color = "#f4f8f4"
+
+/obj/effect/decal/turf_decal/gostblack
+	name = "GOST Black Turf Decals"
+	color = "#2e3032"
+
+/obj/effect/decal/turf_decal/alpha/gostblack
+	name = "Transparent GOST Black Turf Decals"
+	color = "#2e3032"
