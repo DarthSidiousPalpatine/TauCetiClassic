@@ -1,5 +1,5 @@
 //MONKEY BLOCK
-var/global/MONKEYBLOCK = 27
+var/global/MONKEYBLOCK = 30
 /////////////////////
 
 //BAD BLOCKS

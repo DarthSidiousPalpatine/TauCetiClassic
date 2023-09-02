@@ -46,7 +46,7 @@
 #define DNA_UI_LENGTH      20 // Update this when you add something, or you WILL break shit.
 
 
-#define DNA_SE_LENGTH 27
+#define DNA_SE_LENGTH 30
 #define DNA_UNIQUE_ENZYMES_LEN 32
 // For later:
 //#define DNA_SE_LENGTH 50 // Was STRUCDNASIZE, size 27. 15 new blocks added = 42, plus room to grow.
