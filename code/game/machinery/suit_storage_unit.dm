@@ -555,3 +555,103 @@
 /obj/machinery/suit_storage_unit/attack_paw(mob/user)
 	to_chat(user, "<span class='info'>The console controls are far too complicated for your tiny brain!</span>")
 	return
+
+
+/obj/machinery/atmospherics/components/unary/kiosk
+	name = "Suit Kiosk"
+	desc = "Стационарная мини-фабрика для обслуживания и диагностики РИГов."
+	icon = 'icons/obj/suitstorage.dmi'
+	icon_state = "spacesuit_closet_lock"
+	anchored = TRUE
+	density = TRUE
+
+	layer = DEFAULT_MACHINERY_LAYER
+
+	var/obj/item/clothing/head/helmet/space/rig/Helmet
+	var/obj/item/clothing/suit/space/rig/Suit
+	var/icon/helmeticon
+	var/icon/suiticon
+
+/obj/machinery/atmospherics/components/unary/kiosk/atom_init()
+	. = ..()
+	helmeticon = icon(icon, "helmet_closet")
+	suiticon = icon(icon, "scaf_closet")
+
+
+/obj/machinery/atmospherics/components/unary/kiosk/attackby(obj/item/I, mob/user)
+	if(!is_operational())
+		return
+
+	if(istype(I, /obj/item/clothing/suit/space/rig))
+		if(Suit)
+			return
+		user.drop_from_inventory(I, src)
+		Suit = I
+		add_overlay(suiticon)
+		if(Suit.helmet)
+			add_overlay(helmeticon)
+			Helmet = Suit.helmet
+
+/obj/machinery/atmospherics/components/unary/kiosk/update_icon()
+	if(!is_operational())
+		if(icon_state == "spacesuit_closet_lock")
+			return
+		flick_overlay_view(image(icon, "anim_close"))
+		cut_overlay(list(helmeticon, suiticon))
+		icon_state = "spacesuit_closet_lock"
+	else
+		if(icon_state == "spacesuit_closet_open")
+			return
+		flick_overlay_view(image(icon, "anim_open"))
+		icon_state = "spacesuit_closet_open"
+
+/obj/machinery/atmospherics/components/unary/kiosk/attack_hand(mob/user)
+	. = ..()
+	if(!is_operational())
+		return
+	tgui_interact(user)
+
+/obj/machinery/atmospherics/components/unary/kiosk/tgui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "Kiosk", "Киоск")
+		ui.open()
+
+/obj/machinery/atmospherics/components/unary/kiosk/tgui_data(mob/user)
+	var/list/data = list()
+	data["hashelmet"] = Helmet? TRUE : FALSE
+	data["helmeticon"] = Helmet? bicon(Helmet) : null
+
+	data["hassuit"] = Suit? TRUE : FALSE
+	data["helmeticon"] = Suit? bicon(Suit) : null
+
+	data["hasboots"] = Suit?.attached_boots? TRUE : FALSE
+	data["helmeticon"] = Suit?.attached_boots? bicon(Suit.attached_boots) : null
+
+	data["hasgloves"] = Suit?.gloves? TRUE : FALSE
+	data["helmeticon"] = Suit?.gloves? bicon(Suit.gloves) : null
+
+	data["charge"] = Suit?.cell?.charge
+	data["maxcharge"] = Suit?.cell?.maxcharge
+
+
+	data["maxdevices"] = Suit?.max_mounted_devices
+	if(Suit)
+		var/list/suit_devices = list()
+		for(var/obj/item/rig_module/Device in Suit.mounted_devices)
+			suit_devices += list(list("name" = Device.interface_name, "description" = Device.interface_desc, "icon" = bicon(Device), "damage" = Device.damage))
+		data["devices"] = suit_devices
+	return data
+
+/obj/machinery/atmospherics/components/unary/kiosk/tgui_act(action, params)
+	. = ..()
+	if(.)
+		return
+
+	switch(action)
+		if("eject")
+			Helmet?.forceMove(loc)
+			Helmet = null
+
+			Suit?.forceMove(loc)
+			Suit = null

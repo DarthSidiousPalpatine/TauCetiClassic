@@ -57336,11 +57336,6 @@
 /turf/simulated/floor,
 /area/station/engineering/break_room)
 "chi" = (
-/obj/structure/rack,
-/obj/item/clothing/shoes/magboots,
-/obj/item/clothing/suit/space/rig/engineering,
-/obj/item/clothing/mask/breath,
-/obj/item/clothing/head/helmet/space/rig/engineering,
 /obj/item/device/radio/intercom{
 	name = "Station Intercom (General)";
 	pixel_y = 20
@@ -57350,6 +57345,7 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
+/obj/machinery/atmospherics/components/unary/kiosk,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -57366,13 +57362,13 @@
 	d2 = 2;
 	icon_state = "0-2"
 	},
-/obj/machinery/portable_atmospherics/canister/oxygen,
 /obj/machinery/power/apc/largecell{
 	pixel_y = 26;
 	dir = 1;
 	name = "Engineering area power controller";
 	custom_smartlight_preset = "Engineering"
 	},
+/obj/structure/dispenser,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellowcorner"
@@ -57748,10 +57744,10 @@
 	},
 /area/station/hallway/primary/aft)
 "cip" = (
-/obj/machinery/disposal,
-/obj/structure/disposalpipe/trunk{
-	dir = 8
+/obj/machinery/atmospherics/components/unary/portables_connector{
+	dir = 1
 	},
+/obj/machinery/portable_atmospherics/canister/oxygen,
 /turf/simulated/floor{
 	icon_state = "yellow"
 	},
@@ -80017,10 +80013,10 @@
 /turf/environment/space,
 /area/space)
 "qDA" = (
-/obj/structure/disposalpipe/segment{
-	dir = 4
+/obj/structure/disposalpipe/trunk{
+	dir = 8
 	},
-/obj/item/weapon/flora/random,
+/obj/machinery/disposal,
 /turf/simulated/floor{
 	icon_state = "yellowcorner"
 	},
@@ -82591,6 +82587,21 @@
 	icon_state = "white"
 	},
 /area/station/rnd/brainstorm_center)
+"tmB" = (
+/obj/structure/cable/yellow{
+	d1 = 4;
+	d2 = 8;
+	icon_state = "4-8"
+	},
+/obj/machinery/atmospherics/pipe/simple/hidden/scrubbers{
+	dir = 4
+	},
+/obj/machinery/atmospherics/pipe/simple/hidden/supply{
+	dir = 4
+	},
+/obj/machinery/atmospherics/pipe/simple/visible,
+/turf/simulated/floor,
+/area/station/engineering/engine)
 "tnb" = (
 /obj/machinery/door/window/eastright{
 	base_state = "left";
@@ -82963,6 +82974,10 @@
 	},
 /turf/simulated/floor/plating,
 /area/station/maintenance/medbay)
+"ubr" = (
+/obj/machinery/atmospherics/pipe/simple/visible,
+/turf/simulated/floor,
+/area/station/engineering/engine)
 "ucb" = (
 /obj/structure/filingcabinet/chestdrawer,
 /turf/simulated/floor{
@@ -84688,7 +84703,11 @@
 /obj/machinery/firealarm{
 	pixel_y = 24
 	},
-/obj/structure/dispenser,
+/obj/structure/rack,
+/obj/item/clothing/shoes/magboots,
+/obj/item/clothing/suit/space/rig/engineering,
+/obj/item/clothing/mask/breath,
+/obj/item/clothing/head/helmet/space/rig/engineering,
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "yellow"
@@ -112309,9 +112328,9 @@ nxV
 nxV
 crH
 chi
-cuf
-cuf
-czN
+ubr
+ubr
+tmB
 cip
 crH
 crH
