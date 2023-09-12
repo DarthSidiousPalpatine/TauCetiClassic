@@ -1,3 +1,19 @@
+/atom/movable/better_lighting
+	name = ""
+
+	anchored = TRUE
+
+	icon = LIGHTING_ICON
+	icon_state = "transparent"
+	color = "#ffffff"
+	plane = LIGHTING_LAMPS_PLANE
+	mouse_opacity    = MOUSE_OPACITY_TRANSPARENT
+	invisibility     = INVISIBILITY_LIGHTING
+
+	simulated = FALSE
+	flags = NOREACT
+	flags_2 = PROHIBIT_FOR_DEMO_2 // can corrupt the demo
+
 /atom
 	var/light_power = 1 // Intensity of the light.
 	var/light_range = 0 // Range in tiles of the light.
@@ -163,3 +179,34 @@ var/global/EXPOSURE_CONTRAST_POWER = 0
 	cut_overlay(exposure_overlay)
 	QDEL_NULL(glow_overlay)
 	QDEL_NULL(exposure_overlay)
+
+/atom/movable
+	var/atom/movable/better_lighting/atom_better_lighting
+
+/atom/movable/atom_init()
+	. = ..()
+	update_better_lighting()
+
+/atom/movable/Destroy()
+	delete_better_lighting()
+	. = ..()
+
+/atom/movable/update_icon()
+	. = ..()
+	update_better_lighting()
+
+/atom/movable/proc/create_better_lighting()
+	if(!atom_better_lighting)
+		atom_better_lighting = new(src)
+		atom_better_lighting.layer = layer
+
+/atom/movable/proc/update_better_lighting()
+	if(!atom_better_lighting)
+		create_better_lighting()
+
+	atom_better_lighting.icon = icon
+	atom_better_lighting.icon_state = icon_state
+
+/atom/movable/proc/delete_better_lighting()
+	QDEL_NULL(atom_better_lighting)
+
