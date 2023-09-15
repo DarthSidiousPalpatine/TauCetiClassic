@@ -1767,6 +1767,23 @@ var/global/list/all_supply_groups = list("Operations","Security","Hospitality","
 					/obj/item/clothing/suit/lasertag/bluetag)
 	group = "Miscellaneous"
 
+/datum/supply_pack/tatlin
+	name = "TATLIN-branded furniture"
+	contains = list(/obj/structure/stool/tatlin,
+					/obj/structure/stool/tatlin,
+					/obj/structure/stool/tatlin,
+					/obj/structure/stool/bed/chair/tatlin,
+					/obj/structure/stool/bed/chair/tatlin,
+					/obj/structure/stool/bed/tatlin,
+					/obj/structure/table/tatlin,
+					/obj/structure/table/tatlin/small,
+					/obj/structure/table/tatlin/shoestand,
+					/obj/structure/mirror/tatlin,
+					/obj/structure/closet/crate/bin/tatlin,
+					/obj/structure/coatrack/tatlin)
+	crate_name = "TATLIN.NT"
+	group = "Miscellaneous"
+
 //----------------------------------------------
 //-----------------RANDOMISED-------------------
 //----------------------------------------------

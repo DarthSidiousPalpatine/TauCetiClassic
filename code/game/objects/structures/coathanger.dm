@@ -2,7 +2,7 @@
 	name = "coat rack"
 	desc = "Rack that holds coats."
 	icon = 'icons/obj/coatrack.dmi'
-	icon_state = "coatrack0"
+	icon_state = "coatrack"
 	var/obj/item/clothing/suit/coat
 	var/obj/item/clothing/head/det_hat/hat
 	var/list/allowed = list(/obj/item/clothing/suit/storage/labcoat, /obj/item/clothing/suit/storage/det_suit, /obj/item/clothing/head/det_hat)
@@ -69,12 +69,12 @@
 /obj/structure/coatrack/update_icon()
 	cut_overlays()
 
-	if (hat) icon_state = "coatrack1"
-	else icon_state = "coatrack0"
+	if (hat)
+		add_overlay(image('icons/obj/coatrack.dmi', icon_state = "hat"))
 
 	if (istype(coat, /obj/item/clothing/suit/storage/labcoat))
-		add_overlay(image(icon, icon_state = "coat_lab"))
+		add_overlay(image('icons/obj/coatrack.dmi', icon_state = "coat_lab"))
 	if (istype(coat, /obj/item/clothing/suit/storage/labcoat/cmo))
-		add_overlay(image(icon, icon_state = "coat_cmo"))
+		add_overlay(image('icons/obj/coatrack.dmi', icon_state = "coat_cmo"))
 	if (istype(coat, /obj/item/clothing/suit/storage/det_suit))
-		add_overlay(image(icon, icon_state = "coat_det"))
+		add_overlay(image('icons/obj/coatrack.dmi', icon_state = "coat_det"))
