@@ -445,15 +445,15 @@
 /atom/proc/update_adapters()
 	if(!length(smooth_adapters))
 		return
-	
+
 	if(length(overlays_adapters))
 		cut_overlay(overlays_adapters)
-	
+
 	overlays_adapters = list()
 
 	for(var/direction in global.cardinal) // yeah, this is another get_step_around for smoothing system. Maybe need to merge it with `calculate_adjacencies` somehow. Anyway, it's not soo bad.
 		var/turf/T = get_step(src, direction)
-		
+
 		if(!T)
 			continue
 
@@ -473,6 +473,12 @@
 					break
 
 	if(length(overlays_adapters))
+		var/Pixel_X_Offset = pixel_x
+		var/Pixel_Y_Offset = pixel_y
+		if(Pixel_X_Offset || Pixel_Y_Offset)
+			for(var/image/Img in overlays_adapters)
+				Img.pixel_x = -Pixel_X_Offset
+				Img.pixel_y = -Pixel_Y_Offset
 		add_overlay(overlays_adapters)
 
 
