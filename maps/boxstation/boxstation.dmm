@@ -1310,7 +1310,6 @@
 	pixel_x = -24
 	},
 /obj/structure/table,
-/obj/item/weapon/phone,
 /obj/machinery/light/smart{
 	dir = 8
 	},
@@ -8879,6 +8878,10 @@
 /obj/item/device/cardpay{
 	pixel_x = -10
 	},
+/obj/item/weapon/phone/security{
+	pixel_x = 7;
+	pixel_y = 3
+	},
 /turf/simulated/floor{
 	icon_state = "dark"
 	},
@@ -9256,6 +9259,9 @@
 	d1 = 1;
 	d2 = 2;
 	icon_state = "1-2"
+	},
+/obj/item/weapon/phone/engineering{
+	pixel_y = 10
 	},
 /turf/simulated/floor{
 	dir = 4;
@@ -33523,10 +33529,6 @@
 	},
 /area/station/rnd/hallway)
 "bih" = (
-/obj/item/weapon/phone{
-	pixel_x = -3;
-	pixel_y = 3
-	},
 /obj/structure/table,
 /obj/structure/cable{
 	d1 = 1;
@@ -33886,6 +33888,9 @@
 /obj/structure/table,
 /obj/item/wallclock{
 	pixel_x = -32
+	},
+/obj/item/weapon/phone/cargo{
+	pixel_y = 16
 	},
 /turf/simulated/floor{
 	dir = 8;
@@ -39400,6 +39405,10 @@
 	pixel_y = 28
 	},
 /obj/structure/table/glass,
+/obj/item/weapon/phone/command{
+	pixel_x = 7;
+	pixel_y = 4
+	},
 /turf/simulated/floor{
 	dir = 1;
 	icon_state = "darkblue"
@@ -46466,6 +46475,9 @@
 /obj/effect/decal/turf_decal{
 	dir = 8;
 	icon_state = "warn"
+	},
+/obj/item/weapon/phone/science{
+	pixel_y = 14
 	},
 /turf/simulated/floor,
 /area/station/rnd/lab)
@@ -61630,6 +61642,7 @@
 	pixel_x = 8;
 	pixel_y = 2
 	},
+/obj/item/weapon/phone/hop,
 /turf/simulated/floor{
 	dir = 8;
 	icon_state = "blue"
@@ -69932,7 +69945,12 @@
 	dir = 1
 	},
 /obj/structure/table/reinforced,
-/obj/item/weapon/storage/firstaid/regular,
+/obj/item/weapon/storage/firstaid/regular{
+	pixel_y = 4
+	},
+/obj/item/weapon/phone/medbay{
+	pixel_y = -8
+	},
 /turf/simulated/floor{
 	icon_state = "vaultfull"
 	},

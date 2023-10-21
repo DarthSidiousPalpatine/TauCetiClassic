@@ -12,6 +12,29 @@
 	attack_verb = list("called", "rang")
 	hitsound = list('sound/weapons/ring.ogg')
 
+	var/department = "Nothing"
+
+/obj/item/weapon/phone/medbay
+	department = "Medical"
+
+/obj/item/weapon/phone/science
+	department = "Science"
+
+/obj/item/weapon/phone/security
+	department = "Security"
+
+/obj/item/weapon/phone/engineering
+	department = "Engineering"
+
+/obj/item/weapon/phone/cargo
+	department = "Cargo"
+
+/obj/item/weapon/phone/command
+	department = "Command"
+
+/obj/item/weapon/phone/hop
+	department = "Civillian"
+
 /obj/item/weapon/rsp
 	name = "Rapid-Seed-Producer (RSP)"
 	desc = "A device used to rapidly deploy seeds."
