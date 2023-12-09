@@ -86,7 +86,25 @@
 	name = "mars globe"
 	desc = "Глобус Марса."
 	icon = 'icons/obj/items.dmi'
-	icon_state = "globe"
+	icon_state = "globe_mars"
+
+/obj/item/venus_globe
+	name = "venus globe"
+	desc = "Глобус Венеры."
+	icon = 'icons/obj/items.dmi'
+	icon_state = "globe_venus"
+
+/obj/item/earth_globe
+	name = "venus globe"
+	desc = "Глобус Земли."
+	icon = 'icons/obj/items.dmi'
+	icon_state = "globe_earth"
+
+/obj/item/yargon_globe
+	name = "yargon IV globe"
+	desc = "Глобус Яргона-4."
+	icon = 'icons/obj/items.dmi'
+	icon_state = "globe_yargon4"
 
 /obj/item/newtons_pendulum
 	name = "newton's pendulum"
@@ -115,6 +133,17 @@
 		maptext = new_text
 
 		desc = "'Точное время в любое время'. Показывают: [worldtime2text()]"
+
+
+/obj/item/woodenclock
+	name = "wooden clock"
+	desc = "Показывают время."
+	icon = 'icons/obj/items.dmi'
+	icon_state = "wooden_clock"
+
+/obj/item/woodenclock/examine(mob/user)
+	..()
+	to_chat(user, "<span class='notice'>Показывают: [worldtime2text()]</span>")
 
 /obj/item/wallclock
 	name = "wall clock"
