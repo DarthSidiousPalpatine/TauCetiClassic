@@ -974,3 +974,10 @@ TODO: Convert everything to custom hair dye. ~ Luduk.
 /datum/reagent/consumable/drink/liquidelectricity/reaction_turf(turf/T, volume)
 	. = ..()
 	new /obj/effect/effect/sparks/electricity_spark(T)
+
+/datum/reagent/oldschoolium
+	name = "Aging Catalyst"
+	id = "agium"
+	description = "Редкостный фермент изредка выделяющийся буковым деревом. Пахнет старением."
+	color = "#111111"
+	taste_message = "sand"

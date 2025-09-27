@@ -210,6 +210,8 @@
 				to_chat(user, "<span class='warning'>You try to fill [user.a_intent == INTENT_GRAB ? "[src] up from a tank" : "a tank up"], but find it is absent.</span>")
 				return
 
+	else if(istype(target, /obj/structure/preservation_barrel))
+		return
 
 	else if(reagents && reagents.total_volume)
 		to_chat(user, "<span class = 'notice'>Вы разлили содержимое на [CASE(target, ACCUSATIVE_CASE)].</span>")

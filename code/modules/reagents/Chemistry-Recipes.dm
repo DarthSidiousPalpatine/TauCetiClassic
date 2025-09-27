@@ -1311,7 +1311,6 @@
 	required_reagents = list("poisonberryjuice" = 10)
 	required_catalysts = list("enzyme" = 5)
 	result_amount = 10
-
 /datum/chemical_reaction/melonliquor
 	name = "Melon Liquor"
 	id = "melonliquor"
@@ -1351,6 +1350,7 @@
 	required_reagents = list("potato" = 10)
 	required_catalysts = list("enzyme" = 5)
 	result_amount = 10
+
 /datum/chemical_reaction/sake
 	name = "Sake"
 	id = "sake"
@@ -1656,14 +1656,6 @@
 	id = "red_mead"
 	result = "red_mead"
 	required_reagents = list("blood" = 1, "mead" = 1)
-	result_amount = 2
-
-/datum/chemical_reaction/mead
-	name = "Mead"
-	id = "mead"
-	result = "mead"
-	required_reagents = list("sugar" = 1, "water" = 1)
-	required_catalysts = list("enzyme" = 5)
 	result_amount = 2
 
 /datum/chemical_reaction/iced_beer
@@ -2200,3 +2192,21 @@ TODO: Convert everything to custom hair dye,
 	result = "metatrombine"
 	required_reagents = list("bicaridine" = 1, "nitrogen" = 1, "potassium" = 1)
 	result_amount = 3
+
+
+// Barrel recipes
+/datum/chemical_reaction/ice_to_water
+	name = "Ice to Water"
+	id = "ice_to_water"
+	required_reagents = list("ice" = 1)
+	required_catalysts = list("agium" = 1)
+	result = "water"
+	result_amount = 2
+
+/datum/chemical_reaction/water_to_nothing
+	name = "Water to Nothing"
+	id = "water_to_nothing"
+	required_reagents = list("water" = 1)
+	required_catalysts = list("agium" = 1)
+	result = "nothing"
+	result_amount = 1

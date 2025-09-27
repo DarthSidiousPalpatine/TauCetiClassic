@@ -742,3 +742,9 @@
 	animate(visual, pixel_x = (tile.x - our_tile.x) * world.icon_size + pointed_atom.pixel_x, pixel_y = (tile.y - our_tile.y) * world.icon_size + pointed_atom.pixel_y, time = 1.7, easing = EASE_OUT)
 
 	return TRUE
+
+/atom/proc/continuity_read(list/arguments)
+	return
+
+/atom/proc/continuity_write()
+	return ""

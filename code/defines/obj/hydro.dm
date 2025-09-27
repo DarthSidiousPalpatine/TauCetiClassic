@@ -1918,3 +1918,10 @@
 	icon_state = "bottle15"
 	mutmod = 0
 	yieldmod = 2
+
+/obj/item/nutrient/compost
+	name = "compost"
+	icon = 'icons/obj/hydroponics/equipment.dmi'
+	icon_state = "compost"
+	mutmod = 0
+	yieldmod = 5

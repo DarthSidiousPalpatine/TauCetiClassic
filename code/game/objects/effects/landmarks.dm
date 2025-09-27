@@ -557,6 +557,14 @@ var/global/list/list/landmarks_list = list() // assoc list of all landmarks crea
 /obj/effect/landmark/lone_op_spawn
 	name = "Solo operative"
 
+/obj/effect/landmark/maintenance_barrel_spawn
+	name = "Maintenance Barrel"
+
+/obj/effect/landmark/maintenance_barrel_spawn/atom_init(mapload)
+	..()
+	global.maintenance_barrels_landmarks += loc
+	return INITIALIZE_HINT_QDEL
+
 /obj/effect/landmark/junkyard_bum // don't exists on map, randomly spawned by junkyard generator
 	name = "Junkyard Bum"
 
