@@ -15295,6 +15295,7 @@
 	pixel_y = 30
 	},
 /obj/structure/flora/ausbushes/palebush,
+/obj/structure/preservation_table/kitchen,
 /turf/simulated/floor/grass,
 /area/station/civilian/hydroponics)
 "aAg" = (
@@ -21504,6 +21505,7 @@
 	dir = 4
 	},
 /obj/structure/flora/ausbushes/fullgrass,
+/obj/structure/preservation_table/kitchen,
 /turf/simulated/floor/grass,
 /area/station/civilian/hydroponics)
 "aLL" = (
@@ -28625,6 +28627,7 @@
 	pixel_x = 24
 	},
 /obj/structure/flora/ausbushes/ywflowers,
+/obj/structure/preservation_barrel/kitchen,
 /turf/simulated/floor/grass,
 /area/station/civilian/hydroponics)
 "aYz" = (
@@ -43499,6 +43502,7 @@
 	pixel_y = -24
 	},
 /obj/machinery/light/smart,
+/obj/structure/preservation_box/kitchen,
 /turf/simulated/floor/grass,
 /area/station/civilian/hydroponics)
 "byR" = (
@@ -81994,6 +81998,7 @@
 /area/station/bridge/hop_office)
 "qex" = (
 /obj/structure/flora/junglebush,
+/obj/structure/composter/botany,
 /turf/simulated/floor/grass,
 /area/station/civilian/hydroponics)
 "qgb" = (

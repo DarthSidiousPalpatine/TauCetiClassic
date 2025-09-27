@@ -44,6 +44,8 @@
 	// By how much should mob's permeability be multiplied.
 	var/permeability_multiplier = 1.0
 
+	var/continuityFlags = CONTINUITY_RESTRICTED
+
 /datum/reagent/proc/reaction_mob(mob/M, method=TOUCH, volume) //By default we have a chance to transfer some
 	if(!isliving(M))
 		return FALSE

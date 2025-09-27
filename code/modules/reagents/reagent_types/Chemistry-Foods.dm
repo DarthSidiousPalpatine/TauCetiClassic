@@ -6,6 +6,8 @@
 	taste_message = null
 	var/last_volume = 0 // Check digestion code below.
 
+	continuityFlags = CONTINUITY_BARREL
+
 	data = list()
 
 /datum/reagent/consumable/on_general_digest(mob/living/M)

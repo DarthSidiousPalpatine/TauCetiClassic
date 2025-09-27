@@ -9,6 +9,8 @@
 
 	toxin_absorption = 0.5
 
+	continuityFlags = CONTINUITY_BARREL
+
 /datum/reagent/water/reaction_mob(mob/M, method=TOUCH, volume)
 	if(method == TOUCH)
 		if(ishuman(M))

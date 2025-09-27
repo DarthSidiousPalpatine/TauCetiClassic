@@ -20,6 +20,8 @@
 	var/plant_type = 0
 	icon = 'icons/obj/hydroponics/harvest.dmi'
 
+	continuityFlags = CONTINUITY_BOX|CONTINUITY_BARREL|CONTINUITY_TABLE
+
 /obj/item/weapon/reagent_containers/food/snacks/grown/atom_init(mapload, newpotency)
 	if (!isnull(newpotency))
 		potency = newpotency

@@ -5,6 +5,8 @@
 	desc = "Yummy!"
 	icon = 'icons/obj/food.dmi'
 	icon_state = null
+	continuityFlags = CONTINUITY_TABLE|CONTINUITY_COMPOST
+
 	var/food_type = TASTY_FOOD
 	var/food_moodlet = /datum/mood_event/tasty_food
 	var/bitesize = 1

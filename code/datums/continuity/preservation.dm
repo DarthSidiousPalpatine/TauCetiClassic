@@ -2,6 +2,9 @@
 	filename = "Preservation_Barrels"
 
 /datum/continuity_object/barrels/proc/spawn_maintenance_barrel()
+	if(!global.maintenance_barrels_landmarks.len)
+		return
+
 	var/turf/T = pick(global.maintenance_barrels_landmarks)
 	new /obj/structure/preservation_barrel/maintenance(T)
 
@@ -20,7 +23,12 @@
 	for(var/obj/structure/preservation_barrel/Barrel in global.preservation_barrels)
 		if(!barrels_saves[Barrel.save_id])
 			continue
-		var/barrel_record = pick(barrels_saves[Barrel.save_id])
+
+		var/list/continuity_saves = barrels_saves[Barrel.save_id]
+		if(!continuity_saves.len)
+			continue
+
+		var/barrel_record = pick(continuity_saves)
 		if(barrel_record)
 			Barrel.continuity_read(params2list(barrel_record))
 			barrels_saves[Barrel.save_id] -= barrel_record
@@ -56,7 +64,14 @@
 		tables_saves[save_id] = params2list(tables_saves[save_id])
 
 	for(var/obj/structure/preservation_table/Table in global.preservation_tables)
-		var/table_record = pick(tables_saves[Table.save_id])
+		if(!tables_saves[Table.save_id])
+			continue
+
+		var/list/continuity_saves = tables_saves[Table.save_id]
+		if(!continuity_saves.len)
+			continue
+
+		var/table_record = pick(continuity_saves)
 		if(table_record)
 			Table.continuity_read(params2list(table_record))
 			tables_saves[Table.save_id] -= table_record
@@ -92,7 +107,14 @@
 		boxes_saves[save_id] = params2list(boxes_saves[save_id])
 
 	for(var/obj/structure/preservation_box/Box in global.preservation_boxes)
-		var/box_record = pick(boxes_saves[Box.save_id])
+		if(!boxes_saves[Box.save_id])
+			continue
+
+		var/list/continuity_saves = boxes_saves[Box.save_id]
+		if(!continuity_saves.len)
+			continue
+
+		var/box_record = pick(continuity_saves)
 		if(box_record)
 			Box.continuity_read(params2list(box_record))
 			boxes_saves[Box.save_id] -= box_record
@@ -128,7 +150,14 @@
 		composters_saves[save_id] = params2list(composters_saves[save_id])
 
 	for(var/obj/structure/composter/Comp in global.composters)
-		var/composter_record = pick(composters_saves[Comp.save_id])
+		if(!composters_saves[Comp.save_id])
+			continue
+
+		var/list/continuity_saves = composters_saves[Comp.save_id]
+		if(!continuity_saves.len)
+			continue
+
+		var/composter_record = pick(continuity_saves)
 		if(composter_record)
 			Comp.continuity_read(params2list(composter_record))
 			composters_saves[Comp.save_id] -= composter_record

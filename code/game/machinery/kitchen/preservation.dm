@@ -129,11 +129,11 @@ ADD_TO_GLOBAL_LIST(/obj/structure/preservation_barrel, preservation_barrels)
 	var/list/barrel_record = list("items" = list(), "reagents" = list())
 
 	for(var/obj/item/F in internal_storage.contents)
-		if(F.type in global.preservable_vegetables + can_also_preserve)
+		if(F.continuityFlags & CONTINUITY_BARREL)
 			barrel_record["items"] += F.type
 
 	for(var/datum/reagent/R in reagents.reagent_list)
-		if(R.id in global.preservable_reagents + can_also_preserve_reagents)
+		if(R.continuityFlags & CONTINUITY_BARREL)
 			barrel_record["reagents"] += list("[R.id]" = "[R.volume]")
 
 	barrel_record["items"] = list2params(barrel_record["items"])
@@ -220,7 +220,7 @@ ADD_TO_GLOBAL_LIST(/obj/structure/preservation_table, preservation_tables)
 
 	var/i = 1
 	for(var/obj/item/I in internal_storage.contents)
-		if(I.type in global.preservable_vegetables + global.preservable_dishes + can_also_preserve)
+		if(I.continuityFlags & CONTINUITY_TABLE)
 			table_record["[i]"] = I.type
 			i++
 
@@ -256,10 +256,30 @@ ADD_TO_GLOBAL_LIST(/obj/structure/preservation_box, preservation_boxes)
 	internal_storage.set_slots(slots = 14, slot_size = SIZE_BIG, visible = TRUE)
 
 /obj/structure/preservation_box/attackby(obj/item/I, mob/user, params)
-	if(internal_storage.can_be_inserted(I))
+	if(istype(I, /obj/item/weapon/storage)) // fastload from userstorage
+		if(istype(I, /obj/item/weapon/storage/lockbox))
+			var/obj/item/weapon/storage/lockbox/L = I
+			if(L.locked)
+				to_chat(user, "<span class='notice'>\The [L] is locked.</span>")
+				return
+		var/obj/item/weapon/storage/S = I
+		var/item_loaded = 0
+		for(var/obj/Item in S.contents)
+			if(internal_storage.can_be_inserted(Item))
+				internal_storage.handle_item_insertion(Item)
+				item_loaded++
+
+		if(item_loaded)
+			user.visible_message( \
+				"<span class='notice'>[user] loads \the [src] with \the [S].</span>", \
+				"<span class='notice'>You load \the [src] with \the [S].</span>")
+			if(S.contents.len > 0)
+				to_chat(user, "<span class='notice'>Some items are refused.</span>")
+
+	else if(internal_storage.can_be_inserted(I))
 		internal_storage.handle_item_insertion(I)
 
-	return ..()
+	else return ..()
 
 /obj/structure/preservation_box/attack_hand(mob/user)
 	user.SetNextMove(CLICK_CD_MELEE)
@@ -295,7 +315,7 @@ ADD_TO_GLOBAL_LIST(/obj/structure/preservation_box, preservation_boxes)
 
 	var/i = 1
 	for(var/obj/item/I in internal_storage.contents)
-		if(I.type in global.preservable_vegetables + can_also_preserve)
+		if(I.continuityFlags & CONTINUITY_BOX)
 			box_record["[i]"] = I.type
 			i++
 
@@ -329,10 +349,30 @@ ADD_TO_GLOBAL_LIST(/obj/structure/composter, composters)
 	internal_storage.set_slots(slots = 14, slot_size = SIZE_BIG, visible = FALSE)
 
 /obj/structure/composter/attackby(obj/item/I, mob/user, params)
-	if(internal_storage.can_be_inserted(I))
+	if(istype(I, /obj/item/weapon/storage)) // fastload from userstorage
+		if(istype(I, /obj/item/weapon/storage/lockbox))
+			var/obj/item/weapon/storage/lockbox/L = I
+			if(L.locked)
+				to_chat(user, "<span class='notice'>\The [L] is locked.</span>")
+				return
+		var/obj/item/weapon/storage/S = I
+		var/item_loaded = 0
+		for(var/obj/Item in S.contents)
+			if(internal_storage.can_be_inserted(Item))
+				internal_storage.handle_item_insertion(Item)
+				item_loaded++
+
+		if(item_loaded)
+			user.visible_message( \
+				"<span class='notice'>[user] loads \the [src] with \the [S].</span>", \
+				"<span class='notice'>You load \the [src] with \the [S].</span>")
+			if(S.contents.len > 0)
+				to_chat(user, "<span class='notice'>Some items are refused.</span>")
+
+	else if(internal_storage.can_be_inserted(I))
 		internal_storage.handle_item_insertion(I)
 
-	return ..()
+	else return ..()
 
 /obj/structure/composter/attack_hand(mob/user)
 	user.SetNextMove(CLICK_CD_MELEE)
@@ -346,7 +386,11 @@ ADD_TO_GLOBAL_LIST(/obj/structure/composter, composters)
 	for(var/itemnum in composter_record) //Нам надо создать предмет, потому что у выращенных овощей нет нутриентов пока они не пройдут атом_инит.
 		var/itemtype = composter_record[itemnum]
 		var/obj/item/I = new itemtype(internal_storage)
-		if(I.type in can_also_preserve)
+
+		if(istype(I, /obj/item/nutrient/compost))
+			continue
+		if(!istype(I, /obj/item/weapon/reagent_containers))
+			qdel(I)
 			continue
 
 		var/obj/item/weapon/reagent_containers/Item = I
@@ -374,7 +418,7 @@ ADD_TO_GLOBAL_LIST(/obj/structure/composter, composters)
 
 	var/i = 1
 	for(var/obj/item/I in internal_storage.contents)
-		if(I.type in global.preservable_vegetables + global.preservable_dishes + can_also_preserve)
+		if(I.continuityFlags & CONTINUITY_COMPOST)
 			composter_record["[i]"] = I.type
 			i++
 

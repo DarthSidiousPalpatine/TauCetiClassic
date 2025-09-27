@@ -1925,3 +1925,5 @@
 	icon_state = "compost"
 	mutmod = 0
 	yieldmod = 5
+
+	continuityFlags = CONTINUITY_COMPOST
