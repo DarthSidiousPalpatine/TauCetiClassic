@@ -765,13 +765,6 @@ note dizziness decrements automatically in the mob's Life() proc.
 		canmove = canmove && buckled.buckle_movable
 		anchored = anchored || !buckled.buckle_movable
 
-		if(istype(buckled, /obj/vehicle))
-			var/obj/vehicle/V = buckled
-			if(!canmove)
-				V.unload(src)
-			else
-				pixel_y = V.mob_offset_y
-
 	density = !lying
 
 	if(lying != was_lying)

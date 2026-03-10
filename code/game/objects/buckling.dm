@@ -45,6 +45,8 @@
 	if(M.grabbed_by.len)
 		for (var/obj/item/weapon/grab/G in M.grabbed_by)
 			qdel(G)
+
+	M.forceMove(loc)
 	M.buckled = src
 	M.set_dir(dir)
 	buckled_mob = M

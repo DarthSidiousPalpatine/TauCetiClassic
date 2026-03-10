@@ -126,17 +126,22 @@
 
 		mob.last_move_intent = world.time + 10
 
-		add_delay += mob.m_intent_delay()
-
 		var/list/grabs = mob.GetGrabs()
-		if(grabs.len)
-			var/grab_delay
-			for(var/obj/item/weapon/grab/G in grabs)
-				grab_delay += max(0, (G.state - 1) * 4 + (grabs.len - 1) * 4) // so if we have 2 grabs or 1 in high level we will be sloow
-				grab_delay += G.affecting.stat == CONSCIOUS ? ( G.affecting.a_intent == INTENT_HELP ? 0 : 0.5 ) : 1
-			add_delay += grab_delay
 
-		add_delay += mob.movement_delay()
+		if(mob.buckled && istype(mob.buckled, /obj/vehicle))
+			var/obj/vehicle/vehicle = mob.buckled
+			add_delay += vehicle.vehicle_moving_delay
+		else
+			add_delay += mob.movement_delay()
+
+			add_delay += mob.m_intent_delay()
+
+			if(grabs.len)
+				var/grab_delay
+				for(var/obj/item/weapon/grab/G in grabs)
+					grab_delay += max(0, (G.state - 1) * 4 + (grabs.len - 1) * 4) // so if we have 2 grabs or 1 in high level we will be sloow
+					grab_delay += G.affecting.stat == CONSCIOUS ? ( G.affecting.a_intent == INTENT_HELP ? 0 : 0.5 ) : 1
+				add_delay += grab_delay
 
 		move_delay = world.time + add_delay //set move delay
 
