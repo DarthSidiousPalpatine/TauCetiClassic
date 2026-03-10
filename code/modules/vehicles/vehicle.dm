@@ -34,6 +34,8 @@
 	var/load_offset_y = 0		//pixel_y offset for item overlay
 	var/mob_offset_y = 0		//pixel_y offset for mob overlay
 
+	var/tankturn = FALSE
+
 //-------------------------------------------
 // Standard procs
 //-------------------------------------------
@@ -61,6 +63,62 @@
 	else
 		return FALSE
 
+/obj/vehicle/proc/CarMove(direction)
+	switch(direction)
+		if(WEST)
+			if(!tankturn)
+				return FALSE
+			dir = turn(dir, 90)
+			return TRUE
+
+		if(EAST)
+			if(!tankturn)
+				return FALSE
+			dir = turn(dir, -90)
+			return TRUE
+
+		if(NORTHEAST)
+			if(Move(get_step(src, dir)))
+				dir = turn(dir, -90)
+				Move(get_step(src, dir))
+				return TRUE
+
+		if(NORTHWEST)
+			if(Move(get_step(src, dir)))
+				dir = turn(dir, 90)
+				Move(get_step(src, dir))
+				return TRUE
+
+		if(SOUTHEAST)
+			var/prev_dir = dir
+			if(Move(get_step(src, reverse_dir[dir])))
+				dir = turn(prev_dir, 90)
+				prev_dir = dir
+				if(Move(get_step(src, reverse_dir[dir])))
+					dir = prev_dir
+				return TRUE
+
+		if(SOUTHWEST)
+			var/prev_dir = dir
+			if(Move(get_step(src, reverse_dir[dir])))
+				dir = turn(prev_dir, -90)
+				prev_dir = dir
+				if(Move(get_step(src, reverse_dir[dir])))
+					dir = prev_dir
+				return TRUE
+
+		if(NORTH)
+			if(Move(get_step(src, dir)))
+				return TRUE
+
+		if(SOUTH)
+			var/prev_dir = dir
+			if(Move(get_step(src, reverse_dir[dir])))
+				dir = prev_dir
+				return TRUE
+
+	return FALSE
+
 /obj/vehicle/space/spacebike/relaymove(mob/user, direction)
 	if(!user)
 		return
@@ -70,7 +128,7 @@
 	//drunk driving
 	if(user.confused)
 		direction = user.confuse_input(direction)
-	return Move(get_step(src, direction))
+	return CarMove(direction)
 
 /obj/vehicle/proc/can_move()
 	if(world.time <= l_move_time + move_delay)

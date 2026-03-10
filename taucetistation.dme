@@ -1533,7 +1533,6 @@
 #include "code\modules\buildmode\submodes\mapgen.dm"
 #include "code\modules\buildmode\submodes\outfit.dm"
 #include "code\modules\buildmode\submodes\throwing.dm"
-#include "code\modules\cargo\car.dm"
 #include "code\modules\cargo\console.dm"
 #include "code\modules\cargo\export_scanner.dm"
 #include "code\modules\cargo\exports.dm"
