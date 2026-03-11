@@ -73,6 +73,9 @@
 					update_layers()
 					return TRUE
 
+				dir = prev_dir
+				update_layers()
+
 		if(SOUTHWEST)
 			if(!can_move_backwards)
 				return FALSE
@@ -84,6 +87,9 @@
 					dir = prev_dir
 					update_layers()
 					return TRUE
+
+				dir = prev_dir
+				update_layers()
 
 		if(NORTH)
 			if(Move(get_step(src, dir)))
@@ -98,6 +104,9 @@
 				dir = prev_dir
 				update_layers()
 				return TRUE
+
+			dir = prev_dir
+			update_layers()
 
 	return FALSE
 
