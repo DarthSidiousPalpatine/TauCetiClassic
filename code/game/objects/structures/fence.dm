@@ -15,6 +15,7 @@
 	resistance_flags = FULL_INDESTRUCTIBLE
 
 	anchored = TRUE //Забор всегда прикручен к тайлу.
+	var/can_be_screwed = FALSE
 	var/screwed = TRUE //Подкручен и сломается если перелезть.
 
 
@@ -40,13 +41,13 @@
 	update_layer()
 
 /obj/structure/fence/attackby(obj/item/W, mob/user)
-	if(iswrenching(W))
+	if(!(resistance_flags & DECONSTRUCT_IMMUNE) && iswrenching(W))
 		if(W.use_tool(src, user, 50, volume = 50, quality = QUALITY_WRENCHING))
 			to_chat(user, "<span class='notice'>Вы демонтируете забор.</span>")
 			deconstruct(TRUE)
 			return TRUE
 		return FALSE
-	else if(isscrewing(W))
+	else if(can_be_screwed && isscrewing(W))
 		if(W.use_tool(src, user, 50, volume = 50, quality = QUALITY_SCREWING))
 			if(screwed)
 				to_chat(user, "<span class='notice'>Вы ослабили крепления, забор не выдержит нагрузок.</span>")
@@ -66,7 +67,7 @@
 	if(istype(mover) && HAS_TRAIT(mover, TRAIT_ARIBORN))
 		return TRUE
 	if(get_dir(loc, target) & dir)
-		if(!screwed && prob(5)) //5% chance that it won't stop us from going through.
+		if(!screwed && prob(10)) //10% chance that it won't stop us from going through.
 			deconstruct(FALSE)
 
 		return FALSE
@@ -82,14 +83,18 @@
 	if(istype(O) && HAS_TRAIT(O, TRAIT_ARIBORN))
 		return TRUE
 	if(get_dir(O.loc, target) == dir)
+		if(!screwed && prob(10)) //10% chance that it won't stop us from going through.
+			deconstruct(FALSE)
+
 		return FALSE
 
 	return TRUE
 
 /obj/structure/fence/on_climb(mob/living/climber, mob/living/user)
 	if(!screwed)
+		var/throw_dir = get_turf(climber) == get_turf(src) ? dir : get_dir(get_turf(climber), get_turf(src))
 		deconstruct(FALSE)
-		climber.throw_at(get_step(user, dir), 2, 2)
+		climber.throw_at(get_step(climber, throw_dir), 2, 2)
 		return
 
 	return ..()
@@ -138,6 +143,8 @@
 	fence_full = FALSE
 	fence_cover_chance = 20
 
+	can_be_screwed = TRUE
+
 /obj/structure/fence/wood/deconstruct(disassembled)
 	if(!(flags & NODECONSTRUCT))
 		new /obj/item/stack/sheet/wood(loc, 2)
@@ -154,6 +161,8 @@
 
 	fence_full = FALSE
 	fence_cover_chance = 0
+
+	can_be_screwed = TRUE
 
 	var/mutable_appearance/Rail
 
@@ -199,3 +208,32 @@
 	if(!(flags & NODECONSTRUCT))
 		new /obj/item/stack/sheet/metal(loc, 2)
 	..()
+
+/obj/structure/fence/sandbags
+	name = "sandbags"
+	desc = "Хорошее укрытие."
+
+	icon_state = "sandbags"
+
+	max_integrity = 150
+	resistance_flags = CAN_BE_HIT
+
+	fence_full = TRUE
+	fence_cover_chance = 50
+
+	can_be_screwed = FALSE
+
+	var/disassemble_type = /obj/item/stack/sheet/sandbag
+
+/obj/structure/fence/sandbags/deconstruct(disassembled)
+	if(!(flags & NODECONSTRUCT))
+		if(disassembled)
+			new disassemble_type(loc, 1)
+		else
+			new /obj/item/weapon/ore/glass(loc)
+	..()
+
+/obj/structure/fence/sandbags/green
+	icon_state = "sandbags_green"
+
+	disassemble_type = /obj/item/stack/sheet/sandbag_green
