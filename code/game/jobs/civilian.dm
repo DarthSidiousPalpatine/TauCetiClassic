@@ -45,7 +45,7 @@
 	supervisors = "the head of personnel"
 	selection_color = "#d7b088"
 	idtype = /obj/item/weapon/card/id/cargoGold
-	access = list(access_cargo)
+	access = list(access_cargo, access_qm)
 	salary = 0
 	starting_money = 60
 	minimal_player_ingame_minutes = 960
