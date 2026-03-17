@@ -45,7 +45,7 @@
 	supervisors = "the head of personnel"
 	selection_color = "#d7b088"
 	idtype = /obj/item/weapon/card/id/cargoGold
-	access = list(access_maint_tunnels, access_mailsorting, access_cargo, access_cargoshop, access_qm, access_mint, access_mining, access_mining_station, access_recycler)
+	access = list(access_cargo)
 	salary = 0
 	starting_money = 60
 	minimal_player_ingame_minutes = 960
@@ -74,7 +74,7 @@
 	supervisors = "the quartermaster and the head of personnel"
 	selection_color = "#d7b088"
 	idtype = /obj/item/weapon/card/id/cargo
-	access = list(access_maint_tunnels, access_cargo, access_cargoshop, access_mailsorting)
+	access = list(access_cargo)
 	salary = 0
 	starting_money = 25
 	minimal_player_ingame_minutes = 480
@@ -82,48 +82,6 @@
 	skillsets = list("Cargo Technician" = /datum/skillset/cargotech)
 
 	department_stocks = list("Cargo" = 20)
-
-/datum/job/mining
-	title = JOB_MINER
-	departments = list(DEP_CIVILIAN)
-	order = CREW_INTEND_EMPLOYEE(3)
-	total_positions = 3
-	spawn_positions = 3
-	supervisors = "the quartermaster and the head of personnel"
-	selection_color = "#d7b088"
-	idtype = /obj/item/weapon/card/id/cargo
-	access = list(access_mining, access_mint, access_mining_station, access_mailsorting)
-	salary = 0
-	starting_money = 30
-	minimal_player_ingame_minutes = 480
-	outfit = /datum/outfit/job/mining
-	skillsets = list("Shaft Miner" = /datum/skillset/miner)
-
-	department_stocks = list("Cargo" = 10)
-
-/datum/job/recycler
-	title = JOB_RECYCLER
-	departments = list(DEP_CIVILIAN)
-	order = CREW_INTEND_EMPLOYEE(4)
-	total_positions = 2
-	spawn_positions = 2
-	supervisors = "the quartermaster and the head of personnel"
-	selection_color = "#d7b088"
-	idtype = /obj/item/weapon/card/id/cargo
-	access = list(access_mailsorting, access_recycler)
-	salary = 0
-	starting_money = 20
-	minimal_player_ingame_minutes = 480
-	outfit = /datum/outfit/job/recycler
-	skillsets = list("Recycler" = /datum/skillset/recycler)
-	/*
-		HEY YOU!
-		ANY TIME YOU TOUCH THIS, PLEASE CONSIDER GOING TO preferences_savefile.dm
-		AND BUMPING UP THE SAVEFILE_VERSION_MAX, AND SAVEFILE_VERSION_SPECIES_JOBS
-		~Luduk
-	*/
-
-	department_stocks = list("Cargo" = 10)
 
 //Food
 /datum/job/bartender

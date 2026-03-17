@@ -18,7 +18,6 @@
 
 #define JOB_HOP "Head of Personnel"
 #define JOB_ASSISTANT "Assistant"
-#define JOB_MINER "Shaft Miner"
 #define JOB_BARTENDER "Bartender"
 #define JOB_CHEF "Chef"
 #define JOB_HYDRO "Botanist"
@@ -28,7 +27,6 @@
 #define JOB_CHAPLAIN "Chaplain"
 #define JOB_QM "Quartermaster"
 #define JOB_CARGO_TECH "Cargo Technician"
-#define JOB_RECYCLER "Recycler"
 #define JOB_CLOWN "Clown"
 #define JOB_MIME "Mime"
 

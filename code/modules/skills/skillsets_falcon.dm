@@ -162,34 +162,6 @@
 		/datum/skill/command = SKILL_LEVEL_TRAINED
 	)
 
-/datum/skillset/falcon/miner
-	name = "Shaft Miner (Falcon)"
-	initial_skills = list(
-		/datum/skill/firearms = SKILL_LEVEL_TRAINED,
-		/datum/skill/melee = SKILL_LEVEL_TRAINED,
-		/datum/skill/engineering = SKILL_LEVEL_TRAINED,
-		/datum/skill/construction = SKILL_LEVEL_TRAINED,
-		/datum/skill/atmospherics = SKILL_LEVEL_TRAINED,
-		/datum/skill/civ_mech = SKILL_LEVEL_MASTER,
-		/datum/skill/surgery = SKILL_LEVEL_TRAINED,
-		/datum/skill/medical = SKILL_LEVEL_TRAINED,
-		/datum/skill/chemistry = SKILL_LEVEL_TRAINED,
-		/datum/skill/research = SKILL_LEVEL_TRAINED
-	)
-
-/datum/skillset/falcon/recycler
-	name = "Recycler (Falcon)"
-	initial_skills = list(
-		/datum/skill/engineering = SKILL_LEVEL_TRAINED,
-		/datum/skill/construction = SKILL_LEVEL_TRAINED,
-		/datum/skill/atmospherics = SKILL_LEVEL_TRAINED,
-		/datum/skill/civ_mech = SKILL_LEVEL_MASTER,
-		/datum/skill/surgery = SKILL_LEVEL_TRAINED,
-		/datum/skill/medical = SKILL_LEVEL_TRAINED,
-		/datum/skill/chemistry = SKILL_LEVEL_TRAINED,
-		/datum/skill/research = SKILL_LEVEL_TRAINED
-	)
-
 //civilians
 
 /datum/skillset/falcon/captain

@@ -247,7 +247,7 @@ SUBSYSTEM_DEF(economy)
 	var/all_staff = data_core.get_manifest()	//crew manifest
 	var/list/data = list()	//it will be returned
 	var/list/own_department = list()
-	var/list/QM_staff = list("Cargo Technician", "Shaft Miner", "Recycler")	//QM's boys
+	var/list/QM_staff = list("Cargo Technician")	//QM's boys
 
 	switch(head_rank)	//What departments do we manage?
 		if("Admin")

@@ -54,8 +54,6 @@ MAP_REMOVE_JOB(research_assistant)
 
 MAP_REMOVE_JOB(captain)
 
-MAP_REMOVE_JOB(mining)
-
 MAP_REMOVE_JOB(qm)
 
 MAP_REMOVE_JOB(chaplain)
@@ -77,8 +75,6 @@ MAP_REMOVE_JOB(detective)
 MAP_REMOVE_JOB(hos)
 
 MAP_REMOVE_JOB(hop)
-
-MAP_REMOVE_JOB(recycler)
 
 MAP_REMOVE_JOB(barber)
 

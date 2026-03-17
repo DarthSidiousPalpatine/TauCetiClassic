@@ -81,7 +81,7 @@
 	desc = "Ты - дворф! Ты любишь пиво, копать породу и собирать блестящие металлы."
 	requirement = "Шахтер."
 
-	jobs_required = list("Shaft Miner")
+	jobs_required = list("Cargo Technician")
 
 /datum/quality/quirkieish/diggydiggyhole/add_effect(mob/living/carbon/human/H)
 	ADD_TRAIT(H, TRAIT_DWARF, QUALITY_TRAIT)

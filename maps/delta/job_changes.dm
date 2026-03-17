@@ -24,12 +24,6 @@
 	map_total_positions = 8
 	map_spawn_positions = 8
 
-/datum/job/mining/New()
-	..()
-	MAP_JOB_CHECK
-	map_total_positions = 6
-	map_spawn_positions = 6
-
 /datum/job/cadet/New()
 	..()
 	MAP_JOB_CHECK
@@ -37,12 +31,6 @@
 	map_spawn_positions = 6
 
 /datum/job/cargo_tech/New()
-	..()
-	MAP_JOB_CHECK
-	map_total_positions = 4
-	map_spawn_positions = 4
-
-/datum/job/recycler/New()
 	..()
 	MAP_JOB_CHECK
 	map_total_positions = 4

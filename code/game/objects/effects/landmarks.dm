@@ -211,14 +211,6 @@ var/global/list/list/landmarks_list = list() // assoc list of all landmarks crea
 	name = "Cargo Technician"
 	icon_state = "Cargo Technician"
 
-/obj/effect/landmark/start/shaft_miner
-	name = "Shaft Miner"
-	icon_state = "Shaft Miner"
-
-/obj/effect/landmark/start/recycler
-	name = "Recycler"
-	icon_state = "Recycler"
-
 // Security
 /obj/effect/landmark/start/head_of_security
 	name = "Head of Security"
