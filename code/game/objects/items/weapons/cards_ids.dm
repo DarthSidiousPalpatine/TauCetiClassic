@@ -341,12 +341,26 @@
 	item_state = "cargo_id"
 	item_state_world = "cargo_world"
 
+/obj/item/weapon/card/id/cargo/atom_init()
+	. = ..()
+	add_account_record(associated_account_number, access)
+
+/obj/item/weapon/card/id/cargo/GetAccess()
+	return SScargo_access.get_account_access(associated_account_number, access)
+
 /obj/item/weapon/card/id/cargoGold
 	name = "identification card"
 	desc = "ID карта начальника, олицетворяющая умения владельца обеспечивать и планировать."
 	icon_state = "cargoGold"
 	item_state = "cargoGold_id"
 	item_state_world = "cargoGold_world"
+
+/obj/item/weapon/card/id/cargoGold/atom_init()
+	. = ..()
+	add_account_record(associated_account_number, access)
+
+/obj/item/weapon/card/id/cargoGold/GetAccess()
+	return SScargo_access.get_account_access(associated_account_number, access)
 
 /obj/item/weapon/card/id/syndicate
 	name = "Agent card"
