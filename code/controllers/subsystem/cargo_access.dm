@@ -5,7 +5,7 @@ SUBSYSTEM_DEF(cargo_access)
 
 	var/basic_access = access_cargo
 	var/head_access = access_qm
-	var/additional_accesses = list(access_cargoshop, access_mining, access_mining_station, access_mailsorting, access_recycler)
+	var/additional_accesses = list(access_qm, access_cargoshop, access_mining, access_mining_station, access_mailsorting, access_recycler)
 
 	var/records = list()
 
@@ -20,22 +20,22 @@ SUBSYSTEM_DEF(cargo_access)
 	if(!has_basic_access(access))
 		return access
 
-	var/datum/data/record/record = records[account_number]
+	var/datum/data/record/record = records["[account_number]"]
 	if(!record)
 		return access
 
 	var/list/additional_access = list()
 	additional_access |= record.fields["additional_access"]
 	if(is_elected_head(account_number))
-		additional_access |= head_access
+		additional_access |= additional_accesses
 
-	return  access |= additional_access
+	return  additional_access
 
 /datum/controller/subsystem/cargo_access/proc/add_account_record(account_number, list/access)
 	if(!has_basic_access(access))
 		return
 
-	var/datum/data/record/record = records[account_number]
+	var/datum/data/record/record = records["[account_number]"]
 	if(record)
 		return
 
@@ -44,40 +44,40 @@ SUBSYSTEM_DEF(cargo_access)
 	new_record.fields["vote_for"] = null
 	new_record.fields["additional_access"] = list()
 
-	for(var/access_num in access)
-		if(access_num == head_access)
-			new_record.fields["additional_access"] |= additional_accesses
-			break
-
-	records[account_number] = new_record
+	records["[account_number]"] = new_record
 
 /datum/controller/subsystem/cargo_access/proc/toggle_vote(voter_account_number, elected_account_number)
-	var/datum/data/record/voter_record = records[voter_account_number]
+	var/datum/data/record/voter_record = records["[voter_account_number]"]
 	if(!voter_record)
-		return
-
-	var/datum/data/record/elected_record = records[elected_account_number]
-	if(!elected_record)
-		return
-
-	voter_record.fields["vote_for"] = voter_record.fields["vote_for"] == elected_record ? null : elected_record
-
-/datum/controller/subsystem/cargo_access/proc/is_elected_head(account_number)
-	var/datum/data/record/record = records[account_number]
-	if(!record)
 		return FALSE
 
-	var/list/account_number_to_vote = list()
+	if(voter_account_number == elected_account_number)
+		voter_record.fields["vote_for"] = null
+		return TRUE
 
-	for(var/datum/record/check_record in records)
-		var/datum/record/voted_for = check_record.fields["vote_for"]
+	var/datum/data/record/elected_record = records["[elected_account_number]"]
+	if(!elected_record)
+		return FALSE
+
+	voter_record.fields["vote_for"] = elected_record
+	return TRUE
+
+/datum/controller/subsystem/cargo_access/proc/get_elected_head_account_number()
+	if(records.len == 1)
+		var/datum/data/record/first_record = records[1]
+		return first_record["account_number"]
+
+	var/list/account_number_to_vote = list()
+	for(var/account_number in records)
+		var/datum/data/record/check_record = records["[account_number]"]
+		var/datum/data/record/voted_for = check_record.fields["vote_for"]
 		if(!voted_for)
 			continue
 
-		if(account_number_to_vote[voted_for.fields["account_number"]])
-			account_number_to_vote[voted_for.fields["account_number"]]++
+		if(account_number_to_vote["[voted_for.fields["account_number"]]"])
+			account_number_to_vote["[voted_for.fields["account_number"]]"]++
 		else
-			account_number_to_vote[voted_for.fields["account_number"]] = 1
+			account_number_to_vote["[voted_for.fields["account_number"]]"] = 1
 
 	var/elected_account_number = null
 	for(var/acc_num in account_number_to_vote)
@@ -88,4 +88,17 @@ SUBSYSTEM_DEF(cargo_access)
 		if(account_number_to_vote[elected_account_number] < account_number_to_vote[acc_num])
 			elected_account_number = acc_num
 
-	return elected_account_number == account_number
+	for(var/acc_num in account_number_to_vote)
+		if(account_number_to_vote[elected_account_number] == account_number_to_vote[acc_num])
+			return null
+
+	return elected_account_number
+
+/datum/controller/subsystem/cargo_access/proc/is_elected_head(account_number)
+	var/datum/data/record/record = records["[account_number]"]
+	if(!record)
+		return FALSE
+
+	var/elected_account_number = get_elected_head_account_number()
+
+	return elected_account_number ? elected_account_number == account_number : FALSE

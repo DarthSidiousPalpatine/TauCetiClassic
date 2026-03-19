@@ -336,17 +336,40 @@
 
 /obj/item/weapon/card/id/cargo
 	name = "identification card"
-	desc = "ID карта, принадлежащая сотруднику отдела снабжения."
+	desc = "ID карта, принадлежащая сотруднику отдела снабжения. Зажмите карту, чтобы забрать свой голос за заместителя."
 	icon_state = "cargo"
 	item_state = "cargo_id"
 	item_state_world = "cargo_world"
 
 /obj/item/weapon/card/id/cargo/atom_init()
 	. = ..()
-	add_account_record(associated_account_number, access)
+	SScargo_access.add_account_record(associated_account_number, access)
 
 /obj/item/weapon/card/id/cargo/GetAccess()
-	return SScargo_access.get_account_access(associated_account_number, access)
+	if(SScargo_access.get_elected_head_account_number())
+		visible_message("<span class='notice'>Заместитель не выбран, приложите свою карту к карте выбранного вами человека, чтобы проголосовать за него.</span>")
+		return access
+
+	var/list/additional_access = SScargo_access.get_account_access(associated_account_number, access)
+	if(!additional_access || !additional_access.len)
+		visible_message("<span class='notice'>Дополнительный доступ отсутствует, попросите КМа или выбранного заместителя назначить вам доступ.</span>")
+		return access
+
+	return access |= additional_access
+
+/obj/item/weapon/card/id/cargo/attackby(obj/item/I, mob/user, params)
+	if(!istype(I, /obj/item/weapon/card/id/cargo))
+		return ..()
+
+	var/obj/item/weapon/card/id/cargo/card = I
+	if(SScargo_access.toggle_vote(associated_account_number, card.associated_account_number))
+		to_chat(user, "<span class='red'> Вы оставили свой голос за [card.registered_name].</span>")
+
+/obj/item/weapon/card/id/cargo/attack_self(mob/user)
+	if(SScargo_access.toggle_vote(associated_account_number, associated_account_number))
+		to_chat(user, "<span class='red'> Вы забрали свой голос.</span>")
+
+	add_fingerprint(user)
 
 /obj/item/weapon/card/id/cargoGold
 	name = "identification card"
@@ -354,13 +377,6 @@
 	icon_state = "cargoGold"
 	item_state = "cargoGold_id"
 	item_state_world = "cargoGold_world"
-
-/obj/item/weapon/card/id/cargoGold/atom_init()
-	. = ..()
-	add_account_record(associated_account_number, access)
-
-/obj/item/weapon/card/id/cargoGold/GetAccess()
-	return SScargo_access.get_account_access(associated_account_number, access)
 
 /obj/item/weapon/card/id/syndicate
 	name = "Agent card"
