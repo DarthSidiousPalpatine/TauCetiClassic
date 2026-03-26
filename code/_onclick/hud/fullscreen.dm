@@ -1,6 +1,7 @@
 #define SCREEN_DAMAGE_LAYER FULLSCREEN_LAYER + 0.1
 #define SCREEN_BLIND_LAYER SCREEN_DAMAGE_LAYER + 0.1
 #define SCREEN_CRIT_LAYER SCREEN_BLIND_LAYER + 0.1
+#define SCREEN_CURSOR_TRACKER_LAYER SCREEN_CRIT_LAYER + 0.1
 
 /mob
 	var/list/screens = list()
@@ -226,6 +227,36 @@
 		color = null
 		vis_contents += new_holder
 		current_holder = new_holder
+
+/atom/movable/screen/fullscreen/cursor_tracker
+	icon_state = "transparent_screen"
+	layer = SCREEN_CURSOR_TRACKER_LAYER
+	plane = FULLSCREEN_PLANE
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+
+	var/mob/living/parent
+	var/mouse_parameters
+
+/atom/movable/screen/fullscreen/cursor_tracker/proc/track_mob(mob/user)
+	parent = user
+
+/atom/movable/screen/fullscreen/cursor_tracker/proc/get_mouse_pos()
+	var/list/parameters = params2list(mouse_parameters)
+	var/list/to_component = list()
+	to_component["x"] = text2num(parameters["icon-x"])
+	to_component["y"] = text2num(parameters["icon-y"])
+	to_component["atom"] = locate(parent.x + text2num(parameters["vis-x"]) - 6, parent.y + text2num(parameters["vis-y"]) - 6, parent.z)
+	return to_component
+
+/atom/movable/screen/fullscreen/cursor_tracker/MouseEntered(location, control, params)
+	. = ..()
+	MouseMove(location, control, params)
+
+/atom/movable/screen/fullscreen/cursor_tracker/MouseMove(location, control, params)
+	if(usr != parent)
+		return
+
+	mouse_parameters = params
 
 #undef FULLSCREEN_LAYER
 #undef SCREEN_BLIND_LAYER

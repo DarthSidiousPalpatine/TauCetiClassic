@@ -361,6 +361,7 @@
 #include "code\datums\components\multi_carry.dm"
 #include "code\datums\components\seethrough.dm"
 #include "code\datums\components\serial_number.dm"
+#include "code\datums\components\show_throwing.dm"
 #include "code\datums\components\silence.dm"
 #include "code\datums\components\slippery.dm"
 #include "code\datums\components\smooth_tunes.dm"

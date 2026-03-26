@@ -25,6 +25,8 @@
 		spawner_args.Insert(1, /datum/component/logout_spawner)
 		AddComponent(arglist(spawner_args))
 
+	AddComponent(/datum/component/show_throwing)
+
 /mob/living/proc/metabolism_debug()
 	var/print = "<hr>Debug metabolism data:<br><br>"
 	print += "<b>Nutrition</b>: [nutrition] ([PERCENT(nutrition/NUTRITION_LEVEL_FAT)]%)<br>"
@@ -1423,6 +1425,8 @@
 		throw_mode_off()
 	else
 		throw_mode_on()
+
+	SEND_SIGNAL(src, COMSIG_MOB_TOGGLE_THROW)
 
 /mob/living/proc/throw_mode_off()
 	in_throw_mode = FALSE

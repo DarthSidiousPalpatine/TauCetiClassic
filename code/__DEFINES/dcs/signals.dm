@@ -348,6 +348,8 @@
 ///from base of mob/living/carbon/swap_hand(): (obj/item)
 #define COMSIG_MOB_SWAP_HANDS "mob_swap_hands"
 	#define COMPONENT_BLOCK_SWAP 1
+///from base of mob/living/toggle_throw_mode()
+#define COMSIG_MOB_TOGGLE_THROW "mob_toggle_throw"
 ///from mob/living/vomit(): (/mob)
 #define COMSIG_LIVING_VOMITED "living_vomited"
 ///from ai_actual_track(): (mob/living)
