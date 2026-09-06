@@ -250,7 +250,7 @@
 		if(!ingredients["[I.type]"])
 			ingredients["[I.type]"] = 1
 		else
-			ingredients["[I.type]"]++
+			ingredients["[I.type]"] = ingredients["[I.type]"] + 1
 
 	var/datum/recipe/recipe = select_recipe(recipe_type, ingredients)
 	var/obj/cooked

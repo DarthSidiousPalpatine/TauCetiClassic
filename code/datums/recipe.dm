@@ -53,7 +53,7 @@
 		if(!recipe_ingredients_list["[item_type]"])
 			recipe_ingredients_list["[item_type]"] = 1
 		else
-			recipe_ingredients_list["[item_type]"]++
+			recipe_ingredients_list["[item_type]"] = recipe_ingredients_list["[item_type]"] + 1
 
 	recipe_ingredients_count = values_sum(recipe_ingredients_list)
 	recipe_ingredients_length = values_dot(recipe_ingredients_list, recipe_ingredients_list)
