@@ -587,6 +587,13 @@
 	else if(isrobot(M))
 		new /obj/effect/decal/cleanable/blood/oil(src, M)
 
+	else if(isliving(M))
+		var/mob/living/L = M
+		var/obj/effect/decal/cleanable/blood/this = new /obj/effect/decal/cleanable/blood(src)
+		var/blood_datum = L.get_blood_datum()
+		this.basedatum = new blood_datum
+		this.update_icon()
+
 /turf/proc/add_vomit_floor(mob/living/carbon/C, vomit_type = DEFAULT_VOMIT)
 	if(flags & NOBLOODY)
 		return

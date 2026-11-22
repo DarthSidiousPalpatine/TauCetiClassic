@@ -36,8 +36,6 @@
 	faction = "untouchable"
 	var/changes_color = TRUE
 	var/can_emote_snuffles = TRUE
-	edible_nutriment = 3
-	edible_protein = 3
 
 	has_head = TRUE
 	has_arm = TRUE

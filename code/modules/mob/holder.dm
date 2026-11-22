@@ -49,6 +49,20 @@
 	forceMove(H)
 	H.name = src.name
 	H.w_class = w_class
+
+	H.create_reagents(1000)
+	var/remaining_reagents = 1 - health/(maxHealth ? maxHealth : 1)
+	for(var/butcher_type in butcher_results)
+		if(!ispath(butcher_type, /obj/item/weapon/reagent_containers))
+			continue
+		var/obj/item/weapon/reagent_containers/butcher_result = new butcher_type
+		for(var/i in 1 to butcher_results[butcher_type])
+			H.reagents.add_reagent_list(butcher_result.list_reagents)
+		qdel(butcher_result)
+	H.reagents.maximum_volume = H.reagents.total_volume
+	if(remaining_reagents)
+		H.reagents.remove_partly(remaining_reagents * H.reagents.total_volume)
+
 	H.attack_hand(grabber)
 
 	to_chat(grabber, "You scoop up [src].")
@@ -105,16 +119,92 @@
 /obj/item/weapon/holder/attack_self(mob/user)
 	if(isliving(user))
 		var/mob/living/L = user
-		var/mob/living/simple_animal/edible_animal = locate() in contents
-		if(edible_animal && edible_animal.try_eat(L, user, src))
+		var/mob/living/edible_animal = locate() in contents
+		if(edible_animal && edible_animal.butcher_results && try_eat(L, user, src))
 			return TRUE
 	return ..()
 
 /obj/item/weapon/holder/attack(mob/living/M, mob/user, def_zone, silent = FALSE)
-	var/mob/living/simple_animal/edible_animal = locate() in contents
-	if(edible_animal && edible_animal.try_eat(M, user, src, silent))
+	var/mob/living/edible_animal = locate() in contents
+	if(edible_animal && edible_animal.butcher_results && try_eat(M, user, src, silent))
 		return TRUE
 	return ..()
+
+/obj/item/weapon/holder/proc/try_eat(mob/living/M, mob/user, silent = FALSE)
+	if(!istype(M))
+		return FALSE
+
+	var/mob/living/carbon/human/H = M
+	if(!istype(H) || !HAS_TRAIT(H, TRAIT_RAW_MEAT_EATER))
+		if(M == user)
+			to_chat(user, "<span class='warning'>Вам противно есть [CASE(src, GENITIVE_CASE)].</span>")
+		else
+			to_chat(user, "<span class='warning'>[M] не выглядит заинтересованным в поедании [CASE(src, GENITIVE_CASE)].</span>")
+		return TRUE
+
+	M.visible_message("[user] осматривает [CASE(src, ACCUSATIVE_CASE)], ища где бы откусить кусочек.", \
+	"Вы осматриваете [CASE(src, ACCUSATIVE_CASE)], ища где бы откусить кусочек.")
+
+	if(user.is_busy() || !do_after(user, 2 SECONDS, TRUE, src, progress=TRUE))
+		return
+
+	if(!reagents || !reagents.total_volume)
+		to_chat(user, "<span class='rose'>От [CASE(src, GENITIVE_CASE)] ничего не осталось!</span>")
+		user.drop_from_inventory(src)
+		qdel(src)
+		return TRUE
+
+	if(!CanEat(user, M, src, "eat"))
+		return TRUE
+
+	var/fullness = H.get_satiation()
+	if(H == user)
+		if(fullness > (NUTRITION_LEVEL_FAT * (1 + H.overeatduration / 2000) + 100))
+			to_chat(H, "<span class='rose'>Вы больше не в силах съесть даже хвост от [CASE(src, GENITIVE_CASE)].</span>")
+			return TRUE
+		else if(fullness > NUTRITION_LEVEL_NORMAL)
+			to_chat(H, "<span class='notice'>Вы нехотя жуёте [CASE(src, ACCUSATIVE_CASE)].</span>")
+		else if(fullness > NUTRITION_LEVEL_FED)
+			to_chat(H, "<span class='notice'>Вы откусываете кусок от [CASE(src, GENITIVE_CASE)].</span>")
+		else if(fullness > NUTRITION_LEVEL_HUNGRY)
+			to_chat(H, "<span class='notice'>Изголодавшись, вы начинаете есть [CASE(src, ACCUSATIVE_CASE)].</span>")
+		else
+			to_chat(H, "<span class='rose'>Вы с жадностью начинаете есть [CASE(src, ACCUSATIVE_CASE)].</span>")
+	else
+		if(fullness > (NUTRITION_LEVEL_FAT * (1 + H.overeatduration / 2000) + 100))
+			user.visible_message("<span class='rose'>[user] пытается скормить [H] ещё немного [CASE(src, GENITIVE_CASE)], но внутрь больше не лезет.</span>")
+			return TRUE
+		H.visible_message("<span class='rose'>[user] пытается скормить [H] [CASE(src, ACCUSATIVE_CASE)].</span>", \
+			"<span class='warning'><B>[user]</B> пытается скормить вам <B>[CASE(src, ACCUSATIVE_CASE)]</B>.</span>")
+		if(!do_mob(user, H))
+			return TRUE
+		H.log_combat(user, "fed [name], reagents: [reagents.get_reagents_list()] (INTENT: [uppertext(user.a_intent)])")
+		H.visible_message("<span class='rose'>[user] скармливает [H] [CASE(src, ACCUSATIVE_CASE)].</span>", \
+			"<span class='warning'><B>[user]</B> скармливает вам <B>[CASE(src, ACCUSATIVE_CASE)]</B>.</span>")
+
+	var/mob/living/eaten_animal = locate() in contents
+	playsound(H, 'sound/items/eatfood.ogg', VOL_EFFECTS_MASTER, rand(20, 50))
+	var/remaining_food = reagents.total_volume
+	var/bite_size = min(max(1, round(max(w_class, SIZE_MINUSCULE) / 2)), remaining_food)
+	var/bite_damage = eaten_animal.health * bite_size / reagents.maximum_volume
+	reagents.trans_to_ingest(H, bite_size)
+	eaten_animal.apply_damage(bite_damage)
+	eaten_animal.apply_effect(bite_size, AGONY)
+	if(isturf(H.loc))
+		var/turf/T = get_turf(H)
+		T.add_blood_floor(eaten_animal)
+	SEND_SIGNAL(H, COMSIG_HUMAN_ON_CONSUME, src)
+
+	if(!reagents.total_volume)
+		eaten_animal.ghostize(bancheck = TRUE)
+		qdel(eaten_animal)
+		if(!silent)
+			H.visible_message("<span class='notice'>[H] доедает [CASE(src, ACCUSATIVE_CASE)].</span>", "<span class='notice'>Вы доедаете [CASE(src, ACCUSATIVE_CASE)].</span>")
+		SEND_SIGNAL(H, COMSIG_ADD_MOOD_EVENT, "food_type", /datum/mood_event/natural_food)
+		SSStatistics.score.foodeaten++
+		user.drop_from_inventory(src)
+		qdel(src)
+	return TRUE
 
 /obj/item/weapon/holder/mouse
 	name = "mouse"

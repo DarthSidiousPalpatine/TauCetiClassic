@@ -35,6 +35,26 @@ var/global/const/INGEST = 2
 	handle_reactions()
 	return total_transfered
 
+/datum/reagents/proc/remove_partly(amount=1)
+	var/total_transfered = 0
+
+	amount = min(amount, total_volume)
+	var/part = amount / total_volume
+
+	for (var/datum/reagent/current_reagent in reagent_list)
+		if (!current_reagent)
+			continue
+
+		var/current_reagent_transfer = round(current_reagent.volume * part)
+		if(!remove_reagent(current_reagent.id, current_reagent_transfer, safety = 1))
+			continue
+
+		total_transfered += current_reagent_transfer
+		update_total()
+
+	handle_reactions()
+	return total_transfered
+
 /datum/reagents/proc/get_master_reagent_name()
 	var/the_name = null
 	var/the_volume = 0
@@ -514,6 +534,14 @@ var/global/const/INGEST = 2
 		res += A.name
 
 	return res
+
+/datum/reagents/proc/get_reagents_list()
+	var/data = ""
+	if(reagent_list && reagent_list.len) //find a reagent list if there is and check if it has entries
+		for (var/datum/reagent/R in reagent_list) //no reagents will be left behind
+			data += "[R.id]([R.volume] units); " //Using IDs because SOME chemicals(I'm looking at you, chlorhydrate-beer) have the same names as other chemicals.
+		return data
+	else return "No reagents"
 
 /datum/reagents/proc/add_reagent_list(list/list_reagents, list/data=null) // Like add_reagent but you can enter a list. Format it like this: list("toxin" = 10, "beer" = 15)
 	for(var/r_id in list_reagents)
